@@ -1,0 +1,13 @@
+rule -configure- {
+    if ! $(PREFIX) {
+        PREFIX = /usr/local ;
+    }
+    local pp = [ Command "echo $(PREFIX) | sed \"s/\\//\\\\\\\\\\\//g\"" : dummy ] ;
+    Command "sed \"s/@prefix/\\$(pp)/\" ./libex.pc.in > ./libex.pc" ;
+    if $(windoze) {
+         -configure-add-line- "CFLAGS.all += -D__WINDOWS__ ;" ;
+    }
+    -configure-add-line- "LINKLIBS.all += -lpthread -ldl -lm -lrt ;" ;
+}
+
+configure ;

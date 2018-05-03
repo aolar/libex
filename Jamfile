@@ -1,0 +1,43 @@
+if ! $(THIS_IS_K8JAM) { Exit "You need k8jam to build this Download it here: http://repo.or.cz/w/k8jam.git" ; }
+if $(windoze) {
+    setup-windoze ;
+    use-mingw32 ;
+}
+
+if $(debug) {
+    CFLAGS.all += -O0 -g3 ;
+} else {
+    set-profile ;
+}
+set-default-locations ;
+
+CFLAGS.all += -fPIC -D_GNU_SOURCE -Wall -Iinclude/libex -fsplit-stack ;
+
+SubDir TOP ;
+SubInclude TOP src ;
+if $(debug) {
+    SubInclude TOP test ;
+}
+
+softinclude $(TOP)/Jamrules.configure ;
+
+InstallFile include/libex :
+    $(TOP)/include/libex/array.h
+    $(TOP)/include/libex/task.h
+    $(TOP)/include/libex/file.h
+    $(TOP)/include/libex/html.h
+    $(TOP)/include/libex/http.h
+    $(TOP)/include/libex/list.h
+    $(TOP)/include/libex/net.h
+    $(TOP)/include/libex/qdb.h
+    $(TOP)/include/libex/str.h
+    $(TOP)/include/libex/thread.h
+    $(TOP)/include/libex/tree.h
+    $(TOP)/include/libex/json.h
+    $(TOP)/include/libex/hash.h
+;
+
+InstallFile lib/pkgconfig : libex.pc ;
+
+Clean clean : libex.pc ;
+

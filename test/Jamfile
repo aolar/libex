@@ -1,0 +1,42 @@
+SubDir TOP test ;
+Command "objcopy --input binary --output `objdump -i | head -n 2 | tail -n 1` --binary-architecture i386 $(TOP)/test/test_urlenc test/test_urlenc.o" ;
+Command "objcopy --input binary --output `objdump -i | head -n 2 | tail -n 1` --binary-architecture i386 $(TOP)/test/test_urldec test/test_urldec.o" ;
+
+Main test_str$(SUFEXE) : test_str.c ;
+Main test_tree$(SUFEXE) : test_tree.c ;
+Main test_list$(SUFEXE) : test_list.c ;
+Main test_html$(SUFEXE) : test_html.c ;
+Main test_file$(SUFEXE) : test_file.c ;
+Main test_run$(SUFEXE) : test_run.c ;
+Main test_array$(SUFEXE) : test_array.c ;
+Main test_http$(SUFEXE) : test_http.c ;
+Main test_json$(SUFEXE) : test_json.c ;
+Main test_hash$(SUFEXE) : test_hash.c ;
+Main test_qdb$(SUFEXE) : test_qdb.c ;
+Main test_task$(SUFEXE) : test_task.c ;
+Main test_srv$(SUFEXE) : test_srv.c ;
+Main test_cln$(SUFEXE) : test_cln.c ;
+
+# Link
+
+LinkLibraries test_str$(SUFEXE) : libex.a ;
+LinkLibraries test_tree$(SUFEXE) : libex.a ;
+LinkLibraries test_list$(SUFEXE) : libex.a ;
+LinkLibraries test_html$(SUFEXE) : libex.a ;
+LinkLibraries test_file$(SUFEXE) : libex.a ;
+LinkLibraries test_run$(SUFEXE) : libex.a ;
+LinkLibraries test_array$(SUFEXE) : libex.a ;
+LinkLibraries test_http$(SUFEXE) : libex.a ;
+LinkLibraries test_json$(SUFEXE) : libex.a ;
+LinkLibraries test_hash$(SUFEXE) : libex.a ;
+LinkLibraries test_qdb$(SUFEXE) : libex.a ;
+LinkLibraries test_task$(SUFEXE) : libex.a ;
+LinkLibraries test_srv$(SUFEXE) : libex.a ;
+LinkLibraries test_cln$(SUFEXE) : libex.a ;
+
+LINKLIBS on test_str$(SUFEXE) = -export-dynamic -rdynamic test/test_urlenc.o -rdynamic test/test_urldec.o ;
+
+Clean clean :
+    $(TOP)/test/test_urlenc.o
+    $(TOP)/test/test_urldec.o
+;
