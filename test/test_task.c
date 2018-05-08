@@ -3,29 +3,24 @@
 
 int i;
 
-static void on_msg (void *str) {
+static void on_msg (void *str, void *dummy) {
     printf("%s\n", (char*)str);
-}
-
-static void on_freemsg (void *str) {
     free(str);
 }
 
-static void on_info (void *x) {
+static void on_info (void *x, void *y) {
     printf("%d: %lu\n", i++, time(0));
 }
 
 static void test_1 () {
     printf("constant slots\n\n");
     task_t *task = task_create();
-    task_setopt(task, TASK_MSG, on_msg);
-    task_setopt(task, TASK_FREEMSG, on_freemsg);
     task_setopt(task, TASK_MAXSLOTS, TASK_DEFAULT_SLOTS);
     task_start(task);
     for (int i = 0; i < 10; ++i) {
         char *str = malloc(16);
         snprintf(str, 16, "i:%d", i);
-        task_cast(task, str, MSG_MUSTFREE);
+        task_cast(task, on_msg, str, NULL);
     }
     sleep(3);
     task_destroy(task);

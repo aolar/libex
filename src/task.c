@@ -125,20 +125,6 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags) {
     #endif
 }
 
-int task_setopt_msg (task_t *task, task_opt_t opt, msg_h arg) {
-    switch (opt) {
-        case TASK_MSG: task->on_msg = arg; return 0;
-        default: return -1;
-    }
-}
-
-int task_setopt_msgfree (task_t *task, task_opt_t opt, msgfree_h arg) {
-    switch (opt) {
-        case TASK_FREEMSG: task->on_freemsg = arg; return 0;
-        default: return -1;
-    }
-}
-
 int task_setopt_int (task_t *task, task_opt_t opt, long arg) {
     switch (opt) {
         case TASK_MAXSLOTS:
@@ -151,6 +137,15 @@ int task_setopt_int (task_t *task, task_opt_t opt, long arg) {
             if (arg < 0)
                 return -1;
             task->timeout = arg;
+            return 0;
+        default: return -1;
+    }
+}
+
+int task_setopt_msg (task_t *task, task_opt_t opt, msg_h on_msg) {
+    switch (opt) {
+        case TASK_MSG:
+            task->on_msg = on_msg;
             return 0;
         default: return -1;
     }
@@ -183,10 +178,8 @@ static void *slot_process (void *param) {
     task_t *task = slot->task;
     msg_t *msg = NULL;
     while ((msg = get_next_msg(slot, task))) {
-        if (task->on_msg)
-            task->on_msg(msg->req);
-        if ((msg->flags & MSG_MUSTFREE) && task->on_freemsg)
-            task->on_freemsg(msg->req);
+        if (msg->on_msg)
+            msg->on_msg(msg->in_data, msg->out_data);
         free(msg);
     }
     return NULL;
@@ -204,7 +197,7 @@ static void *task_process (void *param) {
         int rc = pthread_cond_timedwait(&task->cond, &task->locker, &ts);
         pthread_mutex_unlock(&task->locker);
         if (ETIMEDOUT == rc && task->on_msg)
-            task->on_msg(NULL);
+            task->on_msg(NULL, NULL);
     }
     return NULL;
 }
@@ -232,12 +225,13 @@ void task_start (task_t *task) {
     }
 }
 
-void task_cast (task_t *task, void *data, int flags) {
+void task_cast (task_t *task, msg_h on_msg, void *in_data, void *out_data) {
     if (!task->is_alive)
         return;
     msg_t *msg = calloc(1, sizeof(msg_t));
-    msg->flags = flags;
-    msg->req = data;
+    msg->in_data = in_data;
+    msg->out_data = out_data;
+    msg->on_msg = on_msg;
     pthread_mutex_lock(&task->locker);
     lst_adde(task->queue, msg);
     pthread_cond_broadcast(&task->cond);
@@ -257,8 +251,6 @@ static int on_wait_slot (list_item_t *li, void *dummy) {
 
 static int on_free_queue (list_item_t *li, task_t *task) {
     msg_t *msg = (msg_t*)li->ptr;
-    if ((msg->flags & MSG_MUSTFREE) && task->on_freemsg)
-        task->on_freemsg(msg);
     free(msg);
     return ENUM_CONTINUE;
 }

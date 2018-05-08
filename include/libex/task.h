@@ -36,19 +36,17 @@ char **mkcmdstr (const char *cmdline, size_t cmdline_len);
 void free_cmd (char **cmd);
 void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
-#define MSG_MUSTFREE 0x00000001
-
 #define TASK_DEFAULT_SLOTS -1
 
-typedef enum { TASK_MSG, TASK_FREEMSG, TASK_MAXSLOTS, TASK_TIMEOUT } task_opt_t;
+typedef enum { TASK_MSG, TASK_MAXSLOTS, TASK_TIMEOUT } task_opt_t;
 
 typedef struct slot slot_t;
-typedef void (*msg_h) (void*);
-typedef void (*msgfree_h) (void*);
+typedef void (*msg_h) (void*, void*);
 
 typedef struct {
-    int flags;
-    void *req;
+    void *in_data;
+    void *out_data;
+    msg_h on_msg;
 } msg_t;
 
 typedef struct {
@@ -59,7 +57,6 @@ typedef struct {
     long max_slots;
     list_t *slots;
     msg_h on_msg;
-    msgfree_h on_freemsg;
     pthread_t th;
     long timeout;
 } task_t;
@@ -70,19 +67,17 @@ struct slot {
     pthread_t th;
 };
 
-int task_setopt_msg (task_t *task, task_opt_t, msg_h arg);
-int task_setopt_msgfree (task_t *task, task_opt_t opt, msgfree_h arg);
 int task_setopt_int (task_t *task, task_opt_t opt, long arg);
+int task_setopt_msg (task_t *task, task_opt_t opt, msg_h on_msg);
 #define task_setopt(task,opt,arg) \
     _Generic((arg), \
-    int: task_setopt_int, \
     msg_h: task_setopt_msg, \
-    default: task_setopt_msgfree \
+    default: task_setopt_int \
 )(task,opt,arg)
 
 task_t *task_create ();
 void task_start (task_t *task);
-void task_cast (task_t *task, void *data, int flags);
+void task_cast (task_t *task, msg_h on_msg, void *in_data, void *out_data);
 void task_destroy (task_t *task);
 
 #endif // __LIBEX_TASK_h__
