@@ -138,14 +138,25 @@ int task_setopt_int (task_t *task, task_opt_t opt, long arg) {
                 return -1;
             task->timeout = arg;
             return 0;
+        case TASK_LIVINGTIME:
+            if (arg < 0)
+                return -1;
+            task->livingtime = arg;
+            return 0;
         default: return -1;
     }
 }
 
-int task_setopt_msg (task_t *task, task_opt_t opt, msg_h on_msg) {
+int task_setopt_msg (task_t *task, task_opt_t opt, msg_h arg) {
     switch (opt) {
         case TASK_MSG:
-            task->on_msg = on_msg;
+            task->on_msg = arg;
+            return 0;
+        case TASK_CREATESLOT:
+            task->on_create_slot = arg;
+            return 0;
+        case TASK_DESTROYSLOT:
+            task->on_destroy_slot = arg;
             return 0;
         default: return -1;
     }
@@ -153,8 +164,6 @@ int task_setopt_msg (task_t *task, task_opt_t opt, msg_h on_msg) {
 
 task_t *task_create () {
     task_t *task = calloc(1, sizeof(task_t));
-    pthread_mutex_init(&task->locker, NULL);
-    pthread_cond_init(&task->cond, NULL);
     return task;
 }
 
@@ -167,7 +176,21 @@ static msg_t *get_next_msg (slot_t *slot, task_t *task) {
             msg = (msg_t*)li->ptr;
             lst_del(li);
         } else
+        if (0 == task->livingtime)
             pthread_cond_wait(&task->cond, &task->locker);
+        else {
+            struct timespec totime;
+            clock_gettime(CLOCK_MONOTONIC, &totime);
+            totime.tv_sec += task->livingtime;
+            if (ETIMEDOUT == pthread_cond_timedwait(&task->cond, &task->locker, &totime)) {
+                lst_del(slot->node);
+                if (task->on_destroy_slot)
+                    task->on_destroy_slot(slot);
+                free(slot);
+                pthread_mutex_unlock(&task->locker);
+                return NULL;
+            }
+        }
     }
     pthread_mutex_unlock(&task->locker);
     return msg;
@@ -179,7 +202,7 @@ static void *slot_process (void *param) {
     msg_t *msg = NULL;
     while ((msg = get_next_msg(slot, task))) {
         if (msg->on_msg)
-            msg->on_msg(msg->in_data, msg->out_data);
+            msg->on_msg(msg->data);
         free(msg);
     }
     return NULL;
@@ -190,24 +213,42 @@ static void *task_process (void *param) {
     while (task->is_alive) {
         struct timespec ts;
         pthread_mutex_lock(&task->locker);
-        clock_gettime(CLOCK_REALTIME, &ts);
+        clock_gettime(CLOCK_MONOTONIC, &ts);
         long ns = ts.tv_nsec+((task->timeout%1000)*1000000);
         ts.tv_sec += task->timeout/1000+(ns/1000000000);
         ts.tv_nsec = ns%1000000000;
         int rc = pthread_cond_timedwait(&task->cond, &task->locker, &ts);
         pthread_mutex_unlock(&task->locker);
         if (ETIMEDOUT == rc && task->on_msg)
-            task->on_msg(NULL, NULL);
+            task->on_msg(NULL);
     }
     return NULL;
 }
 
-static void on_free_slot (slot_t *slot, void *dummy) {
-    free(slot);
+static int add_slot (task_t *task) {
+    slot_t *slot = calloc(1, sizeof(slot_t));
+    slot->is_alive = 1;
+    slot->task = task;
+    slot->node = lst_adde(task->slots, slot);
+    if (0 != pthread_create(&slot->th, NULL, slot_process, slot)) {
+        lst_del(slot->node);
+        free(slot);
+        return -1;
+    }
+    if (task->on_create_slot)
+        task->on_create_slot(slot);
+    return 0;
 }
 
 void task_start (task_t *task) {
     task->is_alive = 1;
+    pthread_mutex_init(&task->locker, NULL);
+    if (task->livingtime || task->timeout) {
+        pthread_condattr_init(&task->cond_attr);
+        pthread_condattr_setclock(&task->cond_attr, CLOCK_MONOTONIC);
+        pthread_cond_init(&task->cond, &task->cond_attr);
+    } else
+        pthread_cond_init(&task->cond, NULL);
     if (task->timeout > 0) {
         pthread_create(&task->th, NULL, task_process, task);
         return;
@@ -215,24 +256,21 @@ void task_start (task_t *task) {
     task->queue = lst_alloc(NULL);
     if (task->max_slots <= 0)
         task->max_slots = 0;
-    task->slots = lst_alloc((free_h)on_free_slot);
-    for (long i = 0; i < task->max_slots; ++i) {
-        slot_t *slot = calloc(1, sizeof(slot_t));
-        slot->is_alive = 1;
-        slot->task = task;
-        lst_adde(task->slots, slot);
-        pthread_create(&slot->th, NULL, slot_process, slot);
-    }
+    task->slots = lst_alloc(NULL);
+    if (0 == task->livingtime)
+        for (long i = 0; i < task->max_slots; ++i)
+            add_slot(task);
 }
 
-void task_cast (task_t *task, msg_h on_msg, void *in_data, void *out_data) {
+void task_cast (task_t *task, msg_h on_msg, void *data) {
     if (!task->is_alive)
         return;
     msg_t *msg = calloc(1, sizeof(msg_t));
-    msg->in_data = in_data;
-    msg->out_data = out_data;
+    msg->data = data;
     msg->on_msg = on_msg;
     pthread_mutex_lock(&task->locker);
+    if (task->livingtime > 0 && task->queue->len > 0 && task->slots->len < task->max_slots)
+        add_slot(task);
     lst_adde(task->queue, msg);
     pthread_cond_broadcast(&task->cond);
     pthread_mutex_unlock(&task->locker);
@@ -249,6 +287,11 @@ static int on_wait_slot (list_item_t *li, void *dummy) {
     return ENUM_CONTINUE;
 }
 
+static int on_free_slot (list_item_t *li, void *dummy) {
+    free(li->ptr);
+    return ENUM_CONTINUE;
+}
+
 static int on_free_queue (list_item_t *li, task_t *task) {
     msg_t *msg = (msg_t*)li->ptr;
     free(msg);
@@ -259,13 +302,14 @@ void task_destroy (task_t *task) {
     task->is_alive = 0;
     if (!task->timeout) {
         pthread_mutex_lock(&task->locker);
-        lst_enum(task->queue, (list_item_h)on_free_queue, task, 0);
-        pthread_mutex_unlock(&task->locker);
+//        lst_enum(task->queue, (list_item_h)on_free_queue, task, 0);
+//        pthread_mutex_unlock(&task->locker);
         lst_enum(task->slots, on_send_stop, NULL, 0);
-        pthread_mutex_lock(&task->locker);
+//        pthread_mutex_lock(&task->locker);
         pthread_cond_broadcast(&task->cond);
         pthread_mutex_unlock(&task->locker);
         lst_enum(task->slots, on_wait_slot, NULL, 0);
+        lst_enum(task->slots, on_free_slot, NULL, 0);
         lst_free(task->slots);
         lst_enum(task->queue, (list_item_h)on_free_queue, task, 0);
         lst_free(task->queue);
@@ -275,6 +319,8 @@ void task_destroy (task_t *task) {
         pthread_mutex_unlock(&task->locker);
         pthread_join(task->th, NULL);
     }
+    if (task->livingtime || task->timeout)
+        pthread_condattr_destroy(&task->cond_attr);
     pthread_cond_destroy(&task->cond);
     pthread_mutex_destroy(&task->locker);
     free(task);
