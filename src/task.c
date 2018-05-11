@@ -126,6 +126,8 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags) {
 }
 
 int task_setopt_int (task_t *task, task_opt_t opt, long arg) {
+    if (task->is_alive)
+        return -1;
     switch (opt) {
         case TASK_MAXSLOTS:
             if (arg < 0)
@@ -148,6 +150,8 @@ int task_setopt_int (task_t *task, task_opt_t opt, long arg) {
 }
 
 int task_setopt_msg (task_t *task, task_opt_t opt, msg_h arg) {
+    if (task->is_alive)
+        return -1;
     switch (opt) {
         case TASK_MSG:
             task->on_msg = arg;
@@ -157,6 +161,17 @@ int task_setopt_msg (task_t *task, task_opt_t opt, msg_h arg) {
             return 0;
         case TASK_DESTROYSLOT:
             task->on_destroy_slot = arg;
+            return 0;
+        default: return -1;
+    }
+}
+
+int task_setopt_void (task_t *task, task_opt_t opt, void *arg) {
+    if (task->is_alive)
+        return -1;
+    switch (opt) {
+        case TASK_INITDATA:
+            task->init_data = arg;
             return 0;
         default: return -1;
     }
@@ -230,6 +245,7 @@ static int add_slot (task_t *task) {
     slot->is_alive = 1;
     slot->task = task;
     slot->node = lst_adde(task->slots, slot);
+    slot->data = task->init_data;
     if (0 != pthread_create(&slot->th, NULL, slot_process, slot)) {
         lst_del(slot->node);
         free(slot);

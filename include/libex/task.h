@@ -38,7 +38,7 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
 #define TASK_DEFAULT_SLOTS -1
 
-typedef enum { TASK_MSG, TASK_MAXSLOTS, TASK_TIMEOUT, TASK_LIVINGTIME, TASK_CREATESLOT, TASK_DESTROYSLOT } task_opt_t;
+typedef enum { TASK_MSG, TASK_MAXSLOTS, TASK_TIMEOUT, TASK_LIVINGTIME, TASK_CREATESLOT, TASK_DESTROYSLOT, TASK_INITDATA } task_opt_t;
 
 typedef struct slot slot_t;
 typedef void (*msg_h) (void*);
@@ -62,6 +62,7 @@ typedef struct {
     pthread_t th;
     long timeout;
     long livingtime;
+    void *init_data;
 } task_t;
 
 struct slot {
@@ -69,13 +70,16 @@ struct slot {
     task_t *task;
     pthread_t th;
     list_item_t *node;
+    void *data;
 };
 
 int task_setopt_int (task_t *task, task_opt_t opt, long arg);
 int task_setopt_msg (task_t *task, task_opt_t opt, msg_h arg);
+int task_setopt_void (task_t *task, task_opt_t opt, void *arg);
 #define task_setopt(task,opt,arg) \
     _Generic((arg), \
     msg_h: task_setopt_msg, \
+    void*: task_setopt_void, \
     default: task_setopt_int \
 )(task,opt,arg)
 
