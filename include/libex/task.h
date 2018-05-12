@@ -36,9 +36,9 @@ char **mkcmdstr (const char *cmdline, size_t cmdline_len);
 void free_cmd (char **cmd);
 void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
-#define TASK_DEFAULT_SLOTS -1
+#define POOL_DEFAULT_SLOTS -1
 
-typedef enum { TASK_MSG, TASK_MAXSLOTS, TASK_TIMEOUT, TASK_LIVINGTIME, TASK_CREATESLOT, TASK_DESTROYSLOT, TASK_INITDATA } task_opt_t;
+typedef enum { POOL_MSG, POOL_MAXSLOTS, POOL_TIMEOUT, POOL_LIVINGTIME, POOL_CREATESLOT, POOL_DESTROYSLOT, POOL_INITDATA } pool_opt_t;
 
 typedef struct slot slot_t;
 typedef void (*msg_h) (void*);
@@ -63,29 +63,29 @@ typedef struct {
     long timeout;
     long livingtime;
     void *init_data;
-} task_t;
+} pool_t;
 
 struct slot {
     int is_alive;
-    task_t *task;
+    pool_t *pool;
     pthread_t th;
     list_item_t *node;
     void *data;
 };
 
-int task_setopt_int (task_t *task, task_opt_t opt, long arg);
-int task_setopt_msg (task_t *task, task_opt_t opt, msg_h arg);
-int task_setopt_void (task_t *task, task_opt_t opt, void *arg);
-#define task_setopt(task,opt,arg) \
+int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg);
+int pool_setopt_msg (pool_t *pool, pool_opt_t opt, msg_h arg);
+int pool_setopt_void (pool_t *pool, pool_opt_t opt, void *arg);
+#define pool_setopt(pool,opt,arg) \
     _Generic((arg), \
-    msg_h: task_setopt_msg, \
-    void*: task_setopt_void, \
-    default: task_setopt_int \
-)(task,opt,arg)
+    msg_h: pool_setopt_msg, \
+    void*: pool_setopt_void, \
+    default: pool_setopt_int \
+)(pool,opt,arg)
 
-task_t *task_create ();
-void task_start (task_t *task);
-void task_cast (task_t *task, msg_h on_msg, void *data);
-void task_destroy (task_t *task);
+pool_t *pool_create ();
+void pool_start (pool_t *pool);
+void pool_call (pool_t *pool, msg_h on_msg, void *data);
+void pool_destroy (pool_t *pool);
 
 #endif // __LIBEX_TASK_h__

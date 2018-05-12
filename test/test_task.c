@@ -5,12 +5,12 @@ int i, t;
 
 static void on_create_slot (void *x) {
     slot_t *slot = (slot_t*)x;
-    printf("create slot %lu\n", slot->task->slots->len);
+    printf("create slot %lu\n", slot->pool->slots->len);
 }
 
 static void on_destroy_slot (void *x) {
     slot_t *slot = (slot_t*)x;
-    printf("destroy slot %lu\n", slot->task->slots->len);
+    printf("destroy slot %lu\n", slot->pool->slots->len);
 }
 
 static void on_msg (void *str) {
@@ -24,34 +24,34 @@ static void on_info (void *x) {
 }
 
 static void test_1 (long livingtime, int timeout) {
-    task_t *task = task_create();
-    task_setopt(task, TASK_MAXSLOTS, TASK_DEFAULT_SLOTS);
+    pool_t *pool = pool_create();
+    pool_setopt(pool, POOL_MAXSLOTS, POOL_DEFAULT_SLOTS);
     if (livingtime > 0)
-        task_setopt(task, TASK_LIVINGTIME, livingtime);
-    task_setopt(task, TASK_CREATESLOT, on_create_slot);
-    task_setopt(task, TASK_DESTROYSLOT, on_destroy_slot);
+        pool_setopt(pool, POOL_LIVINGTIME, livingtime);
+    pool_setopt(pool, POOL_CREATESLOT, on_create_slot);
+    pool_setopt(pool, POOL_DESTROYSLOT, on_destroy_slot);
     t = timeout+1;
-    task_start(task);
+    pool_start(pool);
     for (int i = 0; i < 16; ++i) {
         char *str = malloc(16);
         if (timeout > 0)
             sleep(timeout);
         snprintf(str, 16, "i:%d", i);
-        task_cast(task, on_msg, str);
+        pool_call(pool, on_msg, str);
     }
     sleep(t);
-    task_destroy(task);
+    pool_destroy(pool);
     sleep(timeout);
 }
 
 static void test_2 () {
-    task_t *task = task_create();
-    task_setopt(task, TASK_MSG, on_info);
-    task_setopt(task, TASK_TIMEOUT, 1000);
+    pool_t *pool = pool_create();
+    pool_setopt(pool, POOL_MSG, on_info);
+    pool_setopt(pool, POOL_TIMEOUT, 1000);
     i = 0;
-    task_start(task);
+    pool_start(pool);
     sleep(12);
-    task_destroy(task);
+    pool_destroy(pool);
 }
 
 int main () {
