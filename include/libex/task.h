@@ -38,14 +38,19 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
 #define POOL_DEFAULT_SLOTS -1
 
-typedef enum { POOL_MSG, POOL_MAXSLOTS, POOL_TIMEOUT, POOL_LIVINGTIME, POOL_CREATESLOT, POOL_DESTROYSLOT, POOL_INITDATA } pool_opt_t;
+typedef enum { POOL_MSG, POOL_FREEMSG, POOL_MAXSLOTS, POOL_TIMEOUT, POOL_LIVINGTIME, POOL_CREATESLOT, POOL_DESTROYSLOT, POOL_INITDATA } pool_opt_t;
 
 typedef struct slot slot_t;
-typedef void (*msg_h) (void*);
+typedef void (*pool_msg_h) (void*, void*, void**);
+typedef void (*pool_create_h) (slot_t*, void*);
+typedef void (*pool_destroy_h) (void*);
 
 typedef struct {
-    void *data;
-    msg_h on_msg;
+    void *in_data;
+    void **out_data;
+    pool_msg_h on_msg;
+    pthread_mutex_t *mutex;
+    pthread_cond_t *cond;
 } msg_t;
 
 typedef struct {
@@ -56,9 +61,10 @@ typedef struct {
     list_t *queue;
     long max_slots;
     list_t *slots;
-    msg_h on_msg;
-    msg_h on_create_slot;
-    msg_h on_destroy_slot;
+    pool_msg_h on_msg;
+    pool_destroy_h on_freemsg;
+    pool_create_h on_create_slot;
+    pool_destroy_h on_destroy_slot;
     pthread_t th;
     long timeout;
     long livingtime;
@@ -73,16 +79,23 @@ struct slot {
 };
 
 int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg);
-int pool_setopt_msg (pool_t *pool, pool_opt_t opt, msg_h arg);
+int pool_setopt_msg (pool_t *pool, pool_opt_t opt, pool_msg_h arg);
+int pool_setopt_create (pool_t *pool, pool_opt_t opt, pool_create_h arg);
+int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
 #define pool_setopt(pool,opt,arg) \
     _Generic((arg), \
-    msg_h: pool_setopt_msg, \
+    pool_msg_h: pool_setopt_msg, \
+    pool_create_h: pool_setopt_create, \
+    pool_destroy_h: pool_setopt_destroy, \
     default: pool_setopt_int \
 )(pool,opt,arg)
 
 pool_t *pool_create ();
 void pool_start (pool_t *pool);
-void pool_call (pool_t *pool, msg_h on_msg, void *data);
+void pool_call (pool_t *pool,
+                pool_msg_h on_msg,
+                void *init_data, void *in_data, void **out_data,
+                pthread_mutex_t *mutex, pthread_cond_t *cond);
 void pool_destroy (pool_t *pool);
 
 #endif // __LIBEX_TASK_h__

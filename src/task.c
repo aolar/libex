@@ -149,18 +149,37 @@ int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg) {
     }
 }
 
-int pool_setopt_msg (pool_t *pool, pool_opt_t opt, msg_h arg) {
+int pool_setopt_msg (pool_t *pool, pool_opt_t opt, pool_msg_h arg) {
     if (pool->is_alive)
         return -1;
     switch (opt) {
         case POOL_MSG:
             pool->on_msg = arg;
             return 0;
+        default: return -1;
+    }
+}
+
+int pool_setopt_create (pool_t *pool, pool_opt_t opt, pool_create_h arg) {
+    if (pool->is_alive)
+        return -1;
+    switch (opt) {
         case POOL_CREATESLOT:
             pool->on_create_slot = arg;
             return 0;
+        default: return -1;
+    }
+}
+
+int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg) {
+    if (pool->is_alive)
+        return -1;
+    switch (opt) {
         case POOL_DESTROYSLOT:
             pool->on_destroy_slot = arg;
+            return 0;
+        case POOL_FREEMSG:
+            pool->on_freemsg = arg;
             return 0;
         default: return -1;
     }
@@ -200,15 +219,31 @@ static msg_t *get_next_msg (slot_t *slot, pool_t *pool) {
     return msg;
 }
 
+typedef struct {
+    slot_t *slot;
+    void *init_data;
+} slot_data_t;
+
 static void *slot_process (void *arg) {
     msg_t *msg = NULL;
-    slot_t *slot = (slot_t*)arg;
+    slot_data_t *sd = (slot_data_t*)arg;
+    slot_t *slot = sd->slot;
     pool_t *pool = slot->pool;
+    slot->node =lst_adde(pool->slots, slot);
     if (pool->on_create_slot)
-        pool->on_create_slot(slot->data);
+        pool->on_create_slot(slot, sd->init_data);
+    free(sd);
     while ((msg = get_next_msg(slot, pool))) {
-        if (msg->on_msg)
-            msg->on_msg(msg->data);
+        if (msg->on_msg) {
+            msg->on_msg(slot->data, msg->in_data, msg->out_data);
+            if (msg->mutex && msg->cond) {
+                pthread_mutex_lock(msg->mutex);
+                pthread_cond_signal(msg->cond);
+                pthread_mutex_unlock(msg->mutex);
+            }
+        }
+        if (pool->on_freemsg)
+            pool->on_freemsg(msg->in_data);
         free(msg);
     }
     return NULL;
@@ -226,20 +261,20 @@ static void *pool_process (void *param) {
         int rc = pthread_cond_timedwait(&pool->cond, &pool->locker, &ts);
         pthread_mutex_unlock(&pool->locker);
         if (ETIMEDOUT == rc && pool->on_msg)
-            pool->on_msg(NULL);
+            pool->on_msg(NULL, NULL, NULL);
     }
     return NULL;
 }
 
-static int add_slot (pool_t *pool, void *data) {
-    slot_t *slot = calloc(1, sizeof(slot_t));
+static int add_slot (pool_t *pool, void *init_data) {
+    slot_data_t *sd = malloc(sizeof(slot_data_t));
+    slot_t *slot = sd->slot = calloc(1, sizeof(slot_t));
     slot->is_alive = 1;
     slot->pool = pool;
-    slot->data = data;
-    slot->node = lst_adde(pool->slots, slot);
-    if (0 != pthread_create(&slot->th, NULL, slot_process, slot)) {
-        lst_del(slot->node);
+    sd->init_data = init_data;
+    if (0 != pthread_create(&slot->th, NULL, slot_process, sd)) {
         free(slot);
+        free(sd);
         return -1;
     }
     return 0;
@@ -267,15 +302,21 @@ void pool_start (pool_t *pool) {
             add_slot(pool, NULL);
 }
 
-void pool_call (pool_t *pool, msg_h on_msg, void *data) {
+void pool_call (pool_t *pool,
+                pool_msg_h on_msg,
+                void *init_data, void *in_data, void **out_data,
+                pthread_mutex_t *mutex, pthread_cond_t *cond) {
     if (!pool->is_alive)
         return;
     msg_t *msg = calloc(1, sizeof(msg_t));
-    msg->data = data;
+    msg->in_data = in_data;
+    msg->out_data = out_data;
     msg->on_msg = on_msg;
+    msg->mutex = mutex;
+    msg->cond = cond;
     pthread_mutex_lock(&pool->locker);
     if (pool->livingtime > 0 && pool->queue->len > 0 && pool->slots->len < pool->max_slots)
-        add_slot(pool, data);
+        add_slot(pool, init_data);
     lst_adde(pool->queue, msg);
     pthread_cond_broadcast(&pool->cond);
     pthread_mutex_unlock(&pool->locker);

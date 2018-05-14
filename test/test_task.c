@@ -3,22 +3,21 @@
 
 int i, t;
 
-static void on_create_slot (void *x) {
+static void on_create_slot (slot_t *slot, void *x) {
     printf("create slot\n");
 }
 
 static void on_destroy_slot (void *x) {
-    slot_t *slot = (slot_t*)x;
-    printf("destroy slot %lu\n", slot->pool->slots->len);
+    printf("destroy slot\n");
 }
 
-static void on_msg (void *str) {
+static void on_msg (void *d, void *str, void **x) {
     printf("%s\n", (char*)str);
     free(str);
     sleep(t);
 }
 
-static void on_info (void *x) {
+static void on_info (void *d, void *x, void **z) {
     printf("%d: %lu\n", i++, time(0));
 }
 
@@ -36,7 +35,7 @@ static void test_1 (long livingtime, int timeout) {
         if (timeout > 0)
             sleep(timeout);
         snprintf(str, 16, "i:%d", i);
-        pool_call(pool, on_msg, str);
+        pool_call(pool, on_msg, NULL, str, NULL, NULL, NULL);
     }
     sleep(t);
     pool_destroy(pool);
