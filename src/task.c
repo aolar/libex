@@ -229,7 +229,9 @@ static void *slot_process (void *arg) {
     slot_data_t *sd = (slot_data_t*)arg;
     slot_t *slot = sd->slot;
     pool_t *pool = slot->pool;
+    pthread_mutex_lock(&pool->locker);
     slot->node =lst_adde(pool->slots, slot);
+    pthread_mutex_unlock(&pool->locker);
     if (pool->on_create_slot)
         pool->on_create_slot(slot, sd->init_data);
     free(sd);
