@@ -62,7 +62,6 @@ typedef struct {
     pthread_t th;
     long timeout;
     long livingtime;
-    void *init_data;
 } pool_t;
 
 struct slot {
@@ -75,11 +74,9 @@ struct slot {
 
 int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg);
 int pool_setopt_msg (pool_t *pool, pool_opt_t opt, msg_h arg);
-int pool_setopt_void (pool_t *pool, pool_opt_t opt, void *arg);
 #define pool_setopt(pool,opt,arg) \
     _Generic((arg), \
     msg_h: pool_setopt_msg, \
-    void*: pool_setopt_void, \
     default: pool_setopt_int \
 )(pool,opt,arg)
 

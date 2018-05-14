@@ -4,8 +4,7 @@
 int i, t;
 
 static void on_create_slot (void *x) {
-    slot_t *slot = (slot_t*)x;
-    printf("create slot %lu\n", slot->pool->slots->len);
+    printf("create slot\n");
 }
 
 static void on_destroy_slot (void *x) {
