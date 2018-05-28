@@ -1042,4 +1042,3 @@ int strand (char *outbuf, size_t outlen, int type) {
     outbuf[outlen] = '\0';
     return 0;
 }
-

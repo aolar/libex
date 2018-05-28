@@ -35,6 +35,7 @@ InstallFile include/libex :
     $(TOP)/include/libex/tree.h
     $(TOP)/include/libex/json.h
     $(TOP)/include/libex/hash.h
+    $(TOP)/include/libex/msg.h
 ;
 
 InstallFile lib/pkgconfig : libex.pc ;
