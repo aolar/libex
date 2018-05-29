@@ -1,31 +1,44 @@
 #include "msg.h"
 
+static void msg_init (msgbuf_t *msg) {
+    msg->len = sizeof(uint32_t);
+    *(uint32_t*)msg->ptr = sizeof(uint32_t);
+    msg->pc = msg->ptr + sizeof(uint32_t);
+}
+
 static int msg_alloc (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
     uint32_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
     if (len == bufsize) bufsize += chunk_size;
     char *buf = malloc(bufsize);
     if (!buf) return -1;
-    msg->ptr = msg->pc = buf;
-    msg->ptr[0] = '\0';
-    msg->len = len;
+    msg->ptr = buf;
+    msg->len = sizeof(uint32_t);
     msg->bufsize = bufsize;
     msg->chunk_size = chunk_size;
     *(uint32_t*)msg->ptr = sizeof(uint32_t);
-    msg->pc += sizeof(uint32_t);
+    msg->pc = msg->ptr + sizeof(uint32_t);
     return 0;
 }
 
-int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t chunk_size) {
-    uint32_t len = cookie_len + sizeof(uint32_t) * 4;
-    if (-1 == msg_alloc(msg, len, chunk_size))
-        return -1;
+int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t len, uint32_t chunk_size) {
+    uint32_t nlen = cookie_len + sizeof(uint32_t) * 4;
+    if (len < nlen) len = nlen;
+    if (!msg->ptr) {
+        if (-1 == msg_alloc(msg, len, chunk_size))
+            return -1;
+    } else 
+        msg_init(msg);
     return 0 == msg_setui32(msg, method) && 0 == msg_setstr(msg, cookie, cookie_len) ? 0 : -1;
 }
 
-int msg_create_response (msgbuf_t *msg, int code, uint32_t chunk_size) {
-    uint32_t len = sizeof(uint32_t) * 2;
-    if (-1 == msg_alloc(msg, len, chunk_size))
-        return -1;
+int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_size) {
+    uint32_t nlen = sizeof(uint32_t) * 2;
+    if (len < nlen) len = nlen;
+    if (!msg->ptr) {
+        if (-1 == msg_alloc(msg, len, chunk_size))
+            return -1;
+    } else
+        msg_init(msg);
     return msg_seti32(msg, code);
 }
 
@@ -207,4 +220,13 @@ int msg_enum (msgbuf_t *msg, msg_item_h fn, void *userdata) {
             break;
     }
     return 0 == errno ? 0 : -1;
+}
+
+//
+
+int msg_error (msgbuf_t *msg, int code, const char *str, size_t len) {
+    if (!len) len = strlen(str);
+    if (-1 == msg_create_response(msg, code, sizeof(uint32_t) * 3 + len, 8))
+        return -1;
+    return msg_setstr(msg, str, len);
 }
