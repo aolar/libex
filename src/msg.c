@@ -1,7 +1,6 @@
 #include "msg.h"
 
-int msg_alloc (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t chunk_size) {
-    uint32_t len = cookie_len + sizeof(uint32_t) * 4;
+static int msg_alloc (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
     uint32_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
     if (len == bufsize) bufsize += chunk_size;
     char *buf = malloc(bufsize);
@@ -13,7 +12,21 @@ int msg_alloc (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie
     msg->chunk_size = chunk_size;
     *(uint32_t*)msg->ptr = sizeof(uint32_t);
     msg->pc += sizeof(uint32_t);
+    return 0;
+}
+
+int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t chunk_size) {
+    uint32_t len = cookie_len + sizeof(uint32_t) * 4;
+    if (-1 == msg_alloc(msg, len, chunk_size))
+        return -1;
     return 0 == msg_setui32(msg, method) && 0 == msg_setstr(msg, cookie, cookie_len) ? 0 : -1;
+}
+
+int msg_create_response (msgbuf_t *msg, int code, uint32_t chunk_size) {
+    uint32_t len = sizeof(uint32_t) * 2;
+    if (-1 == msg_alloc(msg, len, chunk_size))
+        return -1;
+    return msg_seti32(msg, code);
 }
 
 int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
@@ -88,7 +101,7 @@ int msg_setlist (msgbuf_t *msg, list_t *lst, msg_item_h fn, void *userdata) {
     return m.rc;
 }
 
-int msg_load (msgbuf_t *msg, char *buf, size_t buflen) {
+int msg_load_request (msgbuf_t *msg, char *buf, size_t buflen) {
     uint32_t len;
     errno = 0;
     msg->ptr = msg->pc = buf;
@@ -103,6 +116,23 @@ int msg_load (msgbuf_t *msg, char *buf, size_t buflen) {
     if (-1 == msg_getui32(msg, &msg->method))
         return -1;
     if (-1 == msg_getstr(msg, &msg->cookie))
+        return -1;
+    return 0;
+}
+
+int msg_load_response (msgbuf_t *msg, char *buf, size_t buflen) {
+    uint32_t len;
+    errno = 0;
+    msg->ptr = msg->pc = buf;
+    msg->len = msg->bufsize = buflen;
+    msg->chunk_size = 0;
+    if (-1 == msg_getui32(msg, &len))
+        return -1;
+    if (len != buflen) {
+        errno = EFAULT;
+        return -1;
+    }
+    if (-1 == msg_getui32(msg, &msg->code))
         return -1;
     return 0;
 }

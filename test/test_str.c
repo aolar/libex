@@ -428,7 +428,7 @@ void test_msg () {
     msgbuf_t msg;
     for (int i = 0; i < 3; ++i)
         lst_adde(lst, &tl[i]);
-    msg_alloc(&msg, MSG_TEST, CONST_STR_LEN("qwerty"), 8);
+    msg_create_request(&msg, MSG_TEST, CONST_STR_LEN("qwerty"), 8);
     msg_seti32(&msg, 48);
     msg_setstr(&msg, CONST_STR_LEN("good luck!"));
     msg_setlist(&msg, lst, on_msg_item, NULL);
