@@ -88,6 +88,25 @@ int msg_setlist (msgbuf_t *msg, list_t *lst, msg_item_h fn, void *userdata) {
     return m.rc;
 }
 
+int msg_load (msgbuf_t *msg, char *buf, size_t buflen) {
+    uint32_t len;
+    errno = 0;
+    msg->ptr = msg->pc = buf;
+    msg->len = msg->bufsize = buflen;
+    msg->chunk_size = 0;
+    if (-1 == msg_getui32(msg, &len))
+        return -1;
+    if (len != buflen) {
+        errno = EFAULT;
+        return -1;
+    }
+    if (-1 == msg_getui32(msg, &msg->method))
+        return -1;
+    if (-1 == msg_getstr(msg, &msg->cookie))
+        return -1;
+    return 0;
+}
+
 int msg_geti (msgbuf_t *msg, int *val) {
     errno = 0;
     if (msg->ptr + msg->len < msg->pc + sizeof(int)) {

@@ -14,6 +14,8 @@ typedef struct {
     uint32_t chunk_size;
     char *ptr;
     char *pc;
+    uint32_t method;
+    strptr_t cookie;
 } msgbuf_t;
 
 typedef int (*msg_item_h) (msgbuf_t*, void*, void*);
@@ -26,6 +28,7 @@ static inline int msg_seti32 (msgbuf_t *msg, int32_t val) { return msg_setbuf(ms
 static inline int msg_setui32 (msgbuf_t *msg, uint32_t val) { return msg_setbuf(msg, &val, sizeof(uint32_t)); };
 static inline int msg_setd (msgbuf_t *msg, double val) { return msg_setbuf(msg, &val, sizeof(double)); };
 int msg_setlist (msgbuf_t *msg, list_t *lst, msg_item_h fn, void *userdata);
+int msg_load (msgbuf_t *msg, char *buf, size_t buflen);
 int msg_geti (msgbuf_t *msg, int *val);
 int msg_geti32 (msgbuf_t *msg, int32_t *val);
 int msg_getui32 (msgbuf_t *msg, uint32_t *val);
