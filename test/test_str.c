@@ -450,7 +450,7 @@ void test_msg () {
         printf("param2: %s\n", s.ptr);
     printf("items:\n");
     msg_enum(&msg, on_get_msg, NULL);
-    free(msg.ptr);
+    msg_clear(&msg);
     lst_free(lst);
 }
 

@@ -1,9 +1,12 @@
 #include "msg.h"
 
-static int msg_alloc (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
+msg_allocator_h msg_alloc = malloc;
+msg_deallocator_h msg_free = free;
+
+static int allocate (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
     uint32_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
     if (len == bufsize) bufsize += chunk_size;
-    char *buf = malloc(bufsize);
+    char *buf = msg_alloc(bufsize);
     if (!buf) return -1;
     msg->ptr = buf;
     msg->len = sizeof(uint32_t);
@@ -17,7 +20,7 @@ static int msg_alloc (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
 int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t len, uint32_t chunk_size) {
     uint32_t nlen = cookie_len + sizeof(uint32_t) * 4;
     if (len < nlen) len = nlen;
-    if (-1 == msg_alloc(msg, len, chunk_size))
+    if (-1 == allocate(msg, len, chunk_size))
         return -1;
     return 0 == msg_setui32(msg, method) && 0 == msg_setstr(msg, cookie, cookie_len) ? 0 : -1;
 }
@@ -25,7 +28,7 @@ int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size
 int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_size) {
     uint32_t nlen = sizeof(uint32_t) * 2;
     if (len < nlen) len = nlen;
-    if (-1 == msg_alloc(msg, len, chunk_size))
+    if (-1 == allocate(msg, len, chunk_size))
         return -1;
     return msg_seti32(msg, code);
 }
@@ -108,16 +111,23 @@ int msg_load_request (msgbuf_t *msg, char *buf, size_t buflen) {
     msg->ptr = msg->pc = buf;
     msg->len = msg->bufsize = buflen;
     msg->chunk_size = 0;
-    if (-1 == msg_getui32(msg, &len))
-        return -1;
-    if (len != buflen) {
-        errno = EFAULT;
+    if (-1 == msg_getui32(msg, &len)) {
+        msg->ptr = NULL;
         return -1;
     }
-    if (-1 == msg_getui32(msg, &msg->method))
+    if (len != buflen) {
+        errno = EFAULT;
+        msg->ptr = NULL;
         return -1;
-    if (-1 == msg_getstr(msg, &msg->cookie))
+    }
+    if (-1 == msg_getui32(msg, &msg->method)) {
+        msg->ptr = NULL;
         return -1;
+    }
+    if (-1 == msg_getstr(msg, &msg->cookie)) {
+        msg->ptr = NULL;
+        return -1;
+    }
     return 0;
 }
 
