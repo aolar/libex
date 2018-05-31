@@ -194,8 +194,7 @@ int msg_getstr (msgbuf_t *msg, strptr_t *str) {
         return -1;
     }
     str->len = len;
-    str->ptr = msg->pc;
-    msg->pc += len + sizeof(uint32_t);
+    msg->pc += len + sizeof(uint32_t) + sizeof(uint32_t);
     return 0;
 }
 
