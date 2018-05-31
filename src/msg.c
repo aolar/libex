@@ -17,9 +17,6 @@ static int msg_alloc (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
 int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t len, uint32_t chunk_size) {
     uint32_t nlen = cookie_len + sizeof(uint32_t) * 4;
     if (len < nlen) len = nlen;
-    if (msg->ptr)
-        free(msg->ptr);
-    memset(msg, 0, sizeof(msgbuf_t));
     if (-1 == msg_alloc(msg, len, chunk_size))
         return -1;
     return 0 == msg_setui32(msg, method) && 0 == msg_setstr(msg, cookie, cookie_len) ? 0 : -1;
@@ -28,9 +25,6 @@ int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size
 int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_size) {
     uint32_t nlen = sizeof(uint32_t) * 2;
     if (len < nlen) len = nlen;
-    if (msg->ptr)
-        free(msg->ptr);
-    memset(msg, 0, sizeof(msgbuf_t));
     if (-1 == msg_alloc(msg, len, chunk_size))
         return -1;
     return msg_seti32(msg, code);

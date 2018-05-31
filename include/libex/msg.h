@@ -39,6 +39,7 @@ int msg_getd (msgbuf_t *msg, double *val);
 int msg_getstr (msgbuf_t *buf, strptr_t *str);
 int msg_enum (msgbuf_t *msg, msg_item_h fn, void *userdata);
 
+static inline void msg_clear (msgbuf_t *msg) { free(msg->ptr); };
 int msg_error (msgbuf_t *msg, int code, const char *str, size_t len);
 static inline int msg_ok(msgbuf_t *msg) { return msg_create_response(msg, 0, 8, 8); };
 
