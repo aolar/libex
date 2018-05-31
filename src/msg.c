@@ -44,15 +44,15 @@ int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
         msg->bufsize = nbufsize;
     }
     memcpy(msg->pc, src, src_len);
-    msg->len = nstr_len;
     msg->pc += src_len;
-    *(uint32_t*)msg->ptr = nstr_len;
+    msg->len = nstr_len;
+    *(uint32_t*)msg->ptr = msg->len;
     return 0;
 }
 
 int msg_setstr (msgbuf_t *msg, const char *src, size_t src_len) {
     char *buf = msg->ptr;
-    uint32_t nstr_len = msg->len + src_len + sizeof(uint32_t) + sizeof(uint32_t);
+    uint32_t nstr_len = msg->len + src_len + sizeof(uint32_t) * 2;
     errno = 0;
     if (nstr_len >= msg->bufsize) {
         uint32_t nbufsize = (nstr_len / msg->chunk_size) * msg->chunk_size + msg->chunk_size;
@@ -65,11 +65,11 @@ int msg_setstr (msgbuf_t *msg, const char *src, size_t src_len) {
     }
     *(uint32_t*)msg->pc = src_len;
     memcpy(msg->pc + sizeof(uint32_t), src, src_len);
-    msg->pc += sizeof(uint32_t) + src_len;
-    memset(msg->pc, 0, sizeof(uint32_t));
+    msg->pc += src_len + sizeof(uint32_t);
+    *(uint32_t*)msg->pc = 0;
     msg->pc += sizeof(uint32_t);
     msg->len = nstr_len;
-    *(uint32_t*)msg->ptr = nstr_len;
+    *(uint32_t*)msg->ptr = msg->len;
     return 0;
 }
 
@@ -194,7 +194,8 @@ int msg_getstr (msgbuf_t *msg, strptr_t *str) {
         return -1;
     }
     str->len = len;
-    msg->pc += len + sizeof(uint32_t) + sizeof(uint32_t);
+    str->ptr = msg->pc;
+    msg->pc += len + sizeof(uint32_t);
     return 0;
 }
 

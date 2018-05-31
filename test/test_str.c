@@ -426,22 +426,24 @@ int on_get_msg (msgbuf_t *msg, void *dummy, void *userdata) {
 void test_msg () {
     list_t *lst = lst_alloc(NULL);
     msgbuf_t msg;
+    void *buf;
+    uint32_t len;
     for (int i = 0; i < 3; ++i)
         lst_adde(lst, &tl[i]);
-    msg_create_request(&msg, MSG_TEST, CONST_STR_LEN("qwerty"), 32, 8);
+    msg_create_request(&msg, MSG_TEST, CONST_STR_LEN("qwerty"), 32, 32);
     msg_seti32(&msg, 48);
     msg_setstr(&msg, CONST_STR_LEN("good luck!"));
     msg_setlist(&msg, lst, on_msg_item, NULL);
-    msg.pc = msg.ptr;
-    uint32_t u;
+    
+    buf = msg.ptr;
+    len = msg.len;
+
+    msg_load_request(&msg, buf, len);
+    
     int32_t i;
     strptr_t s;
-    if (-1 != msg_getui32(&msg, &u))
-        printf("length: %u - %s\n", u, u == msg.len ? "true" : "false");
-    if (-1 != msg_getui32(&msg, &u))
-        printf("method: %u\n", u);
-    if (-1 != msg_getstr(&msg, &s))
-        printf("cookie %s\n", s.ptr);
+    printf("method: %u\n", msg.method);
+    printf("cookie %s\n", msg.cookie.ptr);
     if (-1 != msg_geti32(&msg, &i))
         printf("param1: %i\n", i);
     if (-1 != msg_getstr(&msg, &s))
