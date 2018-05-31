@@ -80,7 +80,7 @@ static tree_item_t *tree_insert_help (rbtree_t *tree, void *key) {
     z->tree = tree;
     if (tree->on_copy)
         z->key = tree->on_copy(key);
-    if ((y == tree->root) || (0 < tree->on_compare(y->key, z->key)))
+    if ((y == tree->root) || (0 < tree->on_compare(y->key, key)))
         y->left = z;
     else
         y->right = z;
