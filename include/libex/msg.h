@@ -27,6 +27,7 @@ typedef void *(*msg_reallocator_h) (void*, size_t);
 
 extern msg_allocator_h msg_alloc;
 extern msg_deallocator_h msg_free;
+extern msg_reallocator_h msg_realloc;
 
 int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t len, uint32_t chunk_size);
 int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_size);
