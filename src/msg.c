@@ -2,6 +2,7 @@
 
 msg_allocator_h msg_alloc = malloc;
 msg_deallocator_h msg_free = free;
+msg_reallocator_h msg_realloc = realloc;
 
 static int allocate (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
     uint32_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
@@ -40,7 +41,7 @@ int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
     if (nstr_len >= msg->bufsize) {
         uint32_t nbufsize = (nstr_len / msg->chunk_size) * msg->chunk_size + msg->chunk_size;
         uintptr_t pc_len = (uintptr_t)msg->pc - (uintptr_t)msg->ptr;
-        buf = realloc(buf, nbufsize);
+        buf = msg_realloc(buf, nbufsize);
         if (!buf) return -1;
         msg->ptr = buf;
         msg->pc = msg->ptr + pc_len;
@@ -60,7 +61,7 @@ int msg_setstr (msgbuf_t *msg, const char *src, size_t src_len) {
     if (nstr_len >= msg->bufsize) {
         uint32_t nbufsize = (nstr_len / msg->chunk_size) * msg->chunk_size + msg->chunk_size;
         uintptr_t pc_len = (uintptr_t)msg->pc - (uintptr_t)msg->ptr;
-        buf = realloc(buf, nbufsize);
+        buf = msg_realloc(buf, nbufsize);
         if (!buf) return -1;
         msg->ptr = buf;
         msg->pc = msg->ptr + pc_len;

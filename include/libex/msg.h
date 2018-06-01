@@ -23,6 +23,7 @@ typedef struct {
 typedef int (*msg_item_h) (msgbuf_t*, void*, void*);
 typedef void *(*msg_allocator_h) (size_t);
 typedef void (*msg_deallocator_h) (void*);
+typedef void *(*msg_reallocator_h) (void*, size_t);
 
 extern msg_allocator_h msg_alloc;
 extern msg_deallocator_h msg_free;
