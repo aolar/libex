@@ -146,6 +146,8 @@ int msg_load_response (msgbuf_t *msg, char *buf, size_t buflen) {
     }
     if (-1 == msg_getui32(msg, &msg->code))
         return -1;
+    if (msg->code != MSG_OK && -1 == msg_getstr(msg, &msg->errmsg))
+        return -1;
     return 0;
 }
 

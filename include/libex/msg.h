@@ -7,6 +7,7 @@
 #define MSG_INSERTED 0
 #define MSG_NOT_INSERTED 1
 #define MSG_ERROR -1
+#define MSG_OK 0
 
 #define MSG_INIT { .len = 0, .bufsize = 0, .chunk_size = 0, .ptr = NULL, .pc = NULL, .method = 0, .cookie = { .ptr = NULL, .len = 0 }, .code = 0 }
 typedef struct {
@@ -18,6 +19,7 @@ typedef struct {
     uint32_t method;
     strptr_t cookie;
     uint32_t code;
+    strptr_t errmsg;
 } msgbuf_t;
 
 typedef int (*msg_item_h) (msgbuf_t*, void*, void*);
