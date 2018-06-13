@@ -109,6 +109,7 @@ int msg_setlist (msgbuf_t *msg, list_t *lst, msg_item_h fn, void *userdata) {
 int msg_load_request (msgbuf_t *msg, char *buf, size_t buflen) {
     uint32_t len;
     errno = 0;
+    msg_clear(msg);
     msg->ptr = msg->pc = buf;
     msg->len = msg->bufsize = buflen;
     msg->chunk_size = 0;
@@ -135,6 +136,7 @@ int msg_load_request (msgbuf_t *msg, char *buf, size_t buflen) {
 int msg_load_response (msgbuf_t *msg, char *buf, size_t buflen) {
     uint32_t len;
     errno = 0;
+    msg_clear(msg);
     msg->ptr = msg->pc = buf;
     msg->len = msg->bufsize = buflen;
     msg->chunk_size = 0;
