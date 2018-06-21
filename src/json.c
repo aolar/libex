@@ -729,7 +729,8 @@ static int get_id (json_item_t *item, intptr_t *id, int *id_len) {
             *id_len = -1;
             return 0;
         case JSON_STRING:
-            *id = (intptr_t)item->data.s.ptr;
+            //*id = (intptr_t)item->data.s.ptr;
+            *id = (intptr_t)strndup(item->data.s.ptr, item->data.s.len);
             *id_len = item->data.s.len;
             return 0;
         case JSON_NULL:
@@ -759,15 +760,20 @@ void jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods) {
         intptr_t id = 0;
         int id_len = 0;
         jsonrpc_method_t *m = methods;
-        get_id(jsonrpc.id, &id, &id_len);
-        while (m && 0 != cmpstr(m->method.ptr, m->method.len, jsonrpc.method.ptr, jsonrpc.method.len))
-            m++;
-        if (m) {
-            list_to_array_t la = { .params = calloc(jsonrpc.params->data.a->len, sizeof(json_item_t*)), .params_len = 0 };
-            json_enum_array(jsonrpc.params->data.a, (json_item_h)on_list_to_array, &la, 0);
-            m->handle(buf, la.params, la.params_len, id, id_len);
-            free(la.params);
-        }
+        if (0 == get_id(jsonrpc.id, &id, &id_len)) {
+            while (m->method.ptr && m->method.len && 0 != cmpstr(m->method.ptr, m->method.len, jsonrpc.method.ptr, jsonrpc.method.len))
+                m++;
+            if (m->method.ptr && m->method.len) {
+                list_to_array_t la = { .params = calloc(jsonrpc.params->data.a->len, sizeof(json_item_t*)), .params_len = 0 };
+                json_enum_array(jsonrpc.params->data.a, (json_item_h)on_list_to_array, &la, 0);
+                m->handle(buf, la.params, la.params_len, id, id_len);
+                free(la.params);
+            } else
+                jsonrpc_stderror(buf, JSONRPC_METHOD_NOT_FOUND, id, id_len);
+            if (id_len > 0)
+                free((void*)id);
+        } else
+            jsonrpc_stderror(buf, JSONRPC_PARSE_ERROR, 0, 0);
     } else
         jsonrpc_stderror(buf, rc, 0, 0);
     if (jsonrpc.json)
