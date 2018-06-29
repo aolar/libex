@@ -87,26 +87,29 @@ int load_conf_exactly (const char *fname, load_conf_h fn) {
     return 0;
 }
 
-static void load_conf_from_spec (spec_path_t id, const char *fname, load_conf_h fn, int hidden) {
+static int load_conf_from_spec (spec_path_t id, const char *fname, load_conf_h fn, int hidden) {
     str_t *path = get_spec_path(id);
-    if (!path) return;
+    if (!path) return -1;
     if (hidden) {
         path = path_add_path(path, ".", NULL);
         strnadd(&path, fname, strlen(fname));
         STR_ADD_NULL(path);
     } else
         path = path_add_path(path, fname, NULL);
-    load_conf_exactly(path->ptr, fn);
+    int rc = load_conf_exactly(path->ptr, fn);
     free(path);
+    return rc;
 }
 
-void load_conf (const char *fname, load_conf_h fn) {
-    load_conf_from_spec(DIR_CONFIG, fname, fn, 0);
-    load_conf_from_spec(DIR_USR_CONFIG, fname, fn, 0);
-    load_conf_from_spec(DIR_LOCAL_CONFIG, fname, fn, 0);
-    load_conf_from_spec(DIR_HOME_CONFIG, fname, fn, 0);
-    load_conf_from_spec(DIR_HOME, fname, fn, 1);
-    load_conf_from_spec(DIR_CURRENT, fname, fn, 1);
+int load_conf (const char *fname, load_conf_h fn) {
+    int rc = -1;
+    if (0 == load_conf_from_spec(DIR_CONFIG, fname, fn, 0)) rc = 0;
+    if (0 == load_conf_from_spec(DIR_USR_CONFIG, fname, fn, 0)) rc = 0;
+    if (0 == load_conf_from_spec(DIR_LOCAL_CONFIG, fname, fn, 0)) rc = 0;
+    if (0 == load_conf_from_spec(DIR_HOME_CONFIG, fname, fn, 0)) rc = 0;
+    if (0 == load_conf_from_spec(DIR_HOME, fname, fn, 1)) rc = 0;
+    if (0 == load_conf_from_spec(DIR_CURRENT, fname, fn, 1)) rc = 0;
+    return rc;
 }
 
 static int enumdir (const char *path, path_h on_path, void *userdata, int flags, int max_depth, int depth) {

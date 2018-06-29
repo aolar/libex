@@ -22,7 +22,7 @@ void slogf (const char *fmt, ...);
 void vslogf (int is_print_time, const char *fmt, va_list ap);
 
 typedef void (*load_conf_h) (const char*, strptr_t*, strptr_t*);
-void load_conf (const char *fname, load_conf_h fn);
+int load_conf (const char *fname, load_conf_h fn);
 int load_conf_exactly (const char *fname, load_conf_h fn);
 #define CONF_HANDLER ({ void fn (const char *fname, strptr_t *key, strptr_t *val) {
 #define CONF_HANDLER_END } fn; })
