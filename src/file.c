@@ -14,7 +14,7 @@ int loginit (const char *fname) {
     if (-1 == stat(fname, &st)) {
         if (errno == ENOENT) {
             #ifndef __WIN32__
-            int fd = open(fname, O_WRONLY | O_CREAT | O_APPEND, 0666);
+            int fd = open(fname, O_WRONLY | O_CREAT | O_APPEND, 0644);
             #else
             int fd = open(fname, O_WRONLY | O_CREAT | O_APPEND);
             #endif
@@ -42,7 +42,7 @@ void vslogf (int is_print_time, const char *fmt, va_list ap) {
         len += vsnprintf(buf+len, LOG_BUF_SIZE-len-2, fmt, ap);
         buf[len++] = '\n';
         #ifndef __WIN32__
-        if (-1 != (fd = open(log_fname, O_WRONLY | O_CREAT | O_APPEND, 0666))) {
+        if (-1 != (fd = open(log_fname, O_WRONLY | O_CREAT | O_APPEND, 0644))) {
         #else
         if (-1 != (fd = open(log_fname, O_WRONLY | O_CREAT | O_APPEND))) {
         #endif

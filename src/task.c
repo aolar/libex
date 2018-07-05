@@ -108,7 +108,7 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags) {
         if (WIFEXITED(status)) { proc->run_exit = RUN_EXITED; proc->exit_code = WEXITSTATUS(status); } else
         if (WIFSTOPPED(status)) { proc->run_exit = RUN_STOPPED; proc->exit_code = WSTOPSIG(status); } else
         if (WIFSIGNALED(status)) { proc->run_exit = RUN_SIGNALED; proc->exit_code = WTERMSIG(status); };
-        proc->pid = 0;
+//        proc->pid = 0;
     }
     #else
     char cmdline [cmd_len+1];
