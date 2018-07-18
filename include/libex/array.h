@@ -3,27 +3,67 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <stdint.h>
-#include "list.h"
 
-typedef struct {
-    void *data;
-    size_t data_size;
-    size_t chunk_size;
-    size_t len;
-    size_t bufsize;
-    compare_h on_compare;
-} array_t;
+#define DEFINE_ARRAY(_array_type_, _data_type_) \
+    typedef void (*free_item_##_array_type_##_h) (_data_type_); \
+    typedef struct _array_##_array_type_##_ _array_type_; \
+    struct _array_##_array_type_##_ { \
+        size_t len, bufsize, chunk_size, data_size; \
+        free_item_##_array_type_##_h on_free; \
+        _data_type_ ptr [0]; \
+    }
 
-array_t *array_alloc (size_t data_size, size_t chunk_size);
-ssize_t array_find (array_t *x, void *key);
-static inline void *array_get (array_t *x, size_t idx) {
-    if (idx >= 0 && idx < x->len)
-        return x->data + idx * x->data_size;
-    return NULL;
-}
-void array_free (array_t *x);
-void *array_add (array_t *x, void *y);
+#define INIT_ARRAY(_data_type_, _array_, _start_len_, _chunk_size_, _on_free_) \
+    size_t _##_array_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
+    _array_ = malloc(sizeof(_data_type_) * _##_array_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
+    if (_array_) { \
+        (_array_)->bufsize = _##_array_##_bufsize; \
+        (_array_)->len = 0; \
+        (_array_)->data_size = sizeof(_data_type_); \
+        (_array_)->chunk_size = _chunk_size_; \
+        (_array_)->on_free = _on_free_; \
+    }
+
+#define ARRAY_ADD(_array_, _data_) \
+    if (_array_->bufsize == _array_->len) { \
+        size_t nbufsize = _array_->bufsize + (_array_)->chunk_size; \
+        if ((_array_ = realloc(_array_, _array_->data_size * nbufsize + 4 * sizeof(size_t) + sizeof(void*)))) { \
+            (_array_)->bufsize = nbufsize; \
+        } \
+    } \
+    (_array_)->ptr[(_array_)->len] = _data_; \
+    ++(_array_)->len;
+
+#define ARRAY_INS(_array_, _data_, _idx_) \
+    if (_array_->bufsize == _array_->len) { \
+        size_t nbufsize = _array_->bufsize + (_array_)->chunk_size; \
+        if ((_array_ = realloc(_array_, _array_->data_size * nbufsize + 4 * sizeof(size_t) + sizeof(void*)))) { \
+            (_array_)->bufsize = nbufsize; \
+        } \
+    } \
+    if (_idx_ < (_array_)->len) { \
+        memmove(&_array_->ptr[_idx_ + 1], &_array_->ptr[_idx_], (_array_->len - _idx_) * _array_->data_size); \
+        _array_->ptr[_idx_] = _data_; \
+        ++_array_->len; \
+    } else { \
+        (_array_)->ptr[(_array_)->len] = _data_; \
+        ++(_array_)->len; \
+    }
+
+#define ARRAY_DEL(_array_, _idx_) \
+    if (_idx_ >= 0 && _idx_ < _array_->len) { \
+        if (_idx_ == _array_->len - 1) \
+            --_array_->len; \
+        else { \
+            memmove(&_array_->ptr[_idx_], &_array_->ptr[_idx_ + 1], (_array_->len - _idx_ - 1) * _array_->data_size); \
+            --_array_->len; \
+        } \
+    }
+
+#define ARRAY_FREE(_array_) \
+    if (_array_->on_free) \
+        for (size_t i = 0; i < _array_->len; ++i) \
+            _array_->on_free(_array_->ptr[i]); \
+    free(_array_)
 
 #endif // __LIBEX_ARRAY_H__
