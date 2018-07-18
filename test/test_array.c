@@ -12,10 +12,20 @@ void test_int_array () {
     for (int i = 0; i < 10; ++i) {
         ARRAY_ADD(x, i);
     }
+    for (size_t i = 0; i < x->len; ++i)
+        printf("%lu: %d\n", i, x->ptr[i]);
+    printf("insert to 5\n");
     ARRAY_INS(x, 50, 5);
-    ARRAY_DEL(x, 3);
-    for (int i = 0; i < x->len; ++i)
-        printf("%d\n", x->ptr[i]);
+    for (size_t i = 0; i < x->len; ++i)
+        printf("%lu: %d\n", i, x->ptr[i]);
+    printf("delete from 4 of 2\n");
+    ARRAY_DEL(x, 4, 2);
+    for (size_t i = 0; i < x->len; ++i)
+        printf("%lu: %d\n", i, x->ptr[i]);
+    printf("delete from 5 of 8\n");
+    ARRAY_DEL(x, 5, 8);
+    for (size_t i = 0; i < x->len; ++i)
+        printf("%lu: %d\n", i, x->ptr[i]);
     printf("%lu %lu %lu %lu\n", x->len, x->bufsize, x->chunk_size, x->data_size);
     ARRAY_FREE(x);
 }

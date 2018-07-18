@@ -50,13 +50,18 @@
         ++(_array_)->len; \
     }
 
-#define ARRAY_DEL(_array_, _idx_) \
-    if (_idx_ >= 0 && _idx_ < _array_->len) { \
+#define ARRAY_DEL(_array_, _idx_, _count_) \
+    if (_idx_ >= 0 && _idx_ < _array_->len && _count_ > 0) { \
         if (_idx_ == _array_->len - 1) \
             --_array_->len; \
         else { \
-            memmove(&_array_->ptr[_idx_], &_array_->ptr[_idx_ + 1], (_array_->len - _idx_ - 1) * _array_->data_size); \
-            --_array_->len; \
+            size_t count; \
+            if (_idx_ + _count_ < _array_->len) \
+                count = _count_; \
+            else \
+                count = _array_->len - _idx_; \
+            memmove(&_array_->ptr[_idx_], &_array_->ptr[_idx_ + count], (count + 1) * _array_->data_size); \
+            _array_->len -= count; \
         } \
     }
 
