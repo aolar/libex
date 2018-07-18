@@ -71,4 +71,27 @@
             _array_->on_free(_array_->ptr[i]); \
     free(_array_)
 
+#define DEFINE_SORTED_ARRAY(_array_type_, _data_type_) \
+    typedef void (*free_item_##_array_type_##_h) (_data_type_); \
+    typedef int (*compare_items_##_array_type_##_h) (_data_type_, _data_type_); \
+    typedef struct _array_##_array_type_##_ _array_type_; \
+    struct _array_##_array_type_##_ { \
+        size_t len, bufsize, chunk_size, data_size; \
+        free_item_##_array_type_##_h on_free; \
+        compare_items_##_array_type_##_h on_compare; \
+        _data_type_ ptr [0]; \
+    }
+
+#define INIT_SORTED_ARRAY(_data_type_, _array_, _start_len_, _chunk_size_, _on_compare, _on_free_) \
+    size_t _##_array_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
+    _array_ = malloc(sizeof(_data_type_) * _##_array_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
+    if (_array_) { \
+        (_array_)->bufsize = _##_array_##_bufsize; \
+        (_array_)->len = 0; \
+        (_array_)->data_size = sizeof(_data_type_); \
+        (_array_)->chunk_size = _chunk_size_; \
+        (_array_)->on_free = _on_free_; \
+        (_array_)->on_compare = _on_compare_; \
+    }
+
 #endif // __LIBEX_ARRAY_H__

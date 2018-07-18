@@ -4,8 +4,9 @@
 #include "../include/libex/array.h"
 
 DEFINE_ARRAY(int_array_t, int);
+DEFINE_SORTED_ARRAY(int_sorted_array_t, int);
 
-void test_int_array () {
+void test_array () {
     int_array_t *x;
     INIT_ARRAY(int, x, 8, 8, NULL);
     printf("%lu %lu %lu %lu\n", x->len, x->bufsize, x->chunk_size, x->data_size);
@@ -27,6 +28,18 @@ void test_int_array () {
     for (size_t i = 0; i < x->len; ++i)
         printf("%lu: %d\n", i, x->ptr[i]);
     printf("%lu %lu %lu %lu\n", x->len, x->bufsize, x->chunk_size, x->data_size);
+    ARRAY_FREE(x);
+}
+
+int on_compare (int x, int y) {
+    if (x > y) return 1;
+    if (x < y) retuirn -1;
+    return 0;
+}
+
+void test_sorted_array () {
+    int_sorted_array_t *x;
+    INIT_SORTED_ARRAY(int, x, 8, 8, NULL, on_compare);
     ARRAY_FREE(x);
 }
 
