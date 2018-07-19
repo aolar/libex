@@ -5,6 +5,7 @@
 #include <string.h>
 
 #define DEFINE_ARRAY(_array_type_, _data_type_) \
+    size_t _##_array_type_##_data_size = sizeof(_data_type_); \
     typedef void (*free_item_##_array_type_##_h) (_data_type_); \
     typedef struct _array_##_array_type_##_ _array_type_; \
     struct _array_##_array_type_##_ { \
@@ -13,16 +14,17 @@
         _data_type_ ptr [0]; \
     }
 
-#define INIT_ARRAY(_data_type_, _array_, _start_len_, _chunk_size_, _on_free_) \
-    size_t _##_array_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
-    _array_ = malloc(sizeof(_data_type_) * _##_array_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
+#define INIT_ARRAY(_array_type_, _array_, _start_len_, _chunk_size_, _on_free_) { \
+    size_t _##_array_type_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
+    _array_ = malloc(_##_array_type_##_data_size * _##_array_type_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
     if (_array_) { \
-        (_array_)->bufsize = _##_array_##_bufsize; \
+        (_array_)->bufsize = _##_array_type_##_bufsize; \
         (_array_)->len = 0; \
-        (_array_)->data_size = sizeof(_data_type_); \
+        (_array_)->data_size = _##_array_type_##_data_size; \
         (_array_)->chunk_size = _chunk_size_; \
         (_array_)->on_free = _on_free_; \
-    }
+    } \
+}
 
 #define ARRAY_ADD(_array_, _data_) \
     if (_array_->bufsize == _array_->len) { \
@@ -72,8 +74,9 @@
     free(_array_)
 
 #define DEFINE_SORTED_ARRAY(_array_type_, _data_type_) \
+    size_t _##_array_type_##_data_size = sizeof(_data_type_); \
     typedef void (*free_item_##_array_type_##_h) (_data_type_); \
-    typedef int (*compare_items_##_array_type_##_h) (_data_type_, _data_type_); \
+    typedef int (*compare_items_##_array_type_##_h) (_data_type_*, _data_type_*); \
     typedef struct _array_##_array_type_##_ _array_type_; \
     struct _array_##_array_type_##_ { \
         size_t len, bufsize, chunk_size, data_size; \
@@ -82,40 +85,42 @@
         _data_type_ ptr [0]; \
     }
 
-#define INIT_SORTED_ARRAY(_data_type_, _array_, _start_len_, _chunk_size_, _on_free_, _on_compare_) \
-    size_t _##_array_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
-    _array_ = malloc(sizeof(_data_type_) * _##_array_##_bufsize + 4 * sizeof(size_t) + sizeof(void*) * 2); \
+#define INIT_SORTED_ARRAY(_array_type_, _array_, _start_len_, _chunk_size_, _on_free_, _on_compare_) { \
+    size_t _##_array_type_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
+    _array_ = malloc(_##_array_type_##_data_size * _##_array_type_##_bufsize + 4 * sizeof(size_t) + sizeof(void*) * 2); \
     if (_array_) { \
-        (_array_)->bufsize = _##_array_##_bufsize; \
+        (_array_)->bufsize = _##_array_type_##_bufsize; \
         (_array_)->len = 0; \
-        (_array_)->data_size = sizeof(_data_type_); \
+        (_array_)->data_size = _##_array_type_##_data_size; \
         (_array_)->chunk_size = _chunk_size_; \
         (_array_)->on_free = _on_free_; \
         (_array_)->on_compare = _on_compare_; \
-    }
+    } \
+}
 
 #define SORTED_ARRAY_FIND(_array_, _data_, _found_idx_, _is_found_) \
     _is_found_ = 0; _found_idx_ = 0; \
     { \
+        int __is_found__ = -1; \
         signed long long int _l_ = 0, _r_ = _array_->len - 1; \
         while (_l_ <= _r_) { \
             _found_idx_ = (_l_ + _r_) / 2LL; \
-            _is_found_ = _array_->on_compare(_data_, _array_->ptr[__found_idx__]); \
-            if (_is_found_ > 0) _l_ = _found_idx_ + 1; \
-            else if (_is_found_ < 0) _r_ = _found_idx_ - 1; \
+            __is_found__ = _array_->on_compare(&_data_, &_array_->ptr[_found_idx_]); \
+            if (__is_found__ > 0) _l_ = _found_idx_ + 1; \
+            else if (__is_found__ < 0) _r_ = _found_idx_ - 1; \
             else break; \
         } \
-        if (_found_idx_ < 0) _found_idx_ = 0; \
+        if (__is_found__ == 0) _is_found_ = 1; \
     }
 
-#define SORTED_ARRAY_ADD(_array_, _data_) { \
+#define SORTED_ARRAY_ADD(_array_, _data_, _idx_) { \
     signed long long _found_idx_ = 0; \
     { \
         int _is_found_ = 0; \
         signed long long int _l_ = 0, _r_ = _array_->len - 1; \
         while (_l_ <= _r_) { \
             _found_idx_ = (_l_ + _r_) / 2LL; \
-            _is_found_ = _array_->on_compare(_data_, _array_->ptr[_found_idx_]); \
+            _is_found_ = _array_->on_compare(&_data_, &_array_->ptr[_found_idx_]); \
             if (_is_found_ > 0) _l_ = _found_idx_ + 1; \
             else if (_is_found_ < 0) _r_ = _found_idx_ - 1; \
             else break; \
@@ -137,6 +142,7 @@
         (_array_)->ptr[(_array_)->len] = _data_; \
         ++(_array_)->len; \
     }\
+    _idx_ = _found_idx_; \
 }
 
 #endif // __LIBEX_ARRAY_H__

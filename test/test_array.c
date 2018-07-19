@@ -9,7 +9,7 @@ DEFINE_SORTED_ARRAY(int_sorted_array_t, int);
 
 void test_array () {
     int_array_t *x;
-    INIT_ARRAY(int, x, 8, 8, NULL);
+    INIT_ARRAY(int_array_t, x, 8, 8, NULL);
     printf("%lu %lu %lu %lu\n", x->len, x->bufsize, x->chunk_size, x->data_size);
     for (int i = 0; i < 10; ++i) {
         ARRAY_ADD(x, i);
@@ -32,19 +32,21 @@ void test_array () {
     ARRAY_FREE(x);
 }
 
-int on_compare (int x, int y) {
-    if (x > y) return 1;
-    if (x < y) return -1;
+int on_compare (int *x, int *y) {
+    if (*x > *y) return 1;
+    if (*x < *y) return -1;
     return 0;
 }
 
 void test_sorted_array () {
     int_sorted_array_t *x;
-    INIT_SORTED_ARRAY(int, x, 8, 8, NULL, on_compare);
+    INIT_SORTED_ARRAY(int_sorted_array_t, x, 8, 8, NULL, on_compare);
     srand(time(0));
     for (int i = 0; i < 15; ++i) {
         int n = rand();
-        SORTED_ARRAY_ADD(x, n);
+        size_t idx;
+        SORTED_ARRAY_ADD(x, n, idx);
+        printf("idx: %lu\n", idx);
     }
     for (size_t i = 0; i < x->len; ++i)
         printf("%lu\t%d\n", i, x->ptr[i]);
