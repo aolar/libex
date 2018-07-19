@@ -38,8 +38,6 @@ int on_compare (int x, int y) {
     return 0;
 }
 
-int a [] = { 2025093037, 409750739, 651615352, 23080399, 1287822061 };
-
 void test_sorted_array () {
     int_sorted_array_t *x;
     INIT_SORTED_ARRAY(int, x, 8, 8, NULL, on_compare);
@@ -54,7 +52,7 @@ void test_sorted_array () {
 }
 
 int main () {
-//    test_array();
+    test_array();
     test_sorted_array();
     return 0;
 }
