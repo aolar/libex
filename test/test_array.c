@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 #include "../include/libex/str.h"
 #include "../include/libex/array.h"
 
@@ -33,17 +34,27 @@ void test_array () {
 
 int on_compare (int x, int y) {
     if (x > y) return 1;
-    if (x < y) retuirn -1;
+    if (x < y) return -1;
     return 0;
 }
+
+int a [] = { 2025093037, 409750739, 651615352, 23080399, 1287822061 };
 
 void test_sorted_array () {
     int_sorted_array_t *x;
     INIT_SORTED_ARRAY(int, x, 8, 8, NULL, on_compare);
+    srand(time(0));
+    for (int i = 0; i < 15; ++i) {
+        int n = rand();
+        SORTED_ARRAY_ADD(x, n);
+    }
+    for (size_t i = 0; i < x->len; ++i)
+        printf("%lu\t%d\n", i, x->ptr[i]);
     ARRAY_FREE(x);
 }
 
 int main () {
-    test_int_array();
+//    test_array();
+    test_sorted_array();
     return 0;
 }

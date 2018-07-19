@@ -82,9 +82,9 @@
         _data_type_ ptr [0]; \
     }
 
-#define INIT_SORTED_ARRAY(_data_type_, _array_, _start_len_, _chunk_size_, _on_compare, _on_free_) \
+#define INIT_SORTED_ARRAY(_data_type_, _array_, _start_len_, _chunk_size_, _on_free_, _on_compare_) \
     size_t _##_array_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
-    _array_ = malloc(sizeof(_data_type_) * _##_array_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
+    _array_ = malloc(sizeof(_data_type_) * _##_array_##_bufsize + 4 * sizeof(size_t) + sizeof(void*) * 2); \
     if (_array_) { \
         (_array_)->bufsize = _##_array_##_bufsize; \
         (_array_)->len = 0; \
@@ -93,5 +93,50 @@
         (_array_)->on_free = _on_free_; \
         (_array_)->on_compare = _on_compare_; \
     }
+
+#define SORTED_ARRAY_FIND(_array_, _data_, _found_idx_, _is_found_) \
+    _is_found_ = 0; _found_idx_ = 0; \
+    { \
+        signed long long int _l_ = 0, _r_ = _array_->len - 1; \
+        while (_l_ <= _r_) { \
+            _found_idx_ = (_l_ + _r_) / 2LL; \
+            _is_found_ = _array_->on_compare(_data_, _array_->ptr[__found_idx__]); \
+            if (_is_found_ > 0) _l_ = _found_idx_ + 1; \
+            else if (_is_found_ < 0) _r_ = _found_idx_ - 1; \
+            else break; \
+        } \
+        if (_found_idx_ < 0) _found_idx_ = 0; \
+    }
+
+#define SORTED_ARRAY_ADD(_array_, _data_) { \
+    signed long long _found_idx_ = 0; \
+    { \
+        int _is_found_ = 0; \
+        signed long long int _l_ = 0, _r_ = _array_->len - 1; \
+        while (_l_ <= _r_) { \
+            _found_idx_ = (_l_ + _r_) / 2LL; \
+            _is_found_ = _array_->on_compare(_data_, _array_->ptr[_found_idx_]); \
+            if (_is_found_ > 0) _l_ = _found_idx_ + 1; \
+            else if (_is_found_ < 0) _r_ = _found_idx_ - 1; \
+            else break; \
+        } \
+        if (_array_->len > 0 && _is_found_ > 0) ++_found_idx_; \
+        if (_found_idx_ < 0) _found_idx_ = 0; \
+    } \
+    if (_array_->bufsize == _array_->len) { \
+        size_t nbufsize = _array_->bufsize + (_array_)->chunk_size; \
+        if ((_array_ = realloc(_array_, _array_->data_size * nbufsize + 4 * sizeof(size_t) + sizeof(void*) * 2))) { \
+            (_array_)->bufsize = nbufsize; \
+        } \
+    } \
+    if (_found_idx_ < (_array_)->len) { \
+        memmove(&_array_->ptr[_found_idx_ + 1], &_array_->ptr[_found_idx_], (_array_->len - _found_idx_) * _array_->data_size); \
+        _array_->ptr[_found_idx_] = _data_; \
+        ++_array_->len; \
+    } else { \
+        (_array_)->ptr[(_array_)->len] = _data_; \
+        ++(_array_)->len; \
+    }\
+}
 
 #endif // __LIBEX_ARRAY_H__
