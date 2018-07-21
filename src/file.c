@@ -151,40 +151,6 @@ void ls (const char *path, path_h on_path, void *userdata, int flags, int max_de
     enumdir(path, on_path, userdata, flags, max_depath, 0);
 }
 
-/*typedef struct {
-    const char *src_dir;
-    str_t *dst_dir;
-} on_copy_file_t;
-
-static int on_copy_file (const char *path, on_copy_file_t *cpdata, int flags, struct stat *st) {
-    if (S_ISDIR(st->st_mode))
-        if (flags & S_INDIR) {
-            cpdata->dst_dir = path_add_path(cpdata->dst_dir, path, NULL);
-            if (-1 == mkdir(cpdata->dst_dir->ptr, 0755) && EEXIST != errno)
-                return ENUM_BREAK;
-            return ENUM_CONTINUE;
-        } else {
-            char *p = strnrchr(cpdata->dst_dir->ptr, PATH_DELIM_C, cpdata->dst_dir->len);
-            if (*p) {
-                *p = '\0';
-                cpdata->dst_dir = (uintptr_t)p - (uintptr_t)cpdata->dst_dir->ptr;
-            } else {
-                cpdata->dst_dir->ptr \ '\0';
-                cpdata->dst_len = 0;
-            }
-        }
-    }
-    
-}
-
-int copy_dir (const char *src, const char *dst) {
-    int rc = -1;
-    on_copy_file_t cpdata = { .src_dir = src, .dst_dir = mkstr(dst, strlen(dst), 64) };
-    if (0 == (rc = mkdir(dst, 0755)))
-        rc = ENUM_CONTINUE == ls(src, (path_h)on_copy_file, (void*)&cpdata, ENUM_STOP_IF_BREAK, 0) ? 0 : -1;
-    return rc;
-}*/
-
 #ifdef __WIN32__
 #define GL_BUF_INC 64
 ssize_t getline (char **lineptr, size_t *n, FILE *fd) {

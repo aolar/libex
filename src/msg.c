@@ -225,8 +225,6 @@ int msg_enum (msgbuf_t *msg, msg_item_h fn, void *userdata) {
     return 0 == errno ? 0 : -1;
 }
 
-//
-
 int msg_error (msgbuf_t *msg, int code, const char *str, size_t len) {
     if (!len) len = strlen(str);
     if (-1 == msg_create_response(msg, code, sizeof(uint32_t) * 3 + len, 8))
