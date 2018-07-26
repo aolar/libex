@@ -4,10 +4,10 @@ enum { JSON_OK, JSON_FIN, JSON_ERROR };
 __thread char *json_error_msg = NULL;
 const char *delims = "{}[],:";
 
-//*************************************************************************************
-//  json parser
-//*************************************************************************************
-// parse tokens
+/*************************************************************************************
+  json parser
+*************************************************************************************/
+
 static int get_token (json_t *j, strptr_t *token) {
     char *p = j->text_ptr, *q, *e = j->text + j->text_len;
     token->ptr = NULL;
@@ -277,9 +277,9 @@ json_item_t *json_find (json_object_t *jo, const char *key, size_t key_len, int 
     return j && type == j->type ? j : NULL;
 }
 
-//*************************************************************************************
-//  create json
-//*************************************************************************************
+/*************************************************************************************
+  create json
+*************************************************************************************/
 
 void json_enum_array (json_array_t *lst, json_item_h fn, void *userdata, int flags) {
     list_item_t *li = lst->head;
@@ -454,9 +454,9 @@ void json_close_object (strbuf_t *buf, int is_end) {
         strbufadd(buf, CONST_STR_LEN("},"));
 }
 
-//*************************************************************************************
-//  json rpc
-//*************************************************************************************
+/*************************************************************************************
+  json rpc
+*************************************************************************************/
 const char *jsonrpc_version = "1.0";
 
 static int jsonrpc_parse_id (json_item_t *ji, jsonrpc_enum_t *data) {
@@ -729,7 +729,6 @@ static int get_id (json_item_t *item, intptr_t *id, int *id_len) {
             *id_len = -1;
             return 0;
         case JSON_STRING:
-            //*id = (intptr_t)item->data.s.ptr;
             *id = (intptr_t)strndup(item->data.s.ptr, item->data.s.len);
             *id_len = item->data.s.len;
             return 0;

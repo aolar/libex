@@ -281,7 +281,8 @@ str_t *mktempnam (const char *dir, size_t dir_len, const char *prefix, size_t pr
     char buf [TEMP_TIMLEN];
     snprintf(buf, TEMP_TIMLEN, TIME_FMT, time(0));
     size_t buflen = strlen(buf);
-    strncpy(path->ptr+path->len+TEMP_NAMLEN, buf, buflen);
+    //strncpy(path->ptr+path->len+TEMP_NAMLEN, buf, buflen);
+    strcpy(path->ptr+path->len+TEMP_NAMLEN, buf);
     path->len += TEMP_NAMLEN+buflen;
     if (getsuf(prefix, prefix_len, &oname))
         strnadd(&path, oname.ptr, oname.len);
@@ -341,9 +342,7 @@ void path_split (const char *path, size_t path_len, str_t **dir, str_t **fname, 
 str_t *get_spec_path (spec_path_t id) {
     str_t *ret = NULL;
     const char *dirname = NULL;
-//    #ifdef __WIN32__
     char buf [MAX_PATH+1];
-//    #endif
     switch (id) {
         case DIR_HOME_CONFIG:
         #ifdef __WIN32__

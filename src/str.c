@@ -144,7 +144,8 @@ char *strputc (char *old_str, const char *new_str) {
             return NULL;
         res = p;
     }
-    strncpy(res, new_str, new_len);
+    //strncpy(res, new_str, new_len);
+    strcpy(res, new_str); // FIXME ?
     return res;
 }
 

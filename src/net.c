@@ -14,11 +14,6 @@ typedef struct {
     netsrv_t *srv;
 } netconn_t;
 
-//typedef int (*srv_try_connect_h) (struct sockaddr_in*, int);
-//typedef void* (*srv_connect_h) (int);
-//typedef int (*srv_event_h) (int, strbuf_t *buf, void *data);
-//typedef int (*srv_disconnect_h) (int, void*);
-
 struct net_daemon {
     netsrv_t *srvs;
     int max_threads;
