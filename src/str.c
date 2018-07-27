@@ -1,5 +1,15 @@
 #include "../include/libex/str.h"
 
+/**
+ * stralloc - create string
+ * @len: reserved length
+ * @chunk_size: minimal growing size
+ *
+ * allocate memory for new stirng with reserved size for @len string size
+ * with @chunk_size growing size
+ *
+ * Returns new string
+ */
 str_t *stralloc (size_t len, size_t chunk_size) {
     size_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
     if (len == bufsize) bufsize += chunk_size;
@@ -12,6 +22,16 @@ str_t *stralloc (size_t len, size_t chunk_size) {
     return ret;
 }
 
+/**
+ * wstralloc - create wide string
+ * @len: reserved length
+ * @chunk_size: minimal growing size
+ *
+ * allocate memory for new wide stirng with reserved size for @len string size
+ * with @chunk_size growing size.
+ *
+ * Returns new string
+ */
 wstr_t *wstralloc (size_t len, size_t chunk_size) {
     size_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
     if (len == bufsize) bufsize += chunk_size;
@@ -24,24 +44,56 @@ wstr_t *wstralloc (size_t len, size_t chunk_size) {
     return ret;
 }
 
+/**
+ * mkstr - create and fill string
+ * @str: source string
+ * @len: length of string
+ * @chunk_size: minimal growing size
+ *
+ * create new string and fill it from source string.
+ *
+ * Return new string. If @len equals 0 then returns NULL
+ */
 str_t *mkstr (const char *str, size_t len, size_t chunk_size) {
     str_t *ret = stralloc(len, chunk_size);
     if (!ret) return NULL;
+    if (0 == len) return NULL;
     ret->len = len;
     if (str && len) memcpy(ret->ptr, str, len);
     STR_ADD_NULL(ret);
     return ret;
 }
 
+/**
+ * wmkstr - create and fill wide string
+ * @str: source string
+ * @len: length of string
+ * @chunk_size: minimal growing size
+ *
+ * Create new wide string and fill from source string.
+ *
+ * Return new string. If @len equals 0 then returns NULL
+ */
 wstr_t *wmkstr (const wchar_t *str, size_t len, size_t chunk_size) {
     wstr_t *ret = wstralloc(len, chunk_size);
     if (!ret) return NULL;
+    if (0 == len) return NULL;
     ret->len = len;
     if (str && len) memcpy(ret->ptr, str, len * sizeof(wchar_t));
     WSTR_ADD_NULL(ret);
     return ret;
 }
 
+/**
+ * strsize - change length of a string
+ * @str: string
+ * @nlen - new length
+ * @flags - if set flags to STR_REDUCE then decrease of a string reduced a size of memory
+ *
+ * Change length of a string.
+ *
+ * Returns 0 is success, -1 if reallocate of memory is fail.
+ */
 int strsize (str_t **str, size_t nlen, int flags) {
     str_t *s = *str;
     size_t bufsize = (nlen / s->chunk_size) * s->chunk_size + s->chunk_size;
@@ -55,6 +107,13 @@ int strsize (str_t **str, size_t nlen, int flags) {
     return 0;
 }
 
+/**
+ * strwlen - returns actual length of a wide string
+ * @str: string buffer
+ * @str_len: size of string buffer
+ *
+ * Returns character count for string string buffer
+ */
 size_t strwlen (const char *str, size_t str_len) {
     size_t actual_len = 0, i = 0;
     while (i++ < str_len)
@@ -97,6 +156,21 @@ static int strrpad (str_t **str, size_t nlen, char filler) {
     return 0;
 }
 
+/**
+ * strpad - trying to pad string
+ * @str: string
+ * @nlen: new string length
+ * @filler: character for filling blank space
+ * @flags: flags is same as flags in strsize function
+ *
+ * Change @str size if needed, pad string and fills blank spsce by @filler
+ * Flags can get the next values:
+ * STR_LEFT - left padding,
+ * STR_CENTER - center padding,
+ * STR_RIGHT - right padding.
+ *
+ * Returns 0 is success, -1 if memory allocation is fail.
+ */
 int strpad (str_t **str, size_t nlen, char filler, int flags) {
     str_t *s = *str;
     if ((flags & STR_MAYBE_UTF)) {
@@ -111,6 +185,15 @@ int strpad (str_t **str, size_t nlen, char filler, int flags) {
     return 0;
 }
 
+/**
+ * strput - assign string from existing string
+ * @str: destination string
+ * @src: source string
+ * @src_len: source string length
+ * @flags: flags is same as flags in strsize function
+ *
+ * Returns 0 is success, -1 if memory alocation is fail.
+ */
 int strput (str_t **str, const char *src, size_t src_len, int flags) {
     if (-1 == strsize(str, src_len, flags)) return -1;
     (*str)->len = src_len;
@@ -119,6 +202,15 @@ int strput (str_t **str, const char *src, size_t src_len, int flags) {
     return 0;
 }
 
+/**
+ * strput - assign string from existing string
+ * @str: destination string
+ * @src: source string
+ * @src_len: source string length
+ * @flags: flags is same as flags in strsize function
+ *
+ * Returns string if success, NULL if memory allocation is fail.
+ */
 str_t *strput2 (str_t *str, const char *src, size_t src_len, int flags) {
     if (-1 == strsize(&str, src_len, flags)) return NULL;
     str->len = src_len;
