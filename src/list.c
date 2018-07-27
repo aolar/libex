@@ -1,4 +1,4 @@
-#include "list.h"
+#include "../include/libex/list.h"
 
 list_t *lst_alloc (free_h on_free) {
     list_t *list = calloc(1, sizeof(list_t));

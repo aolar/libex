@@ -1,4 +1,4 @@
-#include "tree.h"
+#include "../include/libex/tree.h"
 
 rbtree_t *rbtree_alloc (compare_h on_compare, copy_h on_copy, free_h on_free, int unique) {
     rbtree_t *new_tree;

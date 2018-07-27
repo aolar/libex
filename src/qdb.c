@@ -1,4 +1,4 @@
-#include "qdb.h"
+#include "../include/libex/qdb.h"
 
 #define QDB_TRUNC 0x00000001
 #define QDB_STATIC 0x00000002

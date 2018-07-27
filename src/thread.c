@@ -1,4 +1,4 @@
-#include "thread.h"
+#include "../include/libex/thread.h"
 
 int mkthread (thread_t *th, thread_h proc, void *arg) {
     #ifndef __WIN32__
