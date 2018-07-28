@@ -203,7 +203,7 @@ int strput (str_t **str, const char *src, size_t src_len, int flags) {
 }
 
 /**
- * strput - assign string from existing string
+ * strput2 - assign string from existing string
  * @str: destination string
  * @src: source string
  * @src_len: source string length
@@ -219,6 +219,16 @@ str_t *strput2 (str_t *str, const char *src, size_t src_len, int flags) {
     return str;
 }
 
+/**
+ * strputc - replace old string by new string
+ * @old_str: first string
+ * @new_str: second string
+ *
+ * Returns string. If @old_str is null and @new_str is null too then returns NULL
+ * If only old_str is null then returns new str, if new_str is null returns @old_str.
+ * If reallocate memory required and this operation is fail then function returns NULL and
+ * errno set ENOMEM
+ */
 char *strputc (char *old_str, const char *new_str) {
     char *res = old_str;
     if (!res) {
@@ -241,6 +251,14 @@ char *strputc (char *old_str, const char *new_str) {
     return res;
 }
 
+/**
+ * strdel - remove substring from string
+ * @str: string
+ * @pos: first position
+ * @len: character count for removing
+ * @flags: same as flags n strsize() function
+ *
+ */
 void strdel (str_t **str, char *pos, size_t len, int flags) {
     str_t *s = *str;
     char *e = s->ptr + s->len, *epos = pos + len;
@@ -256,6 +274,12 @@ void strdel (str_t **str, char *pos, size_t len, int flags) {
     STR_ADD_NULL(*str);
 }
 
+/**
+ * strntrim - remove leading and concluding tails
+ * @str: string
+ * @str_len string length
+ *
+ */
 void strntrim (char **str, size_t *str_len) {
     if (*str_len == 0) return;
     size_t len = *str_len;
@@ -267,6 +291,16 @@ void strntrim (char **str, size_t *str_len) {
     *str_len = (uintptr_t)e - (uintptr_t)p;
 }
 
+/**
+ * strntok - returns next token
+ * @str: string
+ * @str_len: string length
+ * @sep: character set as separator
+ * @sep_len: length of @sep
+ * @ret: result
+ *
+ * Returns token from @str and change pointer @str for next operation.
+ */
 int strntok (char **str, size_t *str_len, const char *sep, size_t sep_len, strptr_t *ret) {
     char *p = *str, *e = *str + *str_len, *q;
     if (p >= e)
@@ -288,6 +322,16 @@ int strntok (char **str, size_t *str_len, const char *sep, size_t sep_len, strpt
     return 0;
 }
 
+/**
+ * strepl - replace substring in string by source string
+ * @str: string
+ * @dst_pos: destination position
+ * @dst_len: character count of destination
+ * @src_pos: source string
+ * @src_len: source string length
+ *
+ * Returns 0 if success. If it required reallocated memory then set errno to ERANGE. If this operation is fail thne returns -1.
+ */
 int strepl (str_t **str, char *dst_pos, size_t dst_len, const char *src_pos, size_t src_len) {
     str_t *s = *str;
     size_t nstr_len = s->len;
@@ -313,6 +357,14 @@ int strepl (str_t **str, char *dst_pos, size_t dst_len, const char *src_pos, siz
     return 0;
 }
 
+/**
+ * strnchr - locate character in string
+ * @s: string
+ * @str_len: string length
+ * @c: wanted character
+ *
+ * This function same as strchr from libc, buf fin of function controlled of string length
+ */
 char *strnchr (const char *s, int c, size_t str_len) {
     const char *e = s + str_len;
     while (s < e && *s != c) ++s;
@@ -320,6 +372,14 @@ char *strnchr (const char *s, int c, size_t str_len) {
     return (char*)s;
 }
 
+/**
+ * strnrchr - locate character in string
+ * @s: string
+ * @str_len: string length
+ * @c: wanted character
+ *
+ * This function same as strrchr from libc, buf fin of function controlled of string length
+ */
 char *strnrchr (const char *s, int c, size_t str_len) {
     const char *e = s + str_len - 1;
     while (s <= e && *e != c) --e;
@@ -327,6 +387,15 @@ char *strnrchr (const char *s, int c, size_t str_len) {
     return (char*)e;
 }
 
+/**
+ * strnstr - locate a substring
+ * @str: string
+ * @str_len: string length
+ * @needle: is the string haystack
+ * @length of is the string haystack
+ *
+ * This function same as strstr from libc, buf fin of function controlled by string length and @needle length
+ */
 char *strnstr (const char *str, size_t str_len, const char *needle, size_t n_len) {
     const char *p, *pe;
     size_t len;
@@ -347,6 +416,14 @@ char *strnstr (const char *str, size_t str_len, const char *needle, size_t n_len
     return NULL;
 }
 
+/**
+ * strnadd - add string to string
+ * @str: string
+ * @src: source string
+ * @src_len: source string legnth
+ *
+ * Returns 0 if success, -1 if reallocate memory is required and it finished by fail.
+ */
 int strnadd (str_t **str, const char *src, size_t src_len) {
     str_t *s = *str;
     size_t nstr_len = s->len + src_len;
@@ -363,6 +440,14 @@ int strnadd (str_t **str, const char *src, size_t src_len) {
     return 0;
 }
 
+/**
+ * wstrnadd - add wie string to wide string
+ * @str: string
+ * @src: source string
+ * @src_len: source string legnth
+ *
+ * Returns 0 if success, -1 if reallocate memory is required and it finished by fail.
+ */
 int wstrnadd (wstr_t **str, const wchar_t *src, size_t src_len) {
     wstr_t *s = *str;
     size_t nstr_len = s->len + src_len;
@@ -379,6 +464,13 @@ int wstrnadd (wstr_t **str, const wchar_t *src, size_t src_len) {
     return 0;
 }
 
+/**
+ * strconcat - concatenate strings
+ * @chunc_size: minimal size for reallocating memory for string in future
+ * @arg: arguments
+ *
+ * Returns string if success and NULL if memory allocation is fail
+ */
 str_t *strconcat (size_t chunk_size, const char *arg, size_t arg_len, ...) {
     size_t start_len = arg_len;
     va_list ap;
@@ -394,7 +486,11 @@ str_t *strconcat (size_t chunk_size, const char *arg, size_t arg_len, ...) {
     }
     va_end(ap);
     str_t *res = stralloc(start_len, chunk_size);
-    strnadd(&res, arg, arg_len);
+    if (!res) return NULL;
+    if (-1 == strnadd(&res, arg, arg_len)) {
+        free(res);
+        return NULL;
+    }
     va_start(ap, arg_len);
     while (1) {
         const char *s = va_arg(ap, const char*);
@@ -403,12 +499,23 @@ str_t *strconcat (size_t chunk_size, const char *arg, size_t arg_len, ...) {
         size_t n = va_arg(ap, size_t);
         if (!n)
             break;
-        strnadd(&res, s, n);
+        if (-1 == strnadd(&res, s, n)) {
+            free(res);
+            return NULL;
+        }
     }
     va_end(ap);
     return res;
 }
 
+/**
+ * strev - reverse string
+ * @str: source string
+ * @len: source string length
+ * @chunk_size: chunk size of result string
+ *
+ * Returs string if success or NULL if can't allocate memory
+ */
 str_t *strev (const char *str, size_t len, size_t chunk_size) {
     str_t *ret = stralloc(len, chunk_size);
     char *p = ret->ptr, *q = (char*)str + len - 1;
@@ -420,6 +527,15 @@ str_t *strev (const char *str, size_t len, size_t chunk_size) {
     return ret;
 }
 
+/**
+ * strhex - convert string to HEX format
+ * @prifix: result string prefix
+ * @str: source string
+ * @str_len: source string length
+ * @chunk_size: result string chunk size
+ *
+ * Returs string if success or NULL if can't allocate memory
+ */
 str_t *strhex (const char *prefix, const char *str, size_t str_len, size_t chunk_size) {
     char buf [8];
     size_t prefix_len = prefix ? strlen(prefix) : 0;
@@ -433,6 +549,14 @@ str_t *strhex (const char *prefix, const char *str, size_t str_len, size_t chunk
     return result;
 }
 
+/**
+ * hexstr - convert HEX string to string
+ * @str: source string
+ * @str_len: source string length
+ * @chunk_size: result string chunk size
+ *
+ * Returs string if success or NULL if can't allocate memory
+ */
 str_t *hexstr (const char *str, size_t str_len, size_t chunk_size) {
     char buf [3] = {0,0,0}, *tail;
     const char *p = str, *e = p + str_len;
@@ -458,31 +582,77 @@ str_t *hexstr (const char *str, size_t str_len, size_t chunk_size) {
     return res;
 }
 
+/**
+ * cmpstr - compare to strings
+ * @x: first string
+ * @x_len: first string length
+ * @y: second string
+ * @y_len: second string length
+ *
+ * Returns 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ */
 int cmpstr (const char *x, size_t x_len, const char *y, size_t y_len) {
     if (x_len < y_len) return -1;
     if (x_len > y_len) return 1;
     return strncmp(x, y, x_len);
 }
 
+/**
+ * wcmpstr - compare to wide strings
+ * @x: first string
+ * @x_len: first string length
+ * @y: second string
+ * @y_len: second string length
+ *
+ * Returns 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ */
 int wcmpstr (const wchar_t *x, size_t x_len, const wchar_t *y, size_t y_len) {
     if (x_len < y_len) return -1;
     if (x_len > y_len) return 1;
     return wcsncmp(x, y, x_len);
 }
 
+/**
+ * cmpcasestr - compare to strings, ignoring the case of characters
+ * @x: first string
+ * @x_len: first string length
+ * @y: second string
+ * @y_len: second string length
+ *
+ * Returns 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ */
 int cmpcasestr (const char *x, size_t x_len, const char *y, size_t y_len) {
     if (x_len < y_len) return -1;
     if (x_len > y_len) return 1;
     return strncasecmp(x, y, x_len);
 }
 
+/**
+ * wcmpcasestr - compare to wide strings, ignoring the case of characters
+ * @x: first string
+ * @x_len: first string length
+ * @y: second string
+ * @y_len: second string length
+ *
+ * Returns 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ */
 int wcmpcasestr (const wchar_t *x, size_t x_len, const wchar_t *y, size_t y_len) {
     if (x_len < y_len) return -1;
     if (x_len > y_len) return 1;
     return wcsncasecmp(x, y, x_len);
 }
 
-// strbuf
+/**
+ * strbufalloc - create string buffer
+ * @strbuf: string buffer
+ * @len: reserved length
+ * @chunk_size: minimal growing size
+ *
+ * allocate memory for new stirng buffer with reserved size for @len string size
+ * with @chunk_size growing size
+ *
+ * Returns new string
+ */
 int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size) {
     size_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
     if (len == bufsize) bufsize += chunk_size;
@@ -496,6 +666,16 @@ int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size) {
     return 0;
 }
 
+/**
+ * strbufsize - change length of a string buffer
+ * @strbuf: string buffer
+ * @nlen - new length
+ * @flags - if set flags to STR_REDUCE then decrease of a string reduced a size of memory
+ *
+ * Change length of a string.
+ *
+ * Returns 0 is success, -1 if reallocate of memory is fail.
+ */
 int strbufsize (strbuf_t *strbuf, size_t nlen, int flags) {
     char *buf = strbuf->ptr;
     size_t bufsize = (nlen / strbuf->chunk_size) * strbuf->chunk_size + strbuf->chunk_size;
@@ -509,6 +689,15 @@ int strbufsize (strbuf_t *strbuf, size_t nlen, int flags) {
     return 0;
 }
 
+/**
+ * strbufput - assign string from existing string
+ * @strbuf: destination string buffer
+ * @src: source string
+ * @src_len: source string length
+ * @flags: flags is same as flags in strsize function
+ *
+ * Returns 0 is success, -1 if memory alocation is fail.
+ */
 int strbufput (strbuf_t *strbuf, const char *src, size_t src_len, int flags) {
     if (-1 == strbufsize(strbuf, src_len, flags)) return -1;
     strbuf->len = src_len;
@@ -516,6 +705,14 @@ int strbufput (strbuf_t *strbuf, const char *src, size_t src_len, int flags) {
     return 0;
 }
 
+/**
+ * strbufadd - add string to string buffer
+ * @strbuf: string buffer
+ * @src: source string
+ * @src_len: source string legnth
+ *
+ * Returns 0 if success, -1 if reallocate memory is required and it finished by fail.
+ */
 int strbufadd (strbuf_t *strbuf, const char *src, size_t src_len) {
     char *buf = strbuf->ptr;
     size_t nstr_len = strbuf->len + src_len;
@@ -530,7 +727,7 @@ int strbufadd (strbuf_t *strbuf, const char *src, size_t src_len) {
     strbuf->len = nstr_len;
     return 0;
 }
-// base 64
+
 static char encoding_table [] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static char decoding_table [] = {
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -553,6 +750,14 @@ static int mod_table[] = {0, 2, 1};
 
 #define ENCODED_LEN(X) 4 * ((X + 2) / 3)
 
+/**
+ * base64_encode - convert string to base64
+ * @data: input data
+ * @input_length: input data size
+ * @encoded_data: output string
+ * @output_length: output string length
+ *
+ */
 static void base64_encode(const unsigned char *data, size_t input_length, char *encoded_data, size_t output_length) {
     for (int i = 0, j = 0; i < input_length;) {
         uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
@@ -568,6 +773,14 @@ static void base64_encode(const unsigned char *data, size_t input_length, char *
         encoded_data[output_length - 1 - i] = '=';
 }
 
+/**
+ * str_base64_encode - convrt string to base64
+ * @bug: source buffer
+ * @bufsize: source buffer size
+ * @chunk_size: result string size
+ *
+ * Returns string if success, NULL if memory allocation error
+ */
 str_t *str_base64_encode (const char *buf, size_t bufsize, size_t chunk_size) {
     size_t len = ENCODED_LEN(bufsize);
     str_t *res = stralloc(ENCODED_LEN(bufsize), chunk_size);
@@ -577,6 +790,15 @@ str_t *str_base64_encode (const char *buf, size_t bufsize, size_t chunk_size) {
     return res;
 }
 
+/**
+ * strbuf_base64_encode - convert string to base64
+ * @encoded: result string buffer
+ * @input: source data
+ * @input_len: source data length
+ * @chunk_size: result string buffer chunk size
+ *
+ * Returns 0 if success, -1 if memory allocation error
+ */
 int strbuf_base64_encode (strbuf_t *encoded, const char *input, size_t input_len, size_t chunk_size) {
     size_t len = ENCODED_LEN(input_len);
     if (-1 == strbufalloc(encoded, len, chunk_size)) return -1;
@@ -588,9 +810,15 @@ int strbuf_base64_encode (strbuf_t *encoded, const char *input, size_t input_len
 
 #define DECODED_LEN(X) X / 4 * 3;
 
+/**
+ * base64_decode - convert base64 to string
+ * @data: input data
+ * @input_length: input data length
+ * @decoded_data: result data
+ * @output_length: result data length
+ *
+ */
 static void base64_decode(const char *data, size_t input_length, unsigned char *decoded_data, size_t output_length) {
-//    if (data[input_length - 1] == '=') (output_length)--;
-//    if (data[input_length - 2] == '=') (output_length)--;
     for (int i = 0, j = 0; i < input_length;) {
         uint32_t sextet_a = data[i] == '=' ? 0 & i++ : decoding_table[(unsigned char)data[i++]];
         uint32_t sextet_b = data[i] == '=' ? 0 & i++ : decoding_table[(unsigned char)data[i++]];
@@ -603,6 +831,14 @@ static void base64_decode(const char *data, size_t input_length, unsigned char *
     }
 }
 
+/**
+ * str_base64_decode - convert base64 to string
+ * @buf: input string
+ * @bufsize: input string length
+ * @chunk_size: result string chunk size
+ *
+ * Returns string if success, NULL if memory allocation error
+ */
 str_t *str_base64_decode (const char *buf, size_t bufsize, size_t chunk_size) {
     if (bufsize % 4 != 0) return NULL;
     size_t len = DECODED_LEN(bufsize);
@@ -615,6 +851,16 @@ str_t *str_base64_decode (const char *buf, size_t bufsize, size_t chunk_size) {
     return res;
 }
 
+
+/**
+ * strbuf_base64_decode - convert base64 to string
+ * @strbuf: result string buffer
+ * @input: input string
+ * @input_len: input string length
+ * @chunk_size: result string buffer chunk size
+ *
+ * Returns 0 success, -1 if memory allocation error
+ */
 int strbuf_base64_decode (strbuf_t *decoded, const char *input, size_t input_len, size_t chunk_size) {
     if (input_len % 4 != 0) return -1;
     size_t len = DECODED_LEN(input_len);
@@ -627,8 +873,15 @@ int strbuf_base64_decode (strbuf_t *decoded, const char *input, size_t input_len
     return 0;
 }
 
-// URL encode/decode
 
+/**
+ * str_url_encode - encode url
+ * @str: input string
+ * @str_len: input string length
+ * @chunk_size: result string chunk_size
+ *
+ * Returns string if success, NULL if error
+ */
 str_t *str_url_encode (const char *str, size_t str_len, size_t chunk_size) {
     str_t *ret = stralloc(str_len, chunk_size);
     for (size_t i = 0; i < str_len; ++i) {
@@ -645,6 +898,15 @@ str_t *str_url_encode (const char *str, size_t str_len, size_t chunk_size) {
     return NULL;
 }
 
+/**
+ * str_url_encode - encode url
+   @ecoded: result string buffer
+ * @str: input string
+ * @str_len: input string length
+ * @chunk_size: result string chunk_size
+ *
+ * Returns 0 if success, -1 if error
+ */
 int strbuf_url_encode (strbuf_t *encoded, const char *str, size_t str_len, size_t chunk_size) {
     for (size_t i = 0; i < str_len; ++i) {
         unsigned char c = str[i];
@@ -657,6 +919,14 @@ int strbuf_url_encode (strbuf_t *encoded, const char *str, size_t str_len, size_
     return 0;
 }
 
+/**
+ * str_url_decode - decode url
+ * @str: input string
+ * @str_len: input string length
+ * @chunk_size: result string chunk_size
+ *
+ * Returns string if success, NULL if error
+ */
 str_t *str_url_decode (const char *str, size_t str_len, size_t chunk_size) {
     str_t *ret = stralloc(str_len * 1.5, chunk_size);
     char num [] = "0x0__";
@@ -678,6 +948,15 @@ str_t *str_url_decode (const char *str, size_t str_len, size_t chunk_size) {
     return NULL;
 }
 
+/**
+ * strbuf_url_decode - decode url
+ * @decoded: result string buffer
+ * @str: input string
+ * @str_len: input string length
+ * @chunk_size: result string chunk_size
+ *
+ * Returns string if success, NULL if error
+ */
 int strbuf_url_decode (strbuf_t *decoded, const char *str, size_t str_len, size_t chunk_size) {
     char num [] = "0x0__";
     for (size_t i = 0; i < str_len; ++i) {
@@ -783,6 +1062,14 @@ static size_t utf8size (const wchar_t *str, size_t str_len) {
     return r;
 }
 
+/**
+ * str_unescape - unescape source string
+ * @src: source string
+ * @src_len: source string length
+ * @chunk_size: result string chunk_size
+ *
+ * Returns string if success, NULL if error
+ */
 str_t *str_unescape (const char *src, size_t src_len, size_t chunk_size) {
     str_t *ret = stralloc(src_len, chunk_size);
     const char *e = src + src_len;
@@ -814,6 +1101,14 @@ str_t *str_unescape (const char *src, size_t src_len, size_t chunk_size) {
     return ret;
 }
 
+/**
+ * strbuf_unescape - unescape source string
+ * @strbuf: result string buffer
+ * @src: source string
+ * @src_len: source string length
+ *
+ * Returns 0 if success, -1 if error
+ */
 int strbuf_unescape (strbuf_t *strbuf, const char *src, size_t src_len) {
     const char *e = src + src_len;
     char *buf = strbuf->ptr, *be = buf + strbuf->bufsize, temp[4];
@@ -860,6 +1155,14 @@ static int utf8_decode (const char *str, size_t *i) {
     return u;
 }
 
+/**
+ * str_escape - convert string to escaped string
+ * @src: source stirng
+ * @src_len: source string length
+ * @chunk_size: result string chunk size
+ *
+ * Returns string if success, NULL if error
+ */
 str_t *str_escape (const char *src, size_t src_len, size_t chunk_size) {
     str_t *ret = stralloc(src_len, chunk_size);
     int i;
@@ -905,14 +1208,36 @@ static void str_ul_conv (char *str, size_t str_len, locale_t locale, ul_conv_h u
     }
 }
 
+/**
+ * strwupper - convert lowercase wide characters to uppercase
+ * @str: source string
+ * @str_len: source string length
+ * @locale: locale object, see duplocale(3)
+ *
+ */
 inline void strwupper (char *str, size_t str_len, locale_t locale) {
     str_ul_conv(str, str_len, locale, towupper_l);
 }
 
+/**
+ * strwupper - convert uppercase wide characters to lowercase
+ * @str: source string
+ * @str_len: source string length
+ * @locale: locale object, see duplocale(3)
+ *
+ */
 inline void strwlower (char *str, size_t str_len, locale_t locale) {
     str_ul_conv(str, str_len, locale, towlower_l);
 }
 
+/**
+ * str2wstr - convert string to wide string
+ * @str: source string
+ * @str_len: source string length
+ * @chunk_size; result stirng chunk size
+ *
+ * Returns wide string if success, NULL if error
+ */
 wstr_t *str2wstr (const char *str, size_t str_len, size_t chunk_size) {
     wstr_t *ret = wstralloc(str_len, chunk_size);
     size_t i = 0, j = 0;
@@ -926,6 +1251,14 @@ wstr_t *str2wstr (const char *str, size_t str_len, size_t chunk_size) {
     return ret;
 }
 
+/**
+ * wstr2str - convert wide string to string
+ * @str: source wide string
+ * @str_len: source wide string length
+ * @chunk_size; result stirng chunk size
+ *
+ * Returns string if success, NULL if error
+ */
 str_t *wstr2str (const wchar_t *str, size_t str_len, size_t chunk_size) {
     size_t i = 0;
     str_t *ret = stralloc(utf8size(str, str_len), chunk_size);
@@ -937,6 +1270,14 @@ str_t *wstr2str (const wchar_t *str, size_t str_len, size_t chunk_size) {
     return ret;
 }
 
+/**
+ * strbuf_escape - convert string to escaped string buffer
+ * @dst: result string buffer
+ * @src: source stirng
+ * @src_len: source string length
+ *
+ * Returns string if success, NULL if error
+ */
 int strbuf_escape (strbuf_t *dst, const char *src, size_t src_len) {
     int i;
     for (i = 0; i < src_len && src[i] != '\0'; ) {
@@ -966,7 +1307,6 @@ int strbuf_escape (strbuf_t *dst, const char *src, size_t src_len) {
     return 0;
 }
 
-// set of strings
 void *mkstrset (size_t count, const char **strs) {
     void *ret = NULL, *p;
     size_t *lens = alloca(count * sizeof(size_t)), len = 0;
@@ -1095,6 +1435,18 @@ static void rand_gen (char *buf, size_t len, char *templ, size_t templ_len, char
 
 #define RAND_WHAT_CHARS 0x000f
 #define RAND_WHAT_REG 0x00f0
+/**
+ * strand - generate random string
+ * @output: result string
+ * @outlen: result string length
+ * @type: generate parameter flags
+ *
+ * Returns 0 if success, -1 if invalid @type.
+ * RAND_ALPHA - result contains only alpabetic characters
+ * RAND_ALNUM - result contains alphabetic and numeric characters
+ * RAND_UPPER - convert alpabetic characters to uppercase
+ * RAND_LOWER - convert alpabetic characters to lowercase
+ */
 int strand (char *outbuf, size_t outlen, int type) {
     char *buf = NULL;
     size_t buf_len;
