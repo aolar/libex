@@ -1,3 +1,7 @@
+/** @file str.h
+ *  @brief string functions
+ */
+
 #ifndef __LIBEX_STR_H__
 #define __LIBEX_STR_H__
 
@@ -88,6 +92,13 @@ typedef struct {
 
 #define isunicode(c) (((c)&0xc0)==0xc0)
 
+/**
+ * @brief create new stirng with reserved size for @len string size
+ *        with @chunk_size growing size
+ * @param len reserved length
+ * @param chunk_size minimal growing size
+ * @return string
+ */
 str_t *stralloc (size_t len, size_t chunk_size);
 wstr_t *wstralloc (size_t len, size_t chunk_size);
 wstr_t *str2wstr (const char *str, size_t str_len, size_t chunk_size);

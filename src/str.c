@@ -1,14 +1,11 @@
 #include "../include/libex/str.h"
 
 /**
- * stralloc - create string
- * @len: reserved length
- * @chunk_size: minimal growing size
- *
- * allocate memory for new stirng with reserved size for @len string size
- * with @chunk_size growing size
- *
- * Returns new string
+ * @brief create new stirng with reserved size for @len string size
+ *        with @chunk_size growing size
+ * @param len reserved length
+ * @param chunk_size minimal growing size
+ * @return string
  */
 str_t *stralloc (size_t len, size_t chunk_size) {
     size_t bufsize = (len / chunk_size) * chunk_size + chunk_size;
