@@ -1,6 +1,6 @@
 #include "../include/libex/hash.h"
 
-hash_key_t hash_str (const char *s, size_t key_len) {
+hash_key_t hash_str (const char *s, size_t dummy) {
     hash_key_t hash = 0;
     while (*s) {
         hash += *s;
@@ -66,7 +66,7 @@ void hash_free (hash_t *hash) {
                     free(hi);
                     li = li->next;
                 } while (li != bucket->head);
-            lfree(bucket);
+            lst_free(bucket);
         }
     }
     lst_free(hash->hist);

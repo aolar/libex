@@ -1,3 +1,9 @@
+/**
+ * @file msg.h
+ * @brief libex messages functions for binary protocol
+ * @author brian_boru
+ * @mainpage Mesages Functions
+ */
 #ifndef __LIBEX_MSG_H__
 #define __LIBEX_MSG_H__
 
@@ -51,6 +57,8 @@ int msg_enum (msgbuf_t *msg, msg_item_h fn, void *userdata);
 static inline void msg_clear (msgbuf_t *msg) { if (msg->ptr) msg_free(msg->ptr); msg->ptr = NULL; };
 
 int msg_error (msgbuf_t *msg, int code, const char *str, size_t len);
-static inline int msg_ok(msgbuf_t *msg) { return msg_create_response(msg, 0, 8, 8); };
+static inline int msg_ok (msgbuf_t *msg) { return msg_create_response(msg, 0, 8, 8); };
+
+static inline void msg_destroy (msgbuf_t *msg) { if (msg->ptr) { free(msg->ptr); memset(msg, 0, sizeof(msgbuf_t)); } };
 
 #endif // __LIBEX_MSG_H__

@@ -20,11 +20,16 @@ void print_tok (strptr_t *tok, str_t **ret) {
 }
 
 void test_strntok () {
+    int n;
     strptr_t tok;
     char *rule=RULE;
     size_t rule_len = strlen(RULE);
-    strntok(&rule, &rule_len, CONST_STR_LEN("=;"), &tok);
-    strntok(&rule, &rule_len, CONST_STR_LEN("=;"), &tok);
+    n = strntok(&rule, &rule_len, CONST_STR_LEN("=;"), &tok);
+    printf("%d\n", n);
+    n = strntok(&rule, &rule_len, CONST_STR_LEN("=;"), &tok);
+    printf("%d\n", n);
+    n = strntok(&rule, &rule_len, CONST_STR_LEN("=;"), &tok);
+    printf("%d\n", n);
 }
 
 void test_strepl () {
@@ -40,6 +45,7 @@ void test_strepl () {
     strepl(&str, p, 2, CONST_STR_LEN("?"));
     STR_ADD_NULL(str);
     printf("%s\n", str->ptr);
+    free(str);
 }
 
 void test_replall () {
@@ -117,6 +123,7 @@ void str_del () {
     strdel(&str, str->ptr + str->len - 3, 5, 0);
     str->ptr[str->len] = '\0';
     printf("%s\n", str->ptr);
+    free(str);
 }
 
 void str_inc () {
@@ -142,7 +149,7 @@ void str_str () {
     str_t *str = mkstr(CONST_STR_LEN("123"), 8);
     STR_ADD_NULL(str);
     free(str);
-    str = mkstr(CONST_STR_LEN(""), 8);
+    str = mkstr(CONST_STR_LEN("1"), 8);
     STR_ADD_NULL(str);
     free(str);
     str = mkstr(CONST_STR_LEN("12345678"), 8);
@@ -220,7 +227,7 @@ void test_strbuf () {
 void test_unescape () {
     strbuf_t buf;
     strbufalloc(&buf,128, 8);
-    strbuf_escape(&buf, CONST_STR_LEN("Денег нет, но вы держитесь, и хорошего вам настроения"));
+    strbuf_escape(&buf, CONST_STR_LEN("грузите аельсины бочками"));
     printf("%s\n", buf.ptr);
     str_t *str = str_unescape(buf.ptr, buf.len, 1024);
     printf("%s\n", str->ptr);
@@ -417,45 +424,27 @@ int on_msg_item (msgbuf_t *msg, void *data, void *userdata) {
         return MSG_INSERTED;
     return MSG_NOT_INSERTED;
 }
-int on_get_msg (msgbuf_t *msg, void *dummy, void *userdata) {
-    strptr_t s;
-    if (-1 != msg_getstr(msg, &s))
-        printf(" %s\n", s.ptr);
+int on_set_msg (msgbuf_t *msg, void *data, void *userdata) {
+    str_t *s = (str_t*)data;
+    msg_setstr(msg, s->ptr, s->len);
     return ENUM_CONTINUE;
 }
 void test_msg () {
-    list_t *lst = lst_alloc(NULL);
-    msgbuf_t msg;
-    void *buf;
-    uint32_t len;
-    for (int i = 0; i < 3; ++i)
-        lst_adde(lst, &tl[i]);
-    msg_create_request(&msg, MSG_TEST, CONST_STR_LEN("qwerty"), 32, 32);
-    msg_seti32(&msg, 48);
-    msg_setstr(&msg, CONST_STR_LEN("good luck!"));
-    msg_setlist(&msg, lst, on_msg_item, NULL);
-    
-    buf = msg.ptr;
-    len = msg.len;
-
-    msg_load_request(&msg, buf, len);
-    
-    int32_t i;
-    strptr_t s;
-    printf("method: %u\n", msg.method);
-    printf("cookie %s\n", msg.cookie.ptr);
-    if (-1 != msg_geti32(&msg, &i))
-        printf("param1: %i\n", i);
-    if (-1 != msg_getstr(&msg, &s))
-        printf("param2: %s\n", s.ptr);
-    printf("items:\n");
-    msg_enum(&msg, on_get_msg, NULL);
-    msg_clear(&msg);
+    msgbuf_t req = MSG_INIT, resp = MSG_INIT;
+    list_t *lst = lst_alloc(on_default_free_item);
+    msg_create_request(&req, 12, CONST_STR_LEN("1234567"), 64, 64);
+    lst_add(lst, mkstr(CONST_STR_LEN("first"), 8));
+    lst_add(lst, mkstr(CONST_STR_LEN("second"), 8));
+    lst_add(lst, mkstr(CONST_STR_LEN("third"), 8));
+    msg_setlist(&req, lst, on_set_msg, NULL);
+    msg_create_response(&resp, MSG_OK, 64, 64);
+    msg_destroy(&req);
     lst_free(lst);
+    msg_destroy(&resp);
 }
 
 int main () {
-/*    test_strntok();
+    test_strntok();
     test_strepl();
     str_size();
     str_del();
@@ -476,7 +465,7 @@ int main () {
     test_rand();
     test_strw_c();
     test_hexstr();
-    test_concat();*/
+    test_concat();
     test_msg();
     return 0;
 }

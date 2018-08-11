@@ -64,7 +64,7 @@ static void json_free_object (json_object_t *jo) {
 }
 
 static void json_free_array (json_array_t *ja) {
-    lfree(ja);
+    lst_free(ja);
 }
 
 static void json_clear_item (json_item_t *ji) {
@@ -145,7 +145,7 @@ static json_item_t *json_parse_item (json_t *j, strptr_t *token);
 static json_object_t *json_parse_object(json_t *j, strptr_t *token);
 
 static json_array_t *json_parse_array (json_t *j, strptr_t *token) {
-    json_array_t *a = lalloc((free_h)json_free_item);
+    json_array_t *a = lst_alloc((free_h)json_free_item);
     while (JSON_OK == get_token(j, token)) {
         json_item_t *ji;
         if (0 == cmpstr(token->ptr, token->len, CONST_STR_LEN("]")))
@@ -159,7 +159,7 @@ static json_array_t *json_parse_array (json_t *j, strptr_t *token) {
             }
         } else
             json_set_item_value(j, ji, token);
-        ladde(a, (void*)ji);
+        lst_adde(a, (void*)ji);
         if (JSON_OK != get_token(j, token)) goto err;
         if (0 == cmpstr(token->ptr, token->len, CONST_STR_LEN(",")))
             continue;

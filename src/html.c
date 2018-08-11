@@ -10,14 +10,14 @@ static void html_clear_tag (html_tag_t *tag) {
     if (tag->tag_s) free(tag->tag_s);
     if (tag->tag_t) free(tag->tag_t);
     if (tag->tag_e) free(tag->tag_e);
-    lfree(tag->tags);
+    lst_free(tag->tags);
 }
 
 html_tag_t *html_tag_alloc (html_tag_t *parent, int add_to_head) {
     html_tag_t *ntag = calloc(1, sizeof(html_tag_t));
-    ntag->tags = lalloc((free_h)html_clear_tag);
+    ntag->tags = lst_alloc((free_h)html_clear_tag);
     if (parent) {
-        if (add_to_head) ladd(parent->tags, ntag); else ladde(parent->tags, ntag);
+        if (add_to_head) lst_add(parent->tags, ntag); else lst_adde(parent->tags, ntag);
     }
     ntag->parent = parent;
     return ntag;
@@ -34,8 +34,8 @@ static int html_free_tag_cb (html_tag_t *tag, void *userdata) {
 }
 
 void html_clear_tags (list_t *tags) {
-    if (tags) lenum(tags, (list_item_h)html_free_tag_cb, NULL, ENUM_CONTINUE);
-    while (tags->head) ldel(tags->head);
+    if (tags) lst_enum(tags, (list_item_h)html_free_tag_cb, NULL, ENUM_CONTINUE);
+    while (tags->head) lst_del(tags->head);
 }
 
 void html_clear (html_t *html) {

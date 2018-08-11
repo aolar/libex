@@ -198,7 +198,7 @@ static void netconn_io (netsrv_t *srv, netconn_t *conn) {
         case NETSRV_WAIT:
             pthread_rwlock_wrlock(&srv->locker);
             if (!conn->li_wait)
-                conn->li_wait = ladde(srv->waited_conns, conn);
+                conn->li_wait = lst_adde(srv->waited_conns, conn);
             pthread_rwlock_unlock(&srv->locker);
             break;
         case NETSRV_OK:
