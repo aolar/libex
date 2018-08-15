@@ -62,19 +62,16 @@ int load_conf (const char *fname, load_conf_h fn);
  */
 int load_conf_exactly (const char *fname, load_conf_h fn);
 
-/**
- * @brief start handler
- */
+/** @def CONF_HANDLER(fn,key,val) */
+/** @brief begin of configuration handler */
 #define CONF_HANDLER ({ void fn (const char *fname, strptr_t *key, strptr_t *val) {
 
-/**
- * @brief end handler
- */
+/** @def CONF_HANDLER_END */
+/** @brief end of configuration handler */
 #define CONF_HANDLER_END } fn; })
 
-/**
- * @brief assign string configuration item
- */
+/** @def ASSIGN_CONF_STR(VAL,STR) */
+/** @brief assign string value */
 #define ASSIGN_CONF_STR(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         if (VAL) strput(&VAL, val->ptr, val->len, 0); else VAL = mkstr(val->ptr, val->len, 8); \
@@ -82,9 +79,8 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
         return; \
     }
 
-/**
- * @brief assign integer configuration item
- */
+/** @def ASSIGN_CONF_INT(VAL,STR) */
+/** @brief assign integer value */
 #define ASSIGN_CONF_INT(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         char *str = strndup(val->ptr, val->len), *tail; \
@@ -93,9 +89,8 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
         free(str); \
     }
 
-/**
- * @brief assign double configuration item
- */
+/** @def ASSIGN_CONF_DOUBLE(VAL,STR) */
+/** @brief assign double value */
 #define ASSIGN_CONF_DOUBLE(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         char *str = strndup(val->ptr, val->len), *tail; \
@@ -104,9 +99,8 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
         free(str); \
     }
 
-/**
- * @brief assign boolean configuration item
- */
+/** @def ASSIGN_CONF_BOOL(VAL,STR) */
+/** @brief assign boolean value */
 #define ASSIGN_CONF_BOOL(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         if (0 == cmpstr(val->ptr, val->len, CONST_STR_LEN("0"))) VAL = 0; else \
@@ -117,9 +111,8 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
         if (0 == cmpcasestr(val->ptr, val->len, CONST_STR_LEN("YES"))) VAL = 1; \
     }
 
-/**
- * start directory processing
- */
+/** @def S_INDIR */
+/** @brief is start directory processing */
 #define S_INDIR 0x00008000
 
 /**

@@ -1,7 +1,6 @@
 /**
  * @file hash.h
  * @brief hash functions
- * @mainpage Hash functions
  */
 #ifndef __LIBEX_HASH_H__
 #define __LIBEX_HASH_H__

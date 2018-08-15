@@ -1,8 +1,6 @@
 /**
  * @file list.h
  * @brief list functions
- * @author brian_boru
- * @mainpage list functions
  */
 #ifndef __LIBEX_LIST_H__
 #define __LIBEX_LIST_H__

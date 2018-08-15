@@ -1,8 +1,6 @@
 /**
  * @file html.h
  * @brief libex html functions
- * @author brian_boru
- * @mainpage HTML Functions
  */
 #ifndef __LIBEX_HTML_H__
 #define __LIBEX_HTML_H__

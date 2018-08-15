@@ -1,7 +1,6 @@
 /**
  * @file net.h
  * @brief network functions
- * @mainpage network functions
  */
 #ifndef __LIBEX_NET_H__
 #define __LIBEX_NET_H__

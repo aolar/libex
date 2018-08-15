@@ -1,8 +1,6 @@
 /**
  * @file json.h
  * @brief json, jsonrpc functions
- * @author brian_boru
- * @mainpage json functions
  */
 #ifndef __LIBEX_JSON_H__
 #define __LIBEX_JSON_H__

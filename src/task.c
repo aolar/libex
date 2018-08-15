@@ -304,12 +304,13 @@ void pool_start (pool_t *pool) {
             add_slot(pool, NULL);
 }
 
-void pool_call (pool_t *pool,
+int pool_call (pool_t *pool,
                 pool_msg_h on_msg,
                 void *init_data, void *in_data, void **out_data,
                 pthread_mutex_t *mutex, pthread_cond_t *cond) {
+    int ret = 0;
     if (!pool->is_alive)
-        return;
+        return -1;
     msg_t *msg = calloc(1, sizeof(msg_t));
     msg->in_data = in_data;
     msg->out_data = out_data;
@@ -318,10 +319,13 @@ void pool_call (pool_t *pool,
     msg->cond = cond;
     pthread_mutex_lock(&pool->locker);
     if (pool->livingtime > 0 && pool->queue->len > 0 && pool->slots->len < pool->max_slots)
-        add_slot(pool, init_data);
+        ret = add_slot(pool, init_data);
+    if (0 != ret)
+        return ret;
     lst_adde(pool->queue, msg);
     pthread_cond_broadcast(&pool->cond);
     pthread_mutex_unlock(&pool->locker);
+    return ret;
 }
 
 static int on_send_stop (list_item_t *li, void *dummy) {

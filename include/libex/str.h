@@ -1,8 +1,6 @@
 /**
  * @file str.h
  * @brief libex string functions
- * @author brian_boru
- * @mainpage String Functions
  */
 #ifndef __LIBEX_STR_H__
 #define __LIBEX_STR_H__
@@ -26,222 +24,124 @@
 #include <wctype.h>
 
 #if __x86_64 || __ppc64__
-/**
- * #LONG_FMT format for long
- */
+/** #LONG_FMT format for long */
 #define LONG_FMT "%ld"
-/**
- * #ULONG_FMT format for unsigned long
- */
+/** #ULONG_FMT format for unsigned long */
 #define ULONG_FMT "%lu"
-/**
- * #TIME_FMT format for timne_t
- */
+/** #TIME_FMT format for timne_t */
 #define TIME_FMT "%lu"
-/**
- * #SIZE_FMT format for size_t
- */
+/** #SIZE_FMT format for size_t */
 #define SIZE_FMT "%lu"
-/**
- * #LONG_HEXFMT format for long
- */
+/** #LONG_HEXFMT format for long */
 #define LONG_HEXFMT "%02lX"
 #else
-/**
- * #LONG_FMT format for long
- */
+/** #LONG_FMT format for long */
 #define LONG_FMT "%lld"
-/**
- * #ULONG_FMT format for unsigned long
- */
+/** #ULONG_FMT format for unsigned long */
 #define ULONG_FMT "%llu"
-/**
- * #TIME_FMT format for timne_t
- */
+/** #TIME_FMT format for timne_t */
 #define TIME_FMT "%lu"
-/**
- * #SIZE_FMT format for size_t
- */
+/** #SIZE_FMT format for size_t */
 #define SIZE_FMT "%u"
-/**
- * #LONG_HEXFMT format for long
- */
+/** #LONG_HEXFMT format for long */
 #define LONG_HEXFMT "%02llX"
 #endif
 
-/**
- * #STR_SPACES default delimiters for \b strntok
- */
+/** #STR_SPACES default delimiters for \b strntok */
 #define STR_SPACES " \f\n\r\t\v"
 #ifndef CONST_STR_LEN
-/**
- * macros for string length
- */
+/** macros for string length */
 #define CONST_STR_LEN(x) x, x ? sizeof(x) - 1 : 0
-/**
- * macros for wide string legnth
-*/
+/** macros for wide string legnth */
 #define WCONST_STR_LEN(x) x, x ? (sizeof(x) / sizeof(wchar_t) - 1) : 0
 #endif
-/**
- * NULL string
- */
+/** NULL string */
 #define CONST_STR_NULL NULL,0
-/**
- * flag for reduce memory
-*/
+/** flag for reduce memory */
 #define STR_REDUCE 0x0001
-/**
- * append NULL byte to end of string
-*/
+/** append NULL byte to end of string */
 #define STR_ADD_NULL(x) (x)->ptr[(x)->len] = '\0'
-/**
- * append NULL \b wchar_t to end of wide string
- */
+/** append NULL \b wchar_t to end of wide string */
 #define WSTR_ADD_NULL(x) (x)->ptr[(x)->len] = L'\0'
-/**
- * initialize string
- */
+/** initialize string */
 #define CONST_STR_INIT(s) { .len = sizeof(s)-1, .ptr = s }
-/**
- * initialize NULL string
- */
+/** initialize NULL string */
 #define CONST_STR_INIT_NULL { .len = 0, .ptr = NULL }
 
-/**
- * left paddinbg
- */
+/** left paddinbg */
 #define STR_LEFT 0x0001
-/**
- * center padding
- */
+/** center padding */
 #define STR_CENTER 0x0002
-/**
- * right padding
- */
+/** right padding */
 #define STR_RIGHT 0x0004
-/**
- * string can be UTF-8
- */
+/** string can be UTF-8 */
 #define STR_MAYBE_UTF 0x8000
 
-/**
- * random string as alphabetical characters
- */
+/** random string as alphabetical characters */
 #define RAND_ALPHA 0x0001
-/**
- * random string as alphabetical and number characters
- */
+/** random string as alphabetical and number characters */
 #define RAND_ALNUM 0x0002
-/**
- * random string will be uppercase
- */
+/** random string will be uppercase */
 #define RAND_UPPER 0x0010
-/**
- * random string will be lowercase
- */
+/** random string will be lowercase */
 #define RAND_LOWER 0x0020
 
-/**
- * @brief A string structure
- */
+/** @brief A string structure */
 typedef struct {
-    /**
-     * string length
-     */
+    /** string length */
     size_t len;
-    /**
-     * buffer size
-     */
+    /** buffer size */
     size_t bufsize;
-    /**
-     * chunk size
-     */
+    /** chunk size */
     size_t chunk_size;
-    /**
-     * string pointer
-     */
+    /** string pointer */
     char ptr [0];
 } str_t;
 
-/**
- * @brief A wide string structure
- */
+/** @brief A wide string structure */
 typedef struct {
-    /**
-     * string length
-     */
+    /** string length */
     size_t len;
-    /**
-     * buffer size
-     */
+    /** buffer size */
     size_t bufsize;
-    /**
-     * chunk size
-     */
+    /** chunk size */
     size_t chunk_size;
-    /**
-     * string pointer
-     */
+    /** string pointer */
     wchar_t ptr [0];
 } wstr_t;
 
-/**
- * @brief A string pointer structure
- */
+/** @brief A string pointer structure */
 typedef struct {
-    /**
-     * string length
-     */
+    /** string length */
     size_t len;
-    /**
-     * string pointer
-     */
+    /** string pointer */
     char *ptr;
 } strptr_t;
 
-/**
- * @brief A wicd string pointer structure
- */
+/** @brief A wicd string pointer structure */
 typedef struct {
-    /**
-     * string length
-     */
+    /** string length */
     size_t len;
-    /**
-     * string pointer
-     */
+    /** string pointer */
     wchar_t *ptr;
 } wstrptr_t;
 
-/**
- * @brief A string buffer structure
- */
+/** @brief A string buffer structure */
 typedef struct {
-    /**
-     * string length
-     */
+    /** string length */
     size_t len;
-    /**
-     * buffer size
-     */
+    /** buffer size */
     size_t bufsize;
-    /**
-     * chunk size
-     */
+    /** chunk size */
     size_t chunk_size;
-    /**
-     * string pointer
-     */
+    /** string pointer */
     char *ptr;
 } strbuf_t;
 
-/**
- * @brief text unicode
- */
+/** @brief text unicode */
 #define isunicode(c) (((c)&0xc0)==0xc0)
 
-/**
+/** 
  * @brief create new stirng with reserved size for \b len string size
  * with \b chunk_size growing size
  * @param len reserved length
