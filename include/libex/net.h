@@ -89,7 +89,7 @@ typedef struct {
 } net_daemon_info_t;
 
 /** @brief initialize daemon
- * @retval net daemon structure
+ * @return net daemon structure
  */
 net_daemon_t *netsrv_init();
 
@@ -149,7 +149,7 @@ extern void netsrv_setopt_disconnect (net_daemon_t *daemon, netsrv_opt_t opt, sr
 
 /** @brief start daemon
  * @param daemon
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int netsrv_start (net_daemon_t *daemon);
 
@@ -160,7 +160,7 @@ void netsrv_close (net_daemon_t *daemon);
 
 /** @brief get daemon info
  * @param daemon
- * @retval daemon information
+ * @return daemon information
  */
 net_daemon_info_t *get_daemon_info (net_daemon_t *daemon);
 
@@ -168,7 +168,7 @@ net_daemon_info_t *get_daemon_info (net_daemon_t *daemon);
  * @param to_addr address or daemon
  * @param service or port number
  * @param timeout timeout for connection, if timeout <= 0 then it is infinity
- * @retval socket
+ * @return socket
  */
 int net_connect (char *to_addr, char *service, int timeout);
 
@@ -176,7 +176,7 @@ int net_connect (char *to_addr, char *service, int timeout);
  * @param fd socket
  * @param buf buffer for read data
  * @param timeout timeout for reading
- * @retval count of read data
+ * @return count of read data
  */
 ssize_t net_read (int fd, strbuf_t *buf, int timeout);
 
@@ -184,7 +184,7 @@ ssize_t net_read (int fd, strbuf_t *buf, int timeout);
  * @param fd socket
  * @param buf buffer
  * @param size size of buffer
- * @retval count of wrote data
+ * @return count of wrote data
  */
 ssize_t net_write (int fd, char *buf, size_t size);
 

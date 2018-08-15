@@ -24,7 +24,7 @@
 /**
  * @brief initialize log file
  * @param fname log file filename
- * @retval 0 if success, -1 if file can't created
+ * @return 0 if success, -1 if file can't created
  */
 int loginit (const char *fname);
 
@@ -50,7 +50,7 @@ typedef void (*load_conf_h) (const char*, strptr_t*, strptr_t*);
  * @brief load configuration file
  * @param fname configuration filename
  * @param fn callback function
- * @retval 0 if success
+ * @return 0 if success
  */
 int load_conf (const char *fname, load_conf_h fn);
 
@@ -58,20 +58,17 @@ int load_conf (const char *fname, load_conf_h fn);
  * @brief load exactly configuration file
  * @param fname configuration filename
  * @param fn callback function
- * @retval 0 if success
+ * @return 0 if success
  */
 int load_conf_exactly (const char *fname, load_conf_h fn);
 
 /** @def CONF_HANDLER(fn,key,val) */
-/** @brief begin of configuration handler */
 #define CONF_HANDLER ({ void fn (const char *fname, strptr_t *key, strptr_t *val) {
 
 /** @def CONF_HANDLER_END */
-/** @brief end of configuration handler */
 #define CONF_HANDLER_END } fn; })
 
 /** @def ASSIGN_CONF_STR(VAL,STR) */
-/** @brief assign string value */
 #define ASSIGN_CONF_STR(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         if (VAL) strput(&VAL, val->ptr, val->len, 0); else VAL = mkstr(val->ptr, val->len, 8); \
@@ -80,7 +77,6 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
     }
 
 /** @def ASSIGN_CONF_INT(VAL,STR) */
-/** @brief assign integer value */
 #define ASSIGN_CONF_INT(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         char *str = strndup(val->ptr, val->len), *tail; \
@@ -90,7 +86,6 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
     }
 
 /** @def ASSIGN_CONF_DOUBLE(VAL,STR) */
-/** @brief assign double value */
 #define ASSIGN_CONF_DOUBLE(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         char *str = strndup(val->ptr, val->len), *tail; \
@@ -100,7 +95,6 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
     }
 
 /** @def ASSIGN_CONF_BOOL(VAL,STR) */
-/** @brief assign boolean value */
 #define ASSIGN_CONF_BOOL(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         if (0 == cmpstr(val->ptr, val->len, CONST_STR_LEN("0"))) VAL = 0; else \
@@ -134,6 +128,13 @@ typedef int (*path_h) (const char*, void*, int, struct stat*);
 void ls (const char *path, path_h on_path, void *userdata, int flags, int max_depath);
 
 #ifdef __WIN32__
+/**
+ * @brief get line from file
+ * @param lineptr result
+ * @param n string length
+ * @param fd
+ * @return readed size
+ */
 ssize_t getline (char **lineptr, size_t *n, FILE *fd);
 #endif
 
@@ -142,7 +143,7 @@ ssize_t getline (char **lineptr, size_t *n, FILE *fd);
  * @param path source path
  * @param path_len source path length
  * @param result file name
- * @retval 0 if success, -1 if string not connains file name
+ * @return 0 if success, -1 if string not connains file name
  */
 int getfname (const char *path, size_t path_len, strptr_t *result);
 
@@ -151,7 +152,7 @@ int getfname (const char *path, size_t path_len, strptr_t *result);
  * @param path source path
  * @param path_len source path length
  * @param result file name
- * @retval 0 if success, -1 if string not connains file name
+ * @return 0 if success, -1 if string not connains file name
  */
 int getoname (const char *path, size_t path_len, strptr_t *result);
 
@@ -160,7 +161,7 @@ int getoname (const char *path, size_t path_len, strptr_t *result);
  * @param path source path
  * @param path_len source path length
  * @param result directory
- * @retval 0 if success, -1 if string not connains file name
+ * @return 0 if success, -1 if string not connains file name
  */
 void getdir (const char *path, size_t path_len, strptr_t *result);
 
@@ -169,14 +170,14 @@ void getdir (const char *path, size_t path_len, strptr_t *result);
  * @param path source path
  * @param path_len source path length
  * @param result suffix
- * @retval 0 if success, -1 if string not connains file name
+ * @return 0 if success, -1 if string not connains file name
  */
 int getsuf (const char *path, size_t path_len, strptr_t *result);
 
 /**
  * @brief create path from strings
  * @param arg argument
- * @retval full path
+ * @return full path
  */
 str_t *path_combine (const char *arg, ...);
 
@@ -184,7 +185,7 @@ str_t *path_combine (const char *arg, ...);
  * @brief add strings to full path
  * @param path source path
  * @param arg argumens
- * @retval new full path
+ * @return new full path
  */
 str_t *path_add_path (str_t *path, const char *arg, ...);
 
@@ -194,7 +195,7 @@ str_t *path_add_path (str_t *path, const char *arg, ...);
  * @param dir_len string length of \b dir
  * @param prefix prefix for file name
  * @param prefix_len string length for \b prefix_len
- * @retval full path if success, NULL if error
+ * @return full path if success, NULL if error
  */
 str_t *mktempnam (const char *dir, size_t dir_len, const char *prefix, size_t prefix_len);
 
@@ -214,7 +215,7 @@ void path_split (const char *path, size_t path_len, str_t **dir, str_t **fname, 
  * @param where_len
  * @param path
  * @param path_len
- * @retval full path if success, NULL if error
+ * @return full path if success, NULL if error
  */
 str_t *path_expand (const char *where, size_t where_len, const char *path, size_t path_len);
 
@@ -222,7 +223,7 @@ str_t *path_expand (const char *where, size_t where_len, const char *path, size_
  * @brief function checks whether path is absolute
  * @param path
  * @param len
- * @retval returns 1 if path is absolute, 0 if not
+ * @return returns 1 if path is absolute, 0 if not
  */
 int is_abspath (const char *path, size_t len);
 
@@ -237,44 +238,28 @@ int is_abspath (const char *path, size_t len);
  * @brief kind of directory for \b get_spec_path function
  */
 typedef enum {
-    /**
-     * home directory
-     */
+    /** home directory */
     DIR_HOME,
-    /**
-     * usr configuration directory
-     */
+    /** usr configuration directory */
     DIR_USR_CONFIG,
-    /**
-     * local configuration directory
-     */
+    /** local configuration directory */
     DIR_LOCAL_CONFIG,
-    /**
-     * current user configuration directory
-     */
+    /** current user configuration directory */
     DIR_HOME_CONFIG,
-    /**
-     * global configuration directory
-     */
+    /** global configuration directory */
     DIR_CONFIG,
-    /**
-     * program files directory
-     */
+    /** program files directory */
     DIR_PROGRAMS,
-    /**
-     * current directory
-     */
+    /** current directory */
     DIR_CURRENT,
-    /**
-     * temporary files directory
-     */
+    /** temporary files directory */
     DIR_TEMPATH
 } spec_path_t;
 
 /**
  * @brief returns special path name
  * @param id special directory identifier
- * @retval path
+ * @return path
  */
 str_t *get_spec_path (spec_path_t id);
 
@@ -283,7 +268,7 @@ str_t *get_spec_path (spec_path_t id);
  * @param path
  * @param chunk_size chunk size result string
  * @param max_size maximum file size, if \b max_size == 0 then maximum filname is unlimited
- * @retval path, NULL if error or file size greater then \b max_size, check errno
+ * @return path, NULL if error or file size greater then \b max_size, check errno
  */
 str_t *load_all_file (const char *path, size_t chunk_size, size_t max_size);
 
@@ -292,14 +277,14 @@ str_t *load_all_file (const char *path, size_t chunk_size, size_t max_size);
  * @param path
  * @param buf
  * @param buf_len buffer length
- * @retval 0 if success, -1 if error, check errno
+ * @return 0 if success, -1 if error, check errno
  */
 int save_file (const char *path, const char *buf, size_t buf_len);
 
 /**
  * @brief check whether file is exists
  * @param path
- * @retval 0 if file is exists, else returns errno
+ * @return 0 if file is exists, else returns errno
  */
 int is_file_exists (const char *path);
 
@@ -307,7 +292,7 @@ int is_file_exists (const char *path);
  * @brief copy file to other location
  * @param src source file name
  * @param dst destination file name
- * @retval 0 if success, -1 if error, check errno
+ * @return 0 if success, -1 if error, check errno
  */
 int copy_file (const char *src, const char *dst);
 

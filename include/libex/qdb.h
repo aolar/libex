@@ -32,7 +32,7 @@ typedef struct {
 /** @brief return queue structure
  * @param fname
  * @param hdr
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int qdb_stat (const char *fname, qdb_t *hdr);
 
@@ -43,7 +43,7 @@ typedef size_t (*deserialize_h) (int, void**);
 
 /** @brief open queue database
  * @param fname
- * @retval file descriptor or -1 if error
+ * @return file descriptor or -1 if error
  */
 int qdb_open (const char *fname);
 
@@ -51,7 +51,7 @@ int qdb_open (const char *fname);
  * @param fd
  * @param data
  * @param fn callback function
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int qdb_put (int fd, void *data, serialize_h fn);
 
@@ -59,21 +59,21 @@ int qdb_put (int fd, void *data, serialize_h fn);
  * @param fd
  * @param data
  * @param fn
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int qdb_get (int fd, void **data, deserialize_h fn);
 
 /** @brief open queue database
  * @param fname
  * @param default_size
- * @retval file descriptor if success, -1 if error
+ * @return file descriptor if success, -1 if error
  */
 int qdb_nopen (const char *fname, size_t default_size);
 
 /** @brief write data to queue
  * @param fd
  * @param data
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int qdb_nput (int fd, void *data);
 
@@ -81,7 +81,7 @@ int qdb_nput (int fd, void *data);
  * @param fd
  * @param data
  * @param flags can be 0 of QDB_PEEK
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int qdb_nget (int fd, void *data, int flags);
 

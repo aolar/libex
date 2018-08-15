@@ -72,7 +72,7 @@ int html_parse (char *content, size_t content_length, html_t *html);
  * @param tag_e end of tag
  * @param tag_e_len \b tag_e length
  * @param add_to_head
- * @retval int 0 if success, -1 if error
+ * @return int 0 if success, -1 if error
  */
 int html_add_tag (html_tag_t *parent,
                   const char *tag_s, size_t tag_s_len,
@@ -86,11 +86,11 @@ int html_add_tag (html_tag_t *parent,
  * @param recurse recursive searching
  * @param found_item result item
  * @param userdata user data for callback function
- * @retval some from that
+ * @return some from that
  * <ul>
- *      <li> #HTML_NOT_FOUND
- *      <li> #HTML_FOUND
- *      <li> #HTML_FOUND_FIN
+ *      <li> HTML_NOT_FOUND
+ *      <li> HTML_FOUND
+ *      <li> HTML_FOUND_FIN
  * </ul>
  */
 int html_find_tag (list_t *tags, list_item_t *item, on_tag_h on_tag, int recurse, list_item_t **found_item, void *userdata);
@@ -99,7 +99,7 @@ int html_find_tag (list_t *tags, list_item_t *item, on_tag_h on_tag, int recurse
  * @param tag
  * @param idx
  * @param val result string pointer
- * @retval 0 id success, -1 tag not exists
+ * @return 0 id success, -1 tag not exists
  */
 int html_get_tag_attr (str_t *tag, int idx, strptr_t *val);
 
@@ -107,7 +107,7 @@ int html_get_tag_attr (str_t *tag, int idx, strptr_t *val);
  * @param html it's source
  * @param start_len initial string start length
  * @param chunk_size chunk size of string
- * @retval string
+ * @return string
  */
 str_t *html_mkcontent (html_t *html, size_t start_len, size_t chunk_size);
 

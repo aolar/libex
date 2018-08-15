@@ -57,7 +57,7 @@ typedef struct {
 /** @brief create command string array
  * @param cmdline command line
  * @param cmdline_len command line length
- * @retval array of strings as argument for \b exec* function family
+ * @return array of strings as argument for \b exec* function family
  */
 char **mkcmdstr (const char *cmdline, size_t cmdline_len);
 
@@ -184,7 +184,7 @@ struct slot {
  * @param pool
  * @param opt
  * @param arg
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg);
 
@@ -192,7 +192,7 @@ int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg);
  * @param pool
  * @param opt
  * @param arg
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int pool_setopt_msg (pool_t *pool, pool_opt_t opt, pool_msg_h arg);
 
@@ -200,7 +200,7 @@ int pool_setopt_msg (pool_t *pool, pool_opt_t opt, pool_msg_h arg);
  * @param pool
  * @param opt
  * @param arg
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int pool_setopt_create (pool_t *pool, pool_opt_t opt, pool_create_h arg);
 
@@ -208,7 +208,7 @@ int pool_setopt_create (pool_t *pool, pool_opt_t opt, pool_create_h arg);
  * @param pool
  * @param opt
  * @param arg
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
 
@@ -222,7 +222,7 @@ int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
 )(pool,opt,arg)
 
 /** @brief create pool
- * @retval pool structure
+ * @return pool structure
  */
 pool_t *pool_create ();
 
@@ -239,7 +239,7 @@ void pool_start (pool_t *pool);
  * @param out_data output data
  * @param mutex mutex for waiting response
  * @param cond condition for waiting response
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int pool_call (pool_t *pool,
                 pool_msg_h on_msg,

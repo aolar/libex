@@ -71,7 +71,7 @@ typedef uint32_t hash_key_t;
  * @brief returns string hash value, string must be finished by 0. Uses as callback in \b hash_alloc function
  * @param s source string
  * @param dummy don't used
- * @retval hash value
+ * @return hash value
  */
 hash_key_t hash_str (const char *s, size_t dummy);
 
@@ -79,7 +79,7 @@ hash_key_t hash_str (const char *s, size_t dummy);
  * @brief returns string hash value, string. Uses as callback in \b hash_alloc function
  * @param s source string
  * @param len source string length
- * @retval hash value
+ * @return hash value
  */
 hash_key_t hash_nstr (const char *s, size_t len);
 
@@ -121,7 +121,7 @@ typedef struct {
  * @brief callback hash calculation function
  * @param 1-st source data
  * @param 2-nd size of data
- * @retval hash value
+ * @return hash value
  */
 typedef hash_key_t (*calc_h) (void*, size_t);
 
@@ -198,7 +198,7 @@ struct hash {
  * @param on_compare callback for compare hash item keys
  * @param on_copy callback for copying key, can be NULL
  * @param on_free callback for free item
- * @retval hash if success, NULL if error
+ * @return hash if success, NULL if error
  */
 hash_t *hash_alloc (hash_key_t hash_buf_size, hash_type_t type, calc_h on_hash, compare_h on_compare, copy_h on_copy, free_h on_free);
 
@@ -207,7 +207,7 @@ hash_t *hash_alloc (hash_key_t hash_buf_size, hash_type_t type, calc_h on_hash, 
  * @param hash
  * @param key
  * @param key_len
- * @retval hash item or NULL if not found
+ * @return hash item or NULL if not found
  */
 hash_item_t *hash_get (hash_t *hash, void *key, size_t key_len);
 
@@ -216,7 +216,7 @@ hash_item_t *hash_get (hash_t *hash, void *key, size_t key_len);
  * @param hash
  * @param key
  * @param key_len
- * @retval hash item
+ * @return hash item
  */
 hash_item_t *hash_add (hash_t *hash, void *key, size_t key_len);
 
@@ -264,14 +264,14 @@ void hash_set_max_size (hash_t *hash, hash_key_t max_size);
 /**
  * @brief returns filling coefficient of hash
  * @param hash
- * @retval filling coefficient
+ * @return filling coefficient
  */
 double hash_param_filling (hash_t *hash);
 
 /**
  * @brief returns expected conflict parameter
  * @param hash
- * @retval expected conflict parameter
+ * @return expected conflict parameter
  */
 double hash_param_conflict (hash_t *hash);
 

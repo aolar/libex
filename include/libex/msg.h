@@ -64,7 +64,7 @@ extern msg_reallocator_h msg_realloc;
  * @param cookie_len
  * @param len start legtnh of message
  * @param chunk_size
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t len, uint32_t chunk_size);
 
@@ -73,7 +73,7 @@ int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size
  * @param code error code
  * @param len start legtnh of message
  * @param chunk_size
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_size);
 
@@ -81,7 +81,7 @@ int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_s
  * @param msg
  * @src string
  * @src_len string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_setstr (msgbuf_t *msg, const char *src, size_t src_len);
 
@@ -89,7 +89,7 @@ int msg_setstr (msgbuf_t *msg, const char *src, size_t src_len);
  * @param msg
  * @src string
  * @src_len string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len);
 
@@ -97,7 +97,7 @@ int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len);
  * @param msg
  * @src string
  * @src_len string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 static inline int msg_seti (msgbuf_t *msg, int val) { return msg_setbuf(msg, &val, sizeof(int)); };
 
@@ -105,7 +105,7 @@ static inline int msg_seti (msgbuf_t *msg, int val) { return msg_setbuf(msg, &va
  * @param msg
  * @src string
  * @src_len string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 static inline int msg_seti32 (msgbuf_t *msg, int32_t val) { return msg_setbuf(msg, &val, sizeof(int32_t)); };
 
@@ -113,7 +113,7 @@ static inline int msg_seti32 (msgbuf_t *msg, int32_t val) { return msg_setbuf(ms
  * @param msg
  * @src string
  * @src_len string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 static inline int msg_setui32 (msgbuf_t *msg, uint32_t val) { return msg_setbuf(msg, &val, sizeof(uint32_t)); };
 
@@ -121,7 +121,7 @@ static inline int msg_setui32 (msgbuf_t *msg, uint32_t val) { return msg_setbuf(
  * @param msg
  * @src string
  * @src_len string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 static inline int msg_setd (msgbuf_t *msg, double val) { return msg_setbuf(msg, &val, sizeof(double)); };
 
@@ -131,7 +131,7 @@ static inline int msg_setd (msgbuf_t *msg, double val) { return msg_setbuf(msg, 
  * @param fn callback for inserting each elements into message,
  * function prototype is int (*msg_item_h) (msgbuf_t *msg, void *item_data, void *userdata)
  * @param userdata
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_setlist (msgbuf_t *msg, list_t *lst, msg_item_h fn, void *userdata);
 
@@ -139,7 +139,7 @@ int msg_setlist (msgbuf_t *msg, list_t *lst, msg_item_h fn, void *userdata);
  * @param msg
  * @param buf
  * @param buflen
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_load_request (msgbuf_t *msg, char *buf, size_t buflen);
 
@@ -147,42 +147,42 @@ int msg_load_request (msgbuf_t *msg, char *buf, size_t buflen);
  * @param msg
  * @param buf
  * @param buflen
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_load_response (msgbuf_t *msg, char *buf, size_t buflen);
 
 /** @brief get data from message as integer
  * @param msg
  * @param val result
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_geti (msgbuf_t *msg, int *val);
 
 /** @brief get data from message as 32 bit integer
  * @param msg
  * @param val result
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_geti32 (msgbuf_t *msg, int32_t *val);
 
 /** @brief get data from message as 32 bit unsigned integer
  * @param msg
  * @param val result
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_getui32 (msgbuf_t *msg, uint32_t *val);
 
 /** @brief get data from message as double
  * @param msg
  * @param val result
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_getd (msgbuf_t *msg, double *val);
 
 /** @brief get data from message as string
  * @param msg
  * @param val result
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_getstr (msgbuf_t *buf, strptr_t *str);
 
@@ -190,7 +190,7 @@ int msg_getstr (msgbuf_t *buf, strptr_t *str);
  * @param msg
  * @param fn
  * @param userdata
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_enum (msgbuf_t *msg, msg_item_h fn, void *userdata);
 
@@ -204,7 +204,7 @@ static inline void msg_clear (msgbuf_t *msg) { if (msg->ptr) msg_free(msg->ptr);
  * @param code code result
  * @param str error string
  * @param len error string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int msg_error (msgbuf_t *msg, int code, const char *str, size_t len);
 

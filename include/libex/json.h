@@ -145,7 +145,7 @@ typedef int (*json_item_h) (json_item_t*, void*);
 /**
  * @brief parse json and create json structure
  * @param json_str json string
- * @retval json object
+ * @return json object
  */
 json_t *json_parse (const char *json_str);
 
@@ -153,7 +153,7 @@ json_t *json_parse (const char *json_str);
  * @brief parse json object and create json structure
  * @param json_str json string
  * @param json_str_len json string length
- * @retval json object
+ * @return json object
  */
 json_t *json_parse_len (const char *json_str, size_t json_str_len);
 
@@ -164,15 +164,15 @@ json_t *json_parse_len (const char *json_str, size_t json_str_len);
  * @param key_len key name length
  * @param type
  * <ul>
- *  <li> #JSON_OBJECT
- *  <li> #JSON_ARRAY
- *  <li> #JSON_STRING
- *  <li> #JSON_INTEGER
- *  <li> #JSON_DOUBLE
- *  <li> #JSON_TRUE
- *  <li> #JSON_FALSE
- *  <li> #JSON_NULL
- *  <li> #JSON_ANY
+ *  <li> JSON_OBJECT
+ *  <li> JSON_ARRAY
+ *  <li> JSON_STRING
+ *  <li> JSON_INTEGER
+ *  <li> JSON_DOUBLE
+ *  <li> JSON_TRUE
+ *  <li> JSON_FALSE
+ *  <li> JSON_NULL
+ *  <li> JSON_ANY
  * </ul>
  */
 json_item_t *json_find (json_object_t *jo, const char *key, size_t key_len, int type);
@@ -267,8 +267,8 @@ void json_add_key (strbuf_t *buf, const char *key, size_t key_len);
  * @param val_len string value length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_str (strbuf_t *buf, const char *key, size_t key_len, const char *val, size_t val_len, int is_end);
@@ -282,8 +282,8 @@ void json_add_str (strbuf_t *buf, const char *key, size_t key_len, const char *v
  * @param val_len string value length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_escape_str (strbuf_t *buf, const char *key, size_t key_len, const char *val, size_t val_len, int is_end);
@@ -296,8 +296,8 @@ void json_add_escape_str (strbuf_t *buf, const char *key, size_t key_len, const 
  * @param val integer value
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_int (strbuf_t *buf, const char *key, size_t key_len, int64_t val, int is_end);
@@ -311,8 +311,8 @@ void json_add_int (strbuf_t *buf, const char *key, size_t key_len, int64_t val, 
  * @param prec precision of double value
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_double_p (strbuf_t *buf, const char *key, size_t key_len, long double val, int prec, int is_end);
@@ -325,8 +325,8 @@ void json_add_double_p (strbuf_t *buf, const char *key, size_t key_len, long dou
  * @param val double value
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 static inline void json_add_double (strbuf_t *buf, const char *key, size_t key_len, long double val, int is_end) { json_add_double_p(buf, key, key_len, val, JSON_DOUBLE_PRECISION, is_end); }
@@ -338,8 +338,8 @@ static inline void json_add_double (strbuf_t *buf, const char *key, size_t key_l
  * @param key_len name length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_null (strbuf_t *buf, const char *key, size_t key_len, int is_end);
@@ -352,8 +352,8 @@ void json_add_null (strbuf_t *buf, const char *key, size_t key_len, int is_end);
  * @param val boolean value, can be 1 or 0
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_bool (strbuf_t *buf, const char *key, size_t key_len, int val, int is_end);
@@ -365,8 +365,8 @@ void json_add_bool (strbuf_t *buf, const char *key, size_t key_len, int val, int
  * @param key name length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 static inline void json_add_true (strbuf_t *buf, const char *key, size_t key_len, int is_end) { json_add_bool(buf, key, key_len, 1, is_end); }
@@ -378,8 +378,8 @@ static inline void json_add_true (strbuf_t *buf, const char *key, size_t key_len
  * @param key name length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 static inline void json_add_false (strbuf_t *buf, const char *key, size_t key_len, int is_end) { json_add_bool(buf, key, key_len, 0, is_end); }
@@ -440,8 +440,8 @@ void json_open_array (strbuf_t *buf, const char *key, size_t key_len);
  * @param buf string buffer
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_close_array (strbuf_t *buf, int is_end);
@@ -453,8 +453,8 @@ void json_close_array (strbuf_t *buf, int is_end);
  * @param key_len key name length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 static inline void json_empty_array (strbuf_t *buf, const char *key, size_t key_len, int is_end) { json_open_array(buf, key, key_len); json_close_array(buf, is_end); };
@@ -469,8 +469,8 @@ static inline void json_empty_array (strbuf_t *buf, const char *key, size_t key_
  * @param userdata
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_list (strbuf_t *buf, const char *key, size_t key_len, list_t *list, json_list_item_h on_item, void *userdata, int is_end);
@@ -485,8 +485,8 @@ void json_add_list (strbuf_t *buf, const char *key, size_t key_len, list_t *list
  * @param userdata
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_add_tree (strbuf_t *buf, const char *key, size_t key_len, rbtree_t *tree, json_tree_item_h on_item, void *userdata, int is_end);
@@ -504,8 +504,8 @@ void json_open_object (strbuf_t *buf, const char *key, size_t key_len);
  * @param buf string buffer
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 void json_close_object (strbuf_t *buf, int is_end);
@@ -517,8 +517,8 @@ void json_close_object (strbuf_t *buf, int is_end);
  * @param key_len key name length
  * @param is_end
  * <ul>
- *  <li> #JSON_NEXT
- *  <li> #JSON_END
+ *  <li> JSON_NEXT
+ *  <li> JSON_END
  * </ul>
  */
 static inline void json_empty_object (strbuf_t *buf, const char *key, size_t key_len, int is_end) { json_open_object(buf, key, key_len); json_close_object(buf, is_end); };
@@ -684,7 +684,7 @@ int jsonrpc_parse_response_intr (const char *json_str, size_t json_str_len, json
  * @param json_str json string
  * @param json_str_len json string length
  * @param jsonrpc json rpc object
- * @retval json rpc error code
+ * @return json rpc error code
  */
 static inline int jsonrpc_parse_request_len (const char *json_str, size_t json_str_len, jsonrpc_t *jsonrpc) { return jsonrpc_parse_request_intr(json_str, json_str_len, json_parse_len, jsonrpc); };
 
@@ -692,7 +692,7 @@ static inline int jsonrpc_parse_request_len (const char *json_str, size_t json_s
  * @brief json rpc request parser
  * @param json_str json string
  * @param jsonrpc json rpc object
- * @retval json rpc error code
+ * @return json rpc error code
  */
 static inline int jsonrpc_parse_request (const char *json_str, jsonrpc_t *jsonrpc) { return jsonrpc_parse_request_intr(json_str, strlen(json_str), json_parse_len, jsonrpc); };
 
@@ -701,7 +701,7 @@ static inline int jsonrpc_parse_request (const char *json_str, jsonrpc_t *jsonrp
  * @param json_str json string
  * @param json_str_len json string length
  * @param jsonrpc json rpc object
- * @retval json rpc error code
+ * @return json rpc error code
  */
 static inline int jsonrpc_parse_response_len (const char *json_str, size_t json_str_len, jsonrpc_t *jsonrpc) { return jsonrpc_parse_response_intr(json_str, json_str_len, json_parse_len, jsonrpc); };
 
@@ -709,7 +709,7 @@ static inline int jsonrpc_parse_response_len (const char *json_str, size_t json_
  * @brief json rpc response parser
  * @param json_str json string
  * @param jsonrpc json rpc object
- * @retval json rpc error code
+ * @return json rpc error code
  */
 static inline int jsonrpc_parse_response (const char *json_str, jsonrpc_t *jsonrpc) { return jsonrpc_parse_response_intr(json_str, strlen(json_str), json_parse_len, jsonrpc); };
 
@@ -733,7 +733,7 @@ void jsonrpc_setver (jsonrpc_ver_t ver);
  * @param id_len
  * @param on_params callback function for creating parameters
  * @param userdata
- * @retval value of \b on_params
+ * @return value of \b on_params
  * can set id and id_len by macros
  * <ul>
  *  <li> JSONRPC_ID_INT
@@ -750,7 +750,7 @@ int jsonrpc_request (strbuf_t *buf, const char *method, size_t method_len, intpt
  * @param id_len
  * @param on_result callback function for creating json rpc result
  * @param userdata
- * @retval value of \b on_result
+ * @return value of \b on_result
  * can set id and id_len by macros
  * <ul>
  *  <li> JSONRPC_ID_INT
@@ -778,11 +778,11 @@ void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message
  * @param buf string buffer
  * @param code error code
  * <ul>
- *  <li> #JSONRPC_PARSE_ERROR
- *  <li> #JSONRPC_INVALID_REQUEST
- *  <li> #JSONRPC_METHOD_NOT_FOUND
- *  <li> #JSONRPC_INVALID_PARAMS
- *  <li> #JSONRPC_INTERNAL_ERROR
+ *  <li> JSONRPC_PARSE_ERROR
+ *  <li> JSONRPC_INVALID_REQUEST
+ *  <li> JSONRPC_METHOD_NOT_FOUND
+ *  <li> JSONRPC_INVALID_PARAMS
+ *  <li> JSONRPC_INTERNAL_ERROR
  * </ul>
  * @param id
  * @param id_len

@@ -146,7 +146,7 @@ typedef struct {
  * with \b chunk_size growing size
  * @param len reserved length
  * @param chunk_size minimal growing size
- * @retval string
+ * @return string
  */
 str_t *stralloc (size_t len, size_t chunk_size);
 
@@ -155,7 +155,7 @@ str_t *stralloc (size_t len, size_t chunk_size);
  * with \b chunk_size growing size
  * @param len reserved length
  * @param chunk_size minimal growing size
- * @retval string
+ * @return string
  */
 wstr_t *wstralloc (size_t len, size_t chunk_size);
 
@@ -164,7 +164,7 @@ wstr_t *wstralloc (size_t len, size_t chunk_size);
  * @param str source string
  * @param str_len source string length
  * @param chunk_size result stirng chunk size
- * @retval wide string if success, NULL if error
+ * @return wide string if success, NULL if error
  */
 wstr_t *str2wstr (const char *str, size_t str_len, size_t chunk_size);
 
@@ -173,7 +173,7 @@ wstr_t *str2wstr (const char *str, size_t str_len, size_t chunk_size);
  * @param str source wide string
  * @param str_len source wide string length
  * @param chunk_size result stirng chunk size
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *wstr2str (const wchar_t *str, size_t str_len, size_t chunk_size);
 
@@ -182,7 +182,7 @@ str_t *wstr2str (const wchar_t *str, size_t str_len, size_t chunk_size);
  * @param str source string buffer
  * @param len length of source string buffer
  * @param chunk_size minimal growing size
- * @retval string. If returns NULL then fail
+ * @return string. If returns NULL then fail
  */
 str_t *mkstr (const char *str, size_t len, size_t chunk_size);
 
@@ -191,7 +191,7 @@ str_t *mkstr (const char *str, size_t len, size_t chunk_size);
  * @param str source wide string buffer
  * @param len length of source wide string buffer
  * @param chunk_size minimal growing size
- * @retval string. If returns NULL then fail
+ * @return string. If returns NULL then fail
  */
 wstr_t *wmkstr (const wchar_t *str, size_t len, size_t chunk_size);
 
@@ -201,7 +201,7 @@ wstr_t *wmkstr (const wchar_t *str, size_t len, size_t chunk_size);
  * @param nlen - new string length
  * @param flags - if \b flags sets to STR_REDUCE and new buffer size less then old size then 
  * buffer will be decreased.
- * @retval 0 is success, -1 if fail.
+ * @return 0 is success, -1 if fail.
  */
 int strsize (str_t **str, size_t nlen, int flags);
 
@@ -209,7 +209,7 @@ int strsize (str_t **str, size_t nlen, int flags);
  * @brief change buffer size for wide string. If needs then reallocated of memory
  * @param str wide string
  * @param str_len new wide string length
- * @retval 0 is success, -1 if fail.
+ * @return 0 is success, -1 if fail.
  */
 size_t strwlen (const char *str, size_t str_len);
 
@@ -236,14 +236,14 @@ void strwlower (char *str, size_t str_len, locale_t locale);
  * @param filler character for filling
  * @param flags padding type.
  * <ul>
- *  <li>#STR_LEFT
+ *  <li>STR_LEFT
  *      left padding
- *  <li>#STR_RIGHT
+ *  <li>STR_RIGHT
  *      right padding
- *  <li>#STR_CENTER
+ *  <li>STR_CENTER
  *      center padding
  * </ul>
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int strpad (str_t **str, size_t nlen, char filler, int flags);
 
@@ -255,7 +255,7 @@ int strpad (str_t **str, size_t nlen, char filler, int flags);
  * @param src_len source string length
  * @param flags if equals STR_REDUCE and new string length will be less then source string then
  * it will be reallocate memory
- * @retval 0 is success, -1 error.
+ * @return 0 is success, -1 error.
  */
 int strput (str_t **str, const char *src, size_t src_len, int flags);
 
@@ -267,7 +267,7 @@ int strput (str_t **str, const char *src, size_t src_len, int flags);
  * @param src_len source string length
  * @param flags if equals STR_REDUCE and new string length will be less then source string then
  * it will be reallocate memory
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *strput2 (str_t *str, const char *src, size_t src_len, int flags);
 
@@ -278,7 +278,7 @@ str_t *strput2 (str_t *str, const char *src, size_t src_len, int flags);
  * errno set ENOMEM
  * @param old_str first string
  * @param new_str second string
- * @retval string if success, NULL if error.
+ * @return string if success, NULL if error.
  */
 char *strputc (char *old_str, const char *new_str);
 
@@ -297,7 +297,7 @@ void strdel (str_t **str, char *pos, size_t len, int flags);
  * @param str result string
  * @param src source string
  * @param src_len source string legnth
- * @retval 0 if success, -1 if error.
+ * @return 0 if success, -1 if error.
  */
 int strnadd (str_t **str, const char *src, size_t src_len);
 
@@ -306,7 +306,7 @@ int strnadd (str_t **str, const char *src, size_t src_len);
  * @param str result string
  * @param src source string
  * @param src_len source string legnth
- * @retval 0 if success, -1 if error.
+ * @return 0 if success, -1 if error.
  */
 int wstrnadd (wstr_t **str, const wchar_t *src, size_t src_len);
 
@@ -315,7 +315,7 @@ int wstrnadd (wstr_t **str, const wchar_t *src, size_t src_len);
  * @param chunk_size chunk size of string result
  * @param arg first string
  * @param arg_len length of first string
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *strconcat (size_t chunk_size, const char *arg, size_t arg_len, ...);
 
@@ -324,7 +324,7 @@ str_t *strconcat (size_t chunk_size, const char *arg, size_t arg_len, ...);
  * @param str source string
  * @param len source string length
  * @param chunk_size chink size of result string
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *strev (const char *str, size_t len, size_t chunk_size);
 
@@ -342,7 +342,7 @@ void strntrim (char **str, size_t *str_len);
  * @param sep character set as separator
  * @param sep_len length of \b sep
  * @param ret result
- * @retval 0 tokens is returned and string tail is exists, 1 if it is last token, -1 if it geting token over string
+ * @return 0 tokens is returned and string tail is exists, 1 if it is last token, -1 if it geting token over string
  */
 int strntok (char **str, size_t *str_len, const char *sep, size_t sep_len, strptr_t *ret);
 
@@ -353,7 +353,7 @@ int strntok (char **str, size_t *str_len, const char *sep, size_t sep_len, strpt
  * @param dst_len character count of destination
  * @param src_pos source string
  * @param src_len source string length
- * @retval 0 if success, -1 if error.
+ * @return 0 if success, -1 if error.
  */
 int strepl (str_t **str, char *dst_pos, size_t dst_len, const char *src_pos, size_t src_len);
 
@@ -362,7 +362,7 @@ int strepl (str_t **str, char *dst_pos, size_t dst_len, const char *src_pos, siz
  * @param s string
  * @param str_len string length
  * @param c wanted character
- * @retval pointer to found character, NULL if not found
+ * @return pointer to found character, NULL if not found
  */
 char *strnchr (const char *s, int c, size_t str_len);
 
@@ -371,7 +371,7 @@ char *strnchr (const char *s, int c, size_t str_len);
  * @param s string
  * @param str_len string length
  * @param c wanted character
- * @retval pointer to found character, NULL if not found
+ * @return pointer to found character, NULL if not found
  */
 char *strnrchr (const char *s, int c, size_t str_len);
 
@@ -381,7 +381,7 @@ char *strnrchr (const char *s, int c, size_t str_len);
  * @param str_len string length
  * @param needle substring
  * @param n_len substring length
- * @retval pointer to found substring, NULL if not found
+ * @return pointer to found substring, NULL if not found
  */
 char *strnstr (const char *str, size_t str_len, const char *needle, size_t n_len);
 
@@ -391,7 +391,7 @@ char *strnstr (const char *str, size_t str_len, const char *needle, size_t n_len
  * @param str source string
  * @param str_len source string length
  * @param chunk_size result string chunk size
- * @retval string if success or NULL if error
+ * @return string if success or NULL if error
  */
 str_t *strhex (const char *prefix, const char *str, size_t str_len, size_t chunk_size);
 
@@ -400,7 +400,7 @@ str_t *strhex (const char *prefix, const char *str, size_t str_len, size_t chunk
  * @param str source string
  * @param str_len source string length
  * @param chunk_size result string chunk size
- * @retval string if success or NULL if error
+ * @return string if success or NULL if error
  */
 str_t *hexstr (const char *str, size_t str_len, size_t chunk_size);
 
@@ -410,7 +410,7 @@ str_t *hexstr (const char *str, size_t str_len, size_t chunk_size);
  * @param x_len first string length
  * @param y second string
  * @param y_len second string length
- * @retval 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ * @return 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
  */
 int cmpstr (const char *x, size_t x_len, const char *y, size_t y_len);
 
@@ -420,7 +420,7 @@ int cmpstr (const char *x, size_t x_len, const char *y, size_t y_len);
  * @param x_len first string length
  * @param y second string
  * @param y_len second string length
- * @retval 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ * @return 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
  */
 int wcmpstr (const wchar_t *x, size_t x_len, const wchar_t *y, size_t y_len);
 
@@ -430,7 +430,7 @@ int wcmpstr (const wchar_t *x, size_t x_len, const wchar_t *y, size_t y_len);
  * @param x_len first string length
  * @param y second string
  * @param y_len second string length
- * @retval 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ * @return 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
  */
 int cmpcasestr (const char *x, size_t x_len, const char *y, size_t y_len);
 
@@ -440,14 +440,14 @@ int cmpcasestr (const char *x, size_t x_len, const char *y, size_t y_len);
  * @param x_len first string length
  * @param y second string
  * @param y_len second string length
- * @retval 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
+ * @return 1 - if x greater then y, -1 - if x less then y, 0 - if x equals y
  */
 int wcmpcasestr (const wchar_t *x, size_t x_len, const wchar_t *y, size_t y_len);
 
 /**
  * @brief create new string from existing string
  * @param str source stirng
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 static inline str_t *strclone (str_t *str) { return mkstr(str->ptr, str->len, str->chunk_size); };
 /**
@@ -458,7 +458,7 @@ static inline str_t *strclone (str_t *str) { return mkstr(str->ptr, str->len, st
 /**
  * @brief create new wide string from existing wide string
  * @param str source stirng
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 static inline wstr_t *wstrclone (wstr_t *str) { return wmkstr(str->ptr, str->len, str->chunk_size); };
 
@@ -468,7 +468,7 @@ static inline wstr_t *wstrclone (wstr_t *str) { return wmkstr(str->ptr, str->len
  * @param strbuf string buffer
  * @param len reserved length
  * @param chunk_size minimal growing size
- * @retval 0 if success, -1 if error.
+ * @return 0 if success, -1 if error.
  */
 int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size);
 
@@ -477,7 +477,7 @@ int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size);
  * @param strbuf string buffer
  * @param nlen new length
  * @param flags if set flags to STR_REDUCE then decrease of a string reduced a size of memory
- * @retval 0 is success, -1 if error
+ * @return 0 is success, -1 if error
  */
 int strbufsize (strbuf_t *strbuf, size_t nlen, int flags);
 
@@ -489,7 +489,7 @@ int strbufsize (strbuf_t *strbuf, size_t nlen, int flags);
  * @param src_len source string length
  * @param flags if equals STR_REDUCE and new string length will be less then source string then
  * it will be reallocate memory
- * @retval 0 is success, -1 error.
+ * @return 0 is success, -1 error.
  */
 int strbufput (strbuf_t *strbuf, const char *src, size_t src_len, int flags);
 
@@ -498,7 +498,7 @@ int strbufput (strbuf_t *strbuf, const char *src, size_t src_len, int flags);
  * @param strbuf result string buffer
  * @param src source string
  * @param src_len source string legnth
- * @retval 0 if success, -1 if error.
+ * @return 0 if success, -1 if error.
  */
 int strbufadd (strbuf_t *strbuf, const char *src, size_t src_len);
 
@@ -508,7 +508,7 @@ int strbufadd (strbuf_t *strbuf, const char *src, size_t src_len);
  * @param buf source buffer
  * @param bufsize source buffer size
  * @param chunk_size result string size
- * @retval string if success, NULL if memory allocation error
+ * @return string if success, NULL if memory allocation error
  */
 str_t *str_base64_encode (const char *buf, size_t bufsize, size_t chunk_size);
 
@@ -517,7 +517,7 @@ str_t *str_base64_encode (const char *buf, size_t bufsize, size_t chunk_size);
  * @param buf input string
  * @param bufsize input string length
  * @param chunk_size result string chunk size
- * @retval string if success, NULL if memory allocation error
+ * @return string if success, NULL if memory allocation error
  */
 str_t *str_base64_decode (const char *buf, size_t bufsize, size_t chunk_size);
 
@@ -527,7 +527,7 @@ str_t *str_base64_decode (const char *buf, size_t bufsize, size_t chunk_size);
  * @param input source string
  * @param input_len source string length
  * @param chunk_size: result string size
- * @retval 0 if success, -1 if memory allocation error
+ * @return 0 if success, -1 if memory allocation error
  */
 int strbuf_base64_encode (strbuf_t *encoded, const char *input, size_t input_len, size_t chunk_size);
 
@@ -537,7 +537,7 @@ int strbuf_base64_encode (strbuf_t *encoded, const char *input, size_t input_len
  * @param input source string
  * @param input_len source string length
  * @param chunk_size: result string size
- * @retval 0 if success, -1 if memory allocation error
+ * @return 0 if success, -1 if memory allocation error
  */
 int strbuf_base64_decode (strbuf_t *decoded, const char *input, size_t input_len, size_t chunk_size);
 
@@ -546,7 +546,7 @@ int strbuf_base64_decode (strbuf_t *decoded, const char *input, size_t input_len
  * @param str source string
  * @param str_len source string length
  * @param chunk_size: result string chunk_size
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *str_url_encode (const char *str, size_t str_len, size_t chunk_size);
 
@@ -555,7 +555,7 @@ str_t *str_url_encode (const char *str, size_t str_len, size_t chunk_size);
  * @param str source string
  * @param str_len source string length
  * @param chunk_size: result string chunk_size
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *str_url_decode (const char *str, size_t str_len, size_t chunk_size);
 
@@ -564,7 +564,7 @@ str_t *str_url_decode (const char *str, size_t str_len, size_t chunk_size);
  * @param src source string
  * @param src_len source string length
  * @param chunk_size: result string chunk_size
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *str_unescape (const char *src, size_t src_len, size_t chunk_size);
 
@@ -573,7 +573,7 @@ str_t *str_unescape (const char *src, size_t src_len, size_t chunk_size);
  * @param strbuf destination string buffer
  * @param src source string
  * @param src_len source string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int strbuf_unescape (strbuf_t *strbuf, const char *src, size_t src_len);
 
@@ -582,7 +582,7 @@ int strbuf_unescape (strbuf_t *strbuf, const char *src, size_t src_len);
  * @param src source string
  * @param src_len source string length
  * @param chunk_size result string chunk_size
- * @retval string if success, NULL if error
+ * @return string if success, NULL if error
  */
 str_t *str_escape (const char *src, size_t src_len, size_t chunk_size);
 
@@ -591,7 +591,7 @@ str_t *str_escape (const char *src, size_t src_len, size_t chunk_size);
  * @param dst destination string buffer
  * @param src source string
  * @param src_len source string length
- * @retval 0 if success, -1 if error
+ * @return 0 if success, -1 if error
  */
 int strbuf_escape (strbuf_t *dst, const char *src, size_t src_len);
 
@@ -611,7 +611,7 @@ static inline size_t strset_size (void *strset) { return *((size_t*)strset); }
  * @brief create string buffer set from string array
  * @param count string array count
  * @param strs source string array
- * @retval string set buffer
+ * @return string set buffer
  */
 void *mkstrset (size_t count, const char **strs);
 
@@ -627,14 +627,14 @@ void *mkstrset2 (const char **strs, size_t count, size_t *idxs);
  * @brief start for fetching string buffer set
  * @param strset string set buffer
  * @param len string set buffer length
- * @retval pointer to string buffer set
+ * @return pointer to string buffer set
  */
 void *strset_start (void *strset, size_t *len);
 
 /**
  * @brief get next string from string buffer set
  * @param strset_ptr string set
- * @retval string pointer, if result is pointer is NULL and length is 0 then this is the end
+ * @return string pointer, if result is pointer is NULL and length is 0 then this is the end
  */
 strptr_t strset_fetch (void **strset_ptr);
 
@@ -642,7 +642,7 @@ strptr_t strset_fetch (void **strset_ptr);
  * @brief get string pointer by index
  * @param strset string set pointer
  * @param index
- * @retval string pointer, if result is pointer is NULL and length is 0 then this is the end
+ * @return string pointer, if result is pointer is NULL and length is 0 then this is the end
  */
 strptr_t strset_get (void *strset, size_t index);
 
@@ -652,12 +652,12 @@ strptr_t strset_get (void *strset, size_t index);
  * @param outlen result string length
  * @param flags generate parameter flags
  * <ul>
- *      <li>#RAND_ALPHA result string contains only alphabetical characters
- *      <li>#RAND_ALNUM result contains alphabetical and numeric characters
- *      <li>#RAND_UPPER result is uppercase characters
- *      <li>#RAND_LOWER result is lowercase charactrs
+ *      <li>RAND_ALPHA result string contains only alphabetical characters
+ *      <li>RAND_ALNUM result contains alphabetical and numeric characters
+ *      <li>RAND_UPPER result is uppercase characters
+ *      <li>RAND_LOWER result is lowercase charactrs
  * </ul>
- * @retval 0 if success, -1 if invalid \b type.
+ * @return 0 if success, -1 if invalid \b type.
  */
 int strand (char *outbuf, size_t outlen, int flags);
 

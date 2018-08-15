@@ -73,21 +73,21 @@ void lst_free (list_t *list);
 /** @brief add item to head of list
  * @param list
  * @param x pointer to user data
- * @retval list item structure
+ * @return list item structure
  */
 list_item_t *lst_add (list_t *list, void *x);
 
 /** @brief add item to end of list
  * @param list
  * @param x pointer to user data
- * @retval list item structure
+ * @return list item structure
  */
 list_item_t *lst_adde (list_t *list, void *x);
 
 /** @brief add list to end of list
  * @param dst destination list
  * @param src source list
- * @retval list
+ * @return list
  */
 list_t *lst_addelst (list_t *dst, list_t *src);
 
@@ -102,8 +102,8 @@ list_item_t *lst_del (list_item_t *item);
  * @param userdata
  * @param flags
  * <ul>
- *      <li> #ENUM_CONTINUE
- *      <li> #ENUM_STOP_IF_BREAK
+ *      <li> ENUM_CONTINUE
+ *      <li> ENUM_STOP_IF_BREAK
  * </ul>
  */
 void lst_enum (list_t *list, list_item_h fn, void *userdata, int flags);
@@ -112,7 +112,7 @@ void lst_enum (list_t *list, list_item_h fn, void *userdata, int flags);
  * @param list
  * @param fn
  * @param userdata
- * @retval list item
+ * @return list item
  */
 list_item_t *lst_get (list_t *list, compare_h fn, void *userdata);
 
