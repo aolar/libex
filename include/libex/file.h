@@ -51,6 +51,8 @@ typedef void (*load_conf_h) (const char*, strptr_t*, strptr_t*);
  * @param fname configuration filename
  * @param fn callback function
  * @return 0 if success
+ * @section ex Example:
+ * @snippet test_file.c load conf
  */
 int load_conf (const char *fname, load_conf_h fn);
 
@@ -63,12 +65,15 @@ int load_conf (const char *fname, load_conf_h fn);
 int load_conf_exactly (const char *fname, load_conf_h fn);
 
 /** @def CONF_HANDLER(fn,key,val) */
+/** @brief start definition of handler */
 #define CONF_HANDLER ({ void fn (const char *fname, strptr_t *key, strptr_t *val) {
 
 /** @def CONF_HANDLER_END */
+/** @brief end definition of handler */
 #define CONF_HANDLER_END } fn; })
 
 /** @def ASSIGN_CONF_STR(VAL,STR) */
+/** @brief assign of found string value */
 #define ASSIGN_CONF_STR(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         if (VAL) strput(&VAL, val->ptr, val->len, 0); else VAL = mkstr(val->ptr, val->len, 8); \
@@ -77,6 +82,7 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
     }
 
 /** @def ASSIGN_CONF_INT(VAL,STR) */
+/** @brief assign of found integer value */
 #define ASSIGN_CONF_INT(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         char *str = strndup(val->ptr, val->len), *tail; \
@@ -86,6 +92,7 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
     }
 
 /** @def ASSIGN_CONF_DOUBLE(VAL,STR) */
+/** @brief assign of found double value */
 #define ASSIGN_CONF_DOUBLE(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         char *str = strndup(val->ptr, val->len), *tail; \
@@ -95,6 +102,7 @@ int load_conf_exactly (const char *fname, load_conf_h fn);
     }
 
 /** @def ASSIGN_CONF_BOOL(VAL,STR) */
+/** @brief assign of found boolean value */
 #define ASSIGN_CONF_BOOL(VAL,STR) \
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN(STR))) { \
         if (0 == cmpstr(val->ptr, val->len, CONST_STR_LEN("0"))) VAL = 0; else \

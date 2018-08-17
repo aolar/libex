@@ -40,9 +40,11 @@ void test_strepl () {
     STR_ADD_NULL(str);
     printf("%s\n", str->ptr);
     free(str);
+//! [strepl test]
     str = mkstr(CONST_STR_LEN("ssss ffff :x"), 16);
     char *p = strnchr(str->ptr, ':', str->len);
     strepl(&str, p, 2, CONST_STR_LEN("?"));
+//! [strepl test]
     STR_ADD_NULL(str);
     printf("%s\n", str->ptr);
     free(str);
@@ -168,13 +170,17 @@ void test_strnadd () {
 }
 
 void test_pad () {
+//! [strpad test]
     str_t *str = mkstr(CONST_STR_LEN("asdfghjk"), 16);
-    strpad(&str, 15, ' ', STR_LEFT | STR_MAYBE_UTF);
+    strpad(&str, 15, ' ', STR_LEFT);
+//! [strpad test]
     STR_ADD_NULL(str);
     printf("<%s>\n", str->ptr);
     free(str);
+//! [strpad test utf]
     str = mkstr(CONST_STR_LEN("фывапрол"), 16);
     strpad(&str, 15, ' ', STR_LEFT | STR_MAYBE_UTF);
+//! [strpad test utf]
     STR_ADD_NULL(str);
     printf("<%s>\n", str->ptr);
     free(str);

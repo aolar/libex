@@ -19,13 +19,13 @@ int fn_print (list_item_t *x, void *userdata) {
 }
 
 void test () {
-    list_t *lst = lalloc(fn_free);
+    list_t *lst = lst_alloc(fn_free);
     char **p = sa;
     while (*p) {
         str_t *str = stralloc(8, 8);
         strnadd(&str, *p, strlen(*p));
         str->ptr[str->len] = '\0';
-        ladd(lst, str);
+        lst_add(lst, str);
         ++p;
     }
     lst_enum(lst, fn_print, NULL, 0);
@@ -36,33 +36,33 @@ void test () {
         str_t *str = stralloc(8, 8);
         strnadd(&str, *p, strlen(*p));
         str->ptr[str->len] = '\0';
-        ladde(lst, str);
+        lst_adde(lst, str);
         ++p;
     }
-    lenum(lst, fn_print, NULL, 0);
-    lfree(lst);
+    lst_enum(lst, fn_print, NULL, 0);
+    lst_free(lst);
 }
 
 void test_url (const char *url) {
     if (!url || *url++ != '/') return;
-    list_t *ret = lalloc(fn_free);
+    list_t *ret = lst_alloc(fn_free);
     char *q;
     while ((q = strchr(url, '/'))) {
         size_t len = (uintptr_t)q - (uintptr_t)url;
         char *p = strndup(url, len);
-        ladde(ret, p);
+        lst_adde(ret, p);
         url += len;
         while (*url == '/') ++url;
     }
     if (*url)
-        ladde(ret, strdup(url));
-    lenum(ret, ({
+        lst_adde(ret, strdup(url));
+    lst_enum(ret, ({
         int fn (list_item_t *x, void*y) {
             printf("%s\n", (char*)x->ptr);
             return ENUM_CONTINUE;
         } fn;
     }), NULL, 0);
-    lfree(ret);
+    lst_free(ret);
 }
 
 int main (int argc, const char *argv[]) {

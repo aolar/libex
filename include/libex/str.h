@@ -1,6 +1,6 @@
 /**
  * @file str.h
- * @brief libex string functions
+ * @brief string functions
  */
 #ifndef __LIBEX_STR_H__
 #define __LIBEX_STR_H__
@@ -244,6 +244,10 @@ void strwlower (char *str, size_t str_len, locale_t locale);
  *      center padding
  * </ul>
  * @return 0 if success, -1 if error
+ * @section ex1 Example
+ * @snippet test_str.c strpad test
+ * @section ex2 Another example
+ * @snippet test_str.c strpad test utf
  */
 int strpad (str_t **str, size_t nlen, char filler, int flags);
 
@@ -354,6 +358,8 @@ int strntok (char **str, size_t *str_len, const char *sep, size_t sep_len, strpt
  * @param src_pos source string
  * @param src_len source string length
  * @return 0 if success, -1 if error.
+ * @section ex Example:
+ * @snippet test_str.c strepl test
  */
 int strepl (str_t **str, char *dst_pos, size_t dst_len, const char *src_pos, size_t src_len);
 

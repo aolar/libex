@@ -1,6 +1,6 @@
 /**
  * @file task.h
- * @brief libex process/task functions
+ * @brief process/task functions
  */
 #ifndef __LIBEX_TASK_H__
 #define __LIBEX_TASK_H__
@@ -74,7 +74,8 @@ void free_cmd (char **cmd);
  */
 void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
-//#define POOL_DEFAULT_SLOTS -1
+/** @brief default slot count. It is equals cpu core count */
+#define POOL_DEFAULT_SLOTS -1
 
 /** Opaque structure for slot */
 typedef struct slot slot_t;
