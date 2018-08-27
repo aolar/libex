@@ -5,6 +5,6 @@ Depends: libc6 (>= 2.14)
 Architecture: amd64
 Priority: optional
 Section: libdevel
-Installed-Size: 183
+Installed-Size: 2580
 Description: c lib
  c-functions for working with strings, lists, hash, json etc.
