@@ -14,56 +14,31 @@
 #include "list.h"
 #include "str.h"
 
-/**
- * threshold for hash increasing
- */
+/** threshold for hash increasing */
 #define INC_THRESHOLD 0.7
-
-/**
- * threshold for hash decreasing
- */
+/** threshold for hash decreasing */
 #define DEC_THRESHOLD 0.3
 
-/**
- * #MIN_HASH_SIZE minimal hash size
- */
+/** #MIN_HASH_SIZE minimal hash size */
 #define MIN_HASH_SIZE 1024
-/**
- * #MAX_HASH_SIZE maximal hash size
- */
+/** #MAX_HASH_SIZE maximal hash size */
 #define MAX_HASH_SIZE INT_MAX
 
-/**
- * @brief hash type
- */
+/** @brief hash type */
 typedef enum {
-    /**
-     * hash don't change the size
-     */
-    HASH_CONSTSIZE,
-    /**
-     * hash can change size
-     */
-    HASH_VARSIZE
+    HASH_CONSTSIZE,             /**< hash don't change the size */
+    HASH_VARSIZE                /**< hash can change size */
 } hash_type_t;
 
 #if __x86_64 || __ppc64__
-/**
- * maximum hash value
- */
+/** maximum hash value */
 #define MAX_HASH_KEY UINT_MAX
-/**
- * hash value type
- */
+/** hash value type */
 typedef uint64_t hash_key_t;
 #else
-/**
- * maximum hash value
- */
+/** maximum hash value */
 #define MAX_HASH_KEY ULONG_MAX
-/**
- * hash value type
- */
+/** hash value type */
 typedef uint32_t hash_key_t;
 #endif
 
@@ -83,38 +58,16 @@ hash_key_t hash_str (const char *s, size_t dummy);
  */
 hash_key_t hash_nstr (const char *s, size_t len);
 
-/**
- * A hash structure
- */
+/** A hash structure */
 typedef struct hash hash_t;
-/**
- * A hash item structure
- */
+/** A hash item structure */
 typedef struct {
-    /**
-     * key
-     */
-    void *key;
-    /**
-     * value
-     */
-    void *value;
-    /**
-     * key length
-     */
-    size_t key_len;
-    /**
-     * hash index
-     */
-    hash_key_t idx;
-    /**
-     * node item in hash bucket
-     */
-    list_item_t *h_node;
-    /**
-     * node item in history list
-     */
-    list_item_t *b_node;
+    void *key;                  /**< key */
+    void *value;                /**< value */
+    size_t key_len;             /**< key length */
+    hash_key_t idx;             /**< hash index */
+    list_item_t *h_node;        /**< node item in hash bucket */
+    list_item_t *b_node;        /**< node item in history list */
 } hash_item_t;
 
 /**
@@ -132,62 +85,21 @@ typedef hash_key_t (*calc_h) (void*, size_t);
  */
 typedef int (*hash_item_h) (hash_item_t*, void*);
 
-/**
- * @brief A hash structure
- */
+/** @brief A hash structure */
 struct hash {
-    /**
-     * hash size
-     */
-    hash_key_t size;
-    /**
-     * maximum hash size
-     */
-    hash_key_t max_size;
-    /**
-     * user size
-     */
-    hash_key_t used_size;
-    /**
-     * increment size
-     */
-    int32_t inc_size;
-    /**
-     * decrement size
-     */
-    int32_t dec_size;
-    /**
-     * type of hash
-     */
-    hash_type_t type;
-    /**
-     * hash
-     */
-    list_t **ptr;
-    /**
-     * history hash
-     */
-    list_t *hist;
-    /**
-     * key length
-     */
-    hash_key_t len;
-    /**
-     * callback for calculate hash
-     */
-    calc_h on_hash;
-    /**
-     * callback for compare keys
-     */
-    compare_h on_compare;
-    /**
-     * callback for copy key
-     */
-    copy_h on_copy;
-    /**
-     * callback for free element
-     */
-    free_h on_free;
+    hash_key_t size;            /**< hash size */
+    hash_key_t max_size;        /**< maximum hash size */
+    hash_key_t used_size;       /**< used size */
+    int32_t inc_size;           /**< increment size */
+    int32_t dec_size;           /**< decrement size */
+    hash_type_t type;           /**< type of hash */
+    list_t **ptr;               /**< hash */
+    list_t *hist;               /**< history hash */
+    hash_key_t len;             /**< key length */
+    calc_h on_hash;             /**< callback for calculate hash */
+    compare_h on_compare;       /**< callback for compare keys */
+    copy_h on_copy;             /**< callback for copy key */
+    free_h on_free;             /**< callback for free element */
 };
 
 /**

@@ -21,24 +21,15 @@
 #define MSG_INIT { .len = 0, .bufsize = 0, .chunk_size = 0, .ptr = NULL, .pc = NULL, .method = 0, .cookie = { .ptr = NULL, .len = 0 }, .code = 0 }
 /** @brief message structure */
 typedef struct {
-    /** message length */
-    uint32_t len;
-    /** message buffer size */
-    uint32_t bufsize;
-    /** chunk size */
-    uint32_t chunk_size;
-    /** pointer to message */
-    char *ptr;
-    /** current pointer for reading/writing message elements */
-    char *pc;
-    /** method identifier */
-    uint32_t method;
-    /** cookish */
-    strptr_t cookie;
-    /** error code */
-    uint32_t code;
-    /** error message for \ code, nothing if success */
-    strptr_t errmsg;
+    uint32_t len;               /**< message length */
+    uint32_t bufsize;           /**< message buffer size */
+    uint32_t chunk_size;        /**< chunk size */
+    char *ptr;                  /**< pointer to message */
+    char *pc;                   /**< current pointer for reading/writing message elements */
+    uint32_t method;            /**< method identifier */
+    strptr_t cookie;            /**< cookish */
+    uint32_t code;              /**< error code */
+    strptr_t errmsg;            /**< error message for \ code, nothing if success */
 } msgbuf_t;
 
 /** callback for list appending */

@@ -88,54 +88,38 @@
 
 /** @brief A string structure */
 typedef struct {
-    /** string length */
-    size_t len;
-    /** buffer size */
-    size_t bufsize;
-    /** chunk size */
-    size_t chunk_size;
-    /** string pointer */
-    char ptr [0];
+    size_t len;                 /**< string length */
+    size_t bufsize;             /**< buffer size */
+    size_t chunk_size;          /**< chunk size */
+    char ptr [0];               /**< string */
 } str_t;
 
 /** @brief A wide string structure */
 typedef struct {
-    /** string length */
-    size_t len;
-    /** buffer size */
-    size_t bufsize;
-    /** chunk size */
-    size_t chunk_size;
-    /** string pointer */
-    wchar_t ptr [0];
+    size_t len;                 /**< string length */
+    size_t bufsize;             /**< buffer size */
+    size_t chunk_size;          /**< chunk size */
+    wchar_t ptr [0];            /**< wide string */
 } wstr_t;
 
 /** @brief A string pointer structure */
 typedef struct {
-    /** string length */
-    size_t len;
-    /** string pointer */
-    char *ptr;
+    size_t len;                 /**< string length */
+    char *ptr;                  /**< string pointer */
 } strptr_t;
 
 /** @brief A wicd string pointer structure */
 typedef struct {
-    /** string length */
-    size_t len;
-    /** string pointer */
-    wchar_t *ptr;
+    size_t len;                 /**< string length */
+    wchar_t *ptr;               /**< string pointer */
 } wstrptr_t;
 
 /** @brief A string buffer structure */
 typedef struct {
-    /** string length */
-    size_t len;
-    /** buffer size */
-    size_t bufsize;
-    /** chunk size */
-    size_t chunk_size;
-    /** string pointer */
-    char *ptr;
+    size_t len;                 /**< string length */
+    size_t bufsize;             /**< buffer size */
+    size_t chunk_size;          /**< chunk size */
+    char *ptr;                  /**< string pointer */
 } strbuf_t;
 
 /** @brief text unicode */

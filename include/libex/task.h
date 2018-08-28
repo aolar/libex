@@ -24,12 +24,9 @@
 
 /** @brief process exist status */
 typedef enum {
-    /** child process terminated normally */
-    RUN_EXITED,
-    /** child process was stopped by a signal */
-    RUN_STOPPED,
-    /** child process was terminated by a signal */
-    RUN_SIGNALED
+    RUN_EXITED,         /**< child process terminated normally */
+    RUN_STOPPED,        /**< child process was stopped by a signal */
+    RUN_SIGNALED        /**< child process was terminated by a signal */
 } run_exit_t;
 
 /** wait for state changes */
@@ -38,20 +35,14 @@ typedef enum {
 /** @brief process structure */
 typedef struct {
     #ifndef __WIN32__
-    /** process identifier */
-    pid_t pid;
-    /** exit code */
-    int exit_code;
+    pid_t pid;                  /**< process identifier */
+    int exit_code;              /**< exit code */
     #else
-    /** process information */
-    PROCESS_INFORMATION pi;
-    /** exit code */
-    DWORD exit_code;
+    PROCESS_INFORMATION pi;     /**< process information */
+    DWORD exit_code;            /**< exit code */
     #endif
-    /** command string */
-    strptr_t cmd;
-    /** exit status */
-    run_exit_t run_exit;
+    strptr_t cmd;               /**< command string */
+    run_exit_t run_exit;        /**< exit status */
 } run_t;
 
 /** @brief create command string array
@@ -104,81 +95,50 @@ typedef void (*pool_destroy_h) (void*);
 
 /** @brief task pool parameters */
 typedef enum {
-    /** set \b pool_msg_h callback */
-    POOL_MSG,
-    /** set \b pool_destroy_h callback */
-    POOL_FREEMSG,
-    /** set slot count */
-    POOL_MAXSLOTS,
-    /** set timneout between task executing */
-    POOL_TIMEOUT,
-    /** set livingtime for slot, if during this time message not received then slot is terminated */
-    POOL_LIVINGTIME,
-    /** callback for create slot */
-    POOL_CREATESLOT,
-    /** callback for destroy slot */
-    POOL_DESTROYSLOT //,
+    POOL_MSG,                           /**< set \b pool_msg_h callback */
+    POOL_FREEMSG,                       /**< set \b pool_destroy_h callback */
+    POOL_MAXSLOTS,                      /**< set slot count */
+    POOL_TIMEOUT,                       /**< set timneout between task executing */
+    POOL_LIVINGTIME,                    /**< set livingtime for slot, if during this time message not received then slot is terminated */
+    POOL_CREATESLOT,                    /**< callback for create slot */
+    POOL_DESTROYSLOT                    /**< callback for destroy slot */
     //POOL_INITDATA
 } pool_opt_t;
 
 /** @brief message structure */
 typedef struct {
-    /** input data */
-    void *in_data;
-    /** output data */
-    void **out_data;
-    /** callback handler */
-    pool_msg_h on_msg;
-    /** mutex */
-    pthread_mutex_t *mutex;
-    /** condition */
-    pthread_cond_t *cond;
+    void *in_data;                      /**< input data */
+    void **out_data;                    /**< output data */
+    pool_msg_h on_msg;                  /**< callback handler */
+    pthread_mutex_t *mutex;             /**< mutex */
+    pthread_cond_t *cond;               /**< condition */
 } msg_t;
 
 /** @brief pool structure */
 typedef struct {
-    /** pool is alive */
-    int is_alive;
-    /** locker */
-    pthread_mutex_t locker;
-    /** condition attribute */
-    pthread_condattr_t cond_attr;
-    /** condition */
-    pthread_cond_t cond;
-    /** queue list */
-    list_t *queue;
-    /** slot count */
-    long max_slots;
-    /** slots */
-    list_t *slots;
-    /** pool callback message handler */
-    pool_msg_h on_msg;
-    /** callback for free message */
-    pool_destroy_h on_freemsg;
-    /** callback for create slot */
-    pool_create_h on_create_slot;
-    /** callback for destroy slot */
-    pool_destroy_h on_destroy_slot;
-    /** thread */
-    pthread_t th;
-    /** timeout */
-    long timeout;
-    /** living time */
-    long livingtime;
+    int is_alive;                       /**< pool is alive */
+    pthread_mutex_t locker;             /**< locker */
+    pthread_condattr_t cond_attr;       /**< condition attribute */
+    pthread_cond_t cond;                /**< condition */
+    list_t *queue;                      /**< queue list */
+    long max_slots;                     /**< slot count */
+    list_t *slots;                      /**< slots */
+    pool_msg_h on_msg;                  /**< pool callback message handler */
+    pool_destroy_h on_freemsg;          /**< callback for free message */
+    pool_create_h on_create_slot;       /**< callback for create slot */
+    pool_destroy_h on_destroy_slot;     /**< callback for destroy slot */
+    pthread_t th;                       /**< thread */
+    long timeout;                       /**< timeout */
+    long livingtime;                    /**< living time */
 } pool_t;
 
 /** @brief slot structure */
 struct slot {
-    /** slot is alove */
-    int is_alive;
-    /** parent pool */
-    pool_t *pool;
-    /** thread */
-    pthread_t th;
-    /** item in queue */
-    list_item_t *node;
-    /** user data */
-    void *data;
+    int is_alive;                       /**< slot is alove */
+    pool_t *pool;                       /**< parent pool */
+    pthread_t th;                       /**< thread */
+    list_item_t *node;                  /**< item in queue */
+    void *data;                         /**< user data */
 };
 
 /** @brief set integer option

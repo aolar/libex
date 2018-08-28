@@ -32,18 +32,12 @@
 
 /** @brief net service flags */
 typedef enum {
-    /** thread count */
-    NETSRV_THREADS,
-    /** port or service name */
-    NETSRV_SERVICE,
-    /** callback function before connecting */
-    NETSRV_TRYCONNECT,
-    /** callback function after connecting */
-    NETSRV_CONNECT,
-    /** callback function after receive data */
-    NETSRV_EVENT,
-    /** callback function after disconnect */
-    NETSRV_DISCONNECT
+    NETSRV_THREADS,             /**< thread count */
+    NETSRV_SERVICE,             /**< port or service name */
+    NETSRV_TRYCONNECT,          /**< callback function before connecting */
+    NETSRV_CONNECT,             /**< callback function after connecting */
+    NETSRV_EVENT,               /**< callback function after receive data */
+    NETSRV_DISCONNECT           /**< callback function after disconnect */
 } netsrv_opt_t;
 
 /** @brief callback function for #NETSRV_TRYCONNECT
@@ -70,22 +64,16 @@ typedef struct net_daemon net_daemon_t;
 
 /** @brief net service thread info */
 typedef struct {
-    /** is main thread */
-    int is_main;
-    /** process identifier */
-    pthread_t pid;
-    /** connection count */
-    size_t conn_count;
-    /** waited connection count */
-    size_t waited_conn_count;
+    int is_main;                        /**< is main thread */
+    pthread_t pid;                      /**< process identifier */
+    size_t conn_count;                  /**< connection count */
+    size_t waited_conn_count;           /**< waited connection count */
 } netsrv_info_t;
 
 /** @brief daemon structure */
 typedef struct {
-    /** thread count */
-    int thread_count;
-    /** structure for each thread */
-    netsrv_info_t srv_info [0];
+    int thread_count;                   /**< thread count */
+    netsrv_info_t srv_info [0];         /**< structure for each thread */
 } net_daemon_info_t;
 
 /** @brief initialize daemon

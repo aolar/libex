@@ -13,133 +13,60 @@
 #include "list.h"
 #include "tree.h"
 
-/**
- * any json type
- */
+/** any json type */
 #define JSON_ANY       -1
-/**
- * object type
- */
+/** object type */
 #define JSON_OBJECT     1
-/**
- * array type
- */
+/** array type */
 #define JSON_ARRAY      2
-/**
- * string type
- */
+/** string type */
 #define JSON_STRING     3
-/**
- * integer type
- */
+/** integer type */
 #define JSON_INTEGER    4
-/**
- * double type
- */
+/** double type */
 #define JSON_DOUBLE     5
-/**
- * boolean type true value
- */
+/** boolean type true value */
 #define JSON_TRUE       6
-/**
- * boolean type false value
- */
+/** boolean type false value */
 #define JSON_FALSE      7
-/**
- * null value
- */
+/** null value */
 #define JSON_NULL       8
 
-/**
- * @brief object type kept as rb tree
- */
+/** @brief object type kept as rb tree */
 typedef rbtree_t json_object_t;
-/**
- * @brief array type kept as list
- */
+/** @brief array type kept as list */
 typedef list_t json_array_t;
-/**
- * @brief json item structure
- */
+/** @brief json item structure */
 typedef struct json_item {
-    /**
-     * key name
-     */
-    strptr_t key;
-    /**
-     * item type
-     */
-    int type;
-    /**
-     * data
-     */
+    strptr_t key;               /**< key name */
+    int type;                   /**< item type */
     union {
-        /**
-         * string data
-         */
-        strptr_t s;
-        /**
-         * integer data
-         */
-        int64_t i;
-        /**
-         * double data
-         */
-        long double d;
-        /**
-         * object data
-         */
-        json_object_t *o;
-        /**
-         * array data
-         */
-        json_array_t *a;
+        strptr_t s;             /**< string data */
+        int64_t i;              /**< integer data */
+        long double d;          /**< double data */
+        json_object_t *o;       /**< object data */
+        json_array_t *a;        /**< array data */
     } data;
 } json_item_t;
 
-/**
- * @brief json structure
- */
+/** @brief json structure */
 typedef struct {
-    /**
-     * json as string
-     */
-    char *text;
-    /**
-     * current pointer in \b text, used for parsing
-     */
-    char *text_ptr;
-    /**
-     * length of \b text
-     */
-    size_t text_len;
-    /**
-     * root item type
-     */
-    int type;
-    /**
-     * root item
-     */
+    char *text;                 /**< json as string */
+    char *text_ptr;             /**< current pointer in \b text, used for parsing */
+    size_t text_len;            /**< length of \b text */
+    int type;                   /**< root item type */
     union {
-        /**
-         * root as object
-         */
-        json_object_t *o;
-        /**
-         * root as array
-         */
-        json_array_t *a;
+        json_object_t *o;       /**< root as object */
+        json_array_t *a;        /**< root as array */
     } data;
 } json_t;
 
-/**
- * tests name of json item
+/** @def JSON_ISNAME(j,S)
+ * @brief tests name of json item
  */
 #define JSON_ISNAME(j,S) 0 == cmpstr(j->key.ptr, j->key.len, CONST_STR_LEN(S))
 
-/**
- * callback uses for enumeration of json
- */
+/** @brief callback uses for enumeration of json */
 typedef int (*json_item_h) (json_item_t*, void*);
 
 /**
@@ -214,40 +141,23 @@ static inline char *json_str(json_item_t *j) { return strndup(j->data.s.ptr, j->
  */
 void json_free (json_t *j);
 
-/**
- * json item not inserted
- */
+/** json item not inserted */
 #define JSON_NOT_INSERTED 0
-/**
- * json item inserted
- */
+/** json item inserted */
 #define JSON_INSERTED 1
 
-/**
- * @brief callback function for inserting list item into json
- */
+/** @brief callback function for inserting list item into json */
 typedef int (*json_list_item_h) (list_item_t*, strbuf_t*, void*);
-/**
- * @brief callback function for inserting tree item into json
- */
+/** @brief callback function for inserting tree item into json */
 typedef int (*json_tree_item_h) (tree_item_t*, strbuf_t*, void*);
 
-/**
- * flag for inserting the current item
- */
+/** flag for inserting the current item */
 #define JSON_NEXT 0
-/**
- * flags for inserting the end item
- */
+/** flags for inserting the end item */
 #define JSON_END 1
-/**
- * flags for inserting current element into array or object
- */
+/** flags for inserting current element into array or object */
 #define JSON_ITEM JSON_END
-
-/**
- * default double precision
- */
+/** default double precision */
 #define JSON_DOUBLE_PRECISION 6
 
 /**
@@ -547,136 +457,61 @@ static inline void json_begin_array (strbuf_t *buf) { json_open_array(buf, CONST
  */
 static inline void json_end_array (strbuf_t *buf) { json_close_array(buf, JSON_END); }
 
-/**
- * json rpc ok
- */
+/** json rpc ok */
 #define JSONRPC_OK 0
-/**
- * Invalid JSON was received by the server.
- * An error occurred on the server while parsing the JSON text.
- */
+/** Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text. */
 #define JSONRPC_PARSE_ERROR -32700
-/**
- * The JSON sent is not a valid Request object.
- */
+/** The JSON sent is not a valid Request object. */
 #define JSONRPC_INVALID_REQUEST -32600
-/**
- * The method does not exist / is not available.
- */
+/** The method does not exist / is not available. */
 #define JSONRPC_METHOD_NOT_FOUND -32601
-/**
- * Invalid method parameter(s).
- */
+/** Invalid method parameter(s). */
 #define JSONRPC_INVALID_PARAMS -32602
-/**
- * Internal JSON-RPC error.
- */
+/** Internal JSON-RPC error. */
 #define JSONRPC_INTERNAL_ERROR -32603
-/**
- * Reserved for implementation-defined server-errors.
- */
+/** Reserved for implementation-defined server-errors. */
 #define JSONRPC_ERROR -32000
 
-/**
- * integer value json rpc identifier
- */
+/** integer value json rpc identifier */
 #define JSONRPC_ID_INT(X) X, -1
-/**
- * null value json rpc identifier
- */
+/** null value json rpc identifier */
 #define JSONRPC_ID_NULL 0, 0
-/**
- * string value json rpc identifier
- */
+/** string value json rpc identifier */
 #define JSONRPC_ID_STR(X) CONST_STR_LEN(X)
 
-/**
- * json rpc versions
- */
+/** json rpc versions */
 typedef enum {
-    /**
-     * unknown version
-     */
-    JSONRPC_VNONE,
-    /**
-     * 1.0 version
-     */
-    JSONRPC_V10,
-    /**
-     * 2.0 version
-     */
-    JSONRPC_V20
+    JSONRPC_VNONE,              /**< unknown version */
+    JSONRPC_V10,                /**< 1.0 version */
+    JSONRPC_V20                 /**< 2.0 version */
 } jsonrpc_ver_t;
 
-/**
- * @brief json rp structure
- */
+/** @brief json rp structure */
 typedef struct {
-    /**
-     * version
-     */
-    jsonrpc_ver_t ver;
-    /**
-     * json item identifier
-     */
-    json_item_t *id;
-    /**
-     * method
-     */
-    strptr_t method;
-    /**
-     * json item parameters
-     */
-    json_item_t *params;
-    /**
-     * json item result
-     */
-    json_item_t *result;
-    /**
-     * error code
-     */
-    int64_t error_code;
-    /**
-     * error message
-     */
-    strptr_t error_message;
-    /**
-     * json item error data
-     */
-    json_item_t *error_data;
-    /**
-     * json rpc object
-     */
-    json_t *json;
+    jsonrpc_ver_t ver;          /**< version */
+    json_item_t *id;            /**< json item identifier */
+    strptr_t method;            /**< method */
+    json_item_t *params;        /**< json item parameters */
+    json_item_t *result;        /**< json item result */
+    int64_t error_code;         /**< error code */
+    strptr_t error_message;     /**< error message */
+    json_item_t *error_data;    /**< json item error data */
+    json_t *json;               /**< json rpc object */
 } jsonrpc_t;
 
-/**
- * @brief json error enumerator
- */
+/** @brief json error enumerator */
 typedef struct {
-    /**
-     * owner
-     */
-    jsonrpc_t *jsonrpc;
-    /**
-     * error code
-     */
-    int errcode;
+    jsonrpc_t *jsonrpc;         /**< owner */
+    int errcode;                /**< error code */
 } jsonrpc_enum_t;
 
-/**
- * callback function for json rpc parser
- */
+/** callback function for json rpc parser */
 typedef json_t *(*json_parse_h) (const char*, size_t);
 
-/**
- * internal function for parsing request
- */
+/** internal function for parsing request */
 int jsonrpc_parse_request_intr (const char *json_str, size_t json_str_len, json_parse_h on_parse, jsonrpc_t *jsonrpc);
 
-/**
- * internal function for parsing response
- */
+/** internal function for parsing response */
 int jsonrpc_parse_response_intr (const char *json_str, size_t json_str_len, json_parse_h on_parse, jsonrpc_t *jsonrpc);
 
 /**
@@ -795,23 +630,13 @@ void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message
  */
 void jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len);
 
-/**
- * callback function handler
- */
+/** callback function handler */
 typedef void (*jsonrpc_method_h) (strbuf_t *buf, json_item_t **params, size_t params_len, intptr_t id, int id_len);
 
-/**
- * @brief method array
- */
+/** @brief method array */
 typedef struct {
-    /**
-     * method name
-     */
-    strptr_t method;
-    /**
-     * method handler
-     */
-    jsonrpc_method_h handle;
+    strptr_t method;            /**< method name */
+    jsonrpc_method_h handle;    /**< method handler */
 } jsonrpc_method_t;
 
 /**

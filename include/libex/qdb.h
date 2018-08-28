@@ -21,12 +21,9 @@
 
 /** @brief A queue dartabase structure */
 typedef struct {
-    /** head */
-    off_t head;
-    /** tail */
-    off_t tail;
-    /** element size */
-    size_t size;
+    off_t head;         /**< head */
+    off_t tail;         /**< tail */
+    size_t size;        /**< element size */
 } qdb_t;
 
 /** @brief return queue structure

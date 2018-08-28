@@ -26,14 +26,10 @@
 typedef struct list list_t;
 /** list item structure */
 typedef struct list_item {
-    /** data pointer */
-    void *ptr;
-    /** next item */
-    struct list_item *next;
-    /** previous item */
-    struct list_item *prev;
-    /** list */
-    list_t *list;
+    void *ptr;                  /**< data pointer */
+    struct list_item *next;     /**< next item */
+    struct list_item *prev;     /**< previous item */
+    list_t *list;               /**< list */
 } list_item_t;
 
 /** callback for compare two items */
@@ -47,12 +43,9 @@ typedef int (*list_item_h) (list_item_t*, void*);
 
 /** @brief list structure */
 struct list {
-    /** items count */
-    size_t len;
-    /** head */
-    struct list_item *head;
-    /** callback for free item data */
-    free_h on_free;
+    size_t len;                 /**< items count */
+    struct list_item *head;     /**< head */
+    free_h on_free;             /**< callback for free item data */
 };
 
 /** @brief create list
@@ -65,7 +58,7 @@ list_t *lst_alloc (free_h on_free);
  */
 void lst_clear (list_t *list);
 
-/** free list
+/** @brief free list
  * @param list
  */
 void lst_free (list_t *list);
