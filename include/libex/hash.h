@@ -187,6 +187,7 @@ double hash_param_filling (hash_t *hash);
  */
 double hash_param_conflict (hash_t *hash);
 
+/** helper for iterate over all items of hash, begin of iterate */
 #define HASH_FOREACH(key, value, hash) { \
     list_item_t *__x__ = hash->hist->head; \
     if (__x__) { \
@@ -194,6 +195,7 @@ double hash_param_conflict (hash_t *hash);
             hash_item_t *__hash_item__ = (hash_item_t*)__x__->ptr; \
             void *key = __hash_item__->key, *value = __hash_item__->value;
 
+/** helper for iterate over all items of hash, end of iterate */
 #define HASH_END(hash) \
         __x__ = __x__->next; \
     } while (__x__ != hash->hist->head); } }

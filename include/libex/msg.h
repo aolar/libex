@@ -209,4 +209,14 @@ static inline int msg_ok (msgbuf_t *msg) { return msg_create_response(msg, 0, 8,
  */
 static inline void msg_destroy (msgbuf_t *msg) { if (msg->ptr) { free(msg->ptr); memset(msg, 0, sizeof(msgbuf_t)); } };
 
+/** helper for iterate over all items of message part, begin of iterate */
+#define MSG_FOREACH(msg) \
+    uint32_t __count__; \
+    if (0 == msg_getui32(msg, &count)) \
+        for (uint32_t i = 0; i < count; ++i) {
+
+/** helper for iterate over all items of message part, end of iterate */
+#define MSG_END } }
+
+
 #endif // __LIBEX_MSG_H__
