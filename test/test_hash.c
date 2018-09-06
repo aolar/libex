@@ -24,7 +24,7 @@ static void *int_copy (void *key) {
 }
 
 static void int_free (void *key, void *value) {
-//    free(value);
+    free(value);
 }
 
 // char key
@@ -62,7 +62,7 @@ void test_hash_1 () {
     printf("enum: " SIZE_FMT "\n", hash1->len);
     hash_enum(hash1, ({
         int fn (hash_item_t *h, void *dummy) {
-            printf("%d %d\n", d->f1, d->f2);
+            printf("++ %d %d\n", d->f1, d->f2);
             return ENUM_CONTINUE;
         } fn;
     }), NULL, 0);
@@ -75,10 +75,14 @@ void test_hash_1 () {
     printf("enum: " SIZE_FMT "\n", hash1->len);
     hash_enum(hash1, ({
         int fn (hash_item_t *h, void *dummy) {
-            printf("%d %d\n", d->f1, d->f2);
+            printf("-- %d %d\n", d->f1, d->f2);
             return ENUM_CONTINUE;
         } fn;
     }), NULL, 0);
+    printf("foreach\n");
+    HASH_FOREACH(key, value, hash1)
+        printf("- %ld %d\n", (intptr_t)key, ((data_t*)value)->f2);
+    HASH_END(hash1);
     h = hash_get(hash1, (void*)5, 0);
     d = (data_t*)h->value;
     printf("get 5: %d%d\n", d->f1, d->f2);
@@ -132,7 +136,10 @@ void test_hash_4 () {
         if (ERANGE == errno)
             printf("clear. size: %ld\n", h->size);
     }
-    hash_enum(h, on_intenum, NULL, 0);
+    //hash_enum(h, on_intenum, NULL, 0);
+    HASH_FOREACH(key, value, h)
+        printf("%ld: %ld\n", (intptr_t)key, (intptr_t)value);
+    HASH_END(h)
     hash_free(h);
 }
 

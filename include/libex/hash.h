@@ -187,4 +187,16 @@ double hash_param_filling (hash_t *hash);
  */
 double hash_param_conflict (hash_t *hash);
 
+#define HASH_FOREACH(key, value, hash) { \
+    list_item_t *__x__ = hash->hist->head; \
+    if (__x__) { \
+        do { \
+            hash_item_t *__hash_item__ = (hash_item_t*)__x__->ptr; \
+            void *key = __hash_item__->key, *value = __hash_item__->value;
+
+#define HASH_END(hash) \
+        __x__ = __x__->next; \
+    } while (__x__ != hash->hist->head); } }
+
+
 #endif // __LIBEX_HASH_H__

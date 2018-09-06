@@ -118,4 +118,17 @@ static inline void on_default_free_item (void *x, void *y) {
     if (y) free(y);
 }
 
+/** helper for iterate over all items of list, begin of iterate */
+#define LST_FOREACH(value, lst) { \
+    list_item_t *__x__ = lst->head; \
+    if (__x__) { \
+        do { \
+            void *value = __x__->ptr; \
+
+/** helper for iterate over all items of list, end of iterate */
+#define LST_END(lst) \
+        __x__ = __x__->next; \
+    } while (__x__ != lst->head); } }
+
+
 #endif

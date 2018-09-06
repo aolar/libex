@@ -29,6 +29,10 @@ void test () {
         ++p;
     }
     lst_enum(lst, fn_print, NULL, 0);
+    printf("foreach\n");
+    LST_FOREACH(value, lst)
+        printf("- %s\n", ((str_t*)value)->ptr);
+    LST_END(lst)
     lst_clear(lst);
     printf("\n");
     p = sa;

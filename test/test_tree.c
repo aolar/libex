@@ -34,6 +34,10 @@ static void test_tree1 () {
             return ENUM_CONTINUE;
         } fn;
     }), NULL, 0);
+    printf("foreach\n");
+    RBTREE_FOREACH(key, value, t1)
+        printf("- " SIZE_FMT ": %s\n", (intptr_t)key, (char*)value);
+    RBTREE_END(t1)
     printf("-> get\n");
     if ((n = rbtree_get(t1, (void*)2)))
         printf("value: %s\n", (char*)n->value);

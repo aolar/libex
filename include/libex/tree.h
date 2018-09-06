@@ -112,4 +112,19 @@ list_t *rbtree_to_list (rbtree_t *tree);
  */
 void rbtree_free (rbtree_t *tree);
 
+/** helper for iterate over all items of RB tree, begin of iterate */
+#define RBTREE_FOREACH(key, value, tree) { \
+    tree_item_t *nil = tree->nil; \
+    void enum_node (tree_item_t *x) { \
+        if (x->left != nil) enum_node(x->left); \
+        void *key = x->key, *value = x->value; \
+
+/** helper for iterate over all items of RB tree, end of iterate */
+#define RBTREE_END(tree) \
+        if (x->right != nil) enum_node(x->right); \
+    } \
+    if (tree->root != nil && tree->root->left != nil) \
+        enum_node(tree->root->left); \
+    }
+
 #endif //  __LIBEX_TREE_H__
