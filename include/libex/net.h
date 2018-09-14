@@ -37,6 +37,7 @@ typedef enum {
     NETSRV_TRYCONNECT,          /**< callback function before connecting */
     NETSRV_CONNECT,             /**< callback function after connecting */
     NETSRV_EVENT,               /**< callback function after receive data */
+    NETSRV_IDLE,                /**< callback function for no data */
     NETSRV_DISCONNECT           /**< callback function after disconnect */
 } netsrv_opt_t;
 

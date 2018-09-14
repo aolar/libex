@@ -22,6 +22,7 @@ struct net_daemon {
     srv_try_connect_h on_try_connect;
     srv_connect_h on_connect;
     srv_event_h on_event;
+    srv_event_h on_idle;
     srv_disconnect_h on_disconnect;
     pthread_barrier_t barrier;
 };
@@ -136,6 +137,23 @@ static void netconn_free (netconn_t *conn) {
     pthread_rwlock_unlock(&srv->locker);
 }
 
+static netsrv_t *select_netsrv (net_daemon_t *daemon) {
+    netsrv_t *srvs = daemon->srvs, *srv;
+    size_t m = srvs->conns->len;
+    if (0 == m)
+        return srvs;
+    srv = srvs++;
+    for (int i = 1; i < daemon->max_threads; ++i) {
+        size_t l = srvs->conns->len;
+        if (l < m) {
+            srv = srvs;
+            m = l;
+        }
+        srvs++;
+    }
+    return srv;
+}
+
 static int netconn_new (netsrv_t *srv) {
     struct sockaddr in_addr;
     socklen_t in_len = sizeof in_addr;
@@ -150,7 +168,7 @@ static int netconn_new (netsrv_t *srv) {
             goto err;
     event.data.ptr = conn = netconn_create(in_fd, &in_addr);
     event.events = EPOLLIN | EPOLLET;
-    netsrv_t *srv_io = conn->srv = &daemon->srvs[daemon->srv_id == daemon->max_threads - 1 ? 0 : daemon->srv_id++];
+    netsrv_t *srv_io = select_netsrv(daemon);  //conn->srv = &daemon->srvs[daemon->srv_id == daemon->max_threads - 1 ? 0 : daemon->srv_id++];
     pthread_rwlock_wrlock(&srv_io->locker);
     conn->li = lst_adde(srv_io->conns, conn);
     pthread_rwlock_unlock(&srv_io->locker);
@@ -377,7 +395,10 @@ inline void netsrv_setopt_connect (net_daemon_t *daemon, netsrv_opt_t opt, srv_c
 }
 
 inline void netsrv_setopt_event (net_daemon_t *daemon, netsrv_opt_t opt, srv_event_h x) {
-    daemon->on_event = x;
+    if (NETSRV_EVENT == opt)
+        daemon->on_event = x;
+    else
+        daemon->on_idle = x;
 }
 
 inline void netsrv_setopt_disconnect (net_daemon_t *daemon, netsrv_opt_t opt, srv_disconnect_h x) {
