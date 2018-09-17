@@ -7,9 +7,8 @@ static int on_try_connect(struct sockaddr_in *in_addr, int fd) {
     return in_addr->sin_addr.s_addr == listen_addr ? NETSRV_OK : NETSRV_DONE;
 }
 
-static void *on_connect (int fd) {
+static void on_connect (int fd, void **data) {
     printf("connected: %d\n", fd);
-    return NULL;
 }
 
 static int on_disconnect (int fd, void *data) {

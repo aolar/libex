@@ -37,7 +37,6 @@ typedef enum {
     NETSRV_TRYCONNECT,          /**< callback function before connecting */
     NETSRV_CONNECT,             /**< callback function after connecting */
     NETSRV_EVENT,               /**< callback function after receive data */
-    NETSRV_IDLE,                /**< callback function for no data */
     NETSRV_DISCONNECT           /**< callback function after disconnect */
 } netsrv_opt_t;
 
@@ -49,7 +48,7 @@ typedef int (*srv_try_connect_h) (struct sockaddr_in*, int);
 /** callback function for #NETSRV_CONNECT
  * @param 1-st socket
  */
-typedef void* (*srv_connect_h) (int);
+typedef void (*srv_connect_h) (int, void**);
 /** @brief function for #NETSRV_EVENT
  * @param 1-st buffer with received data
  * @param 2-nd user data
@@ -96,28 +95,28 @@ extern void netsrv_setopt_int (net_daemon_t *daemon, netsrv_opt_t opt, int x);
  */
 extern void netsrv_setopt_str (net_daemon_t *daemon, netsrv_opt_t opt, const char *x);
 
-/** @brief set integer callback function for daemon
+/** @brief set trying to connect callback function for daemon
  * @param daemon
  * @param opt option
  * @param x paramemter
  */
 extern void netsrv_setopt_try_connect (net_daemon_t *daemon, netsrv_opt_t opt, srv_try_connect_h x);
 
-/** @brief set integer callback function for daemon
+/** @brief set connecting callback function for daemon
  * @param daemon
  * @param opt option
  * @param x paramemter
  */
 extern void netsrv_setopt_connect (net_daemon_t *daemon, netsrv_opt_t opt, srv_connect_h x);
 
-/** @brief set integer callback function for daemon
+/** @brief set event callback function for daemon
  * @param daemon
  * @param opt option
  * @param x paramemter
  */
 extern void netsrv_setopt_event (net_daemon_t *daemon, netsrv_opt_t opt, srv_event_h x);
 
-/** @brief set integer callback function for daemon
+/** @brief set disconnecting callback function for daemon
  * @param daemon
  * @param opt option
  * @param x paramemter

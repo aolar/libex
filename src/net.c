@@ -22,7 +22,6 @@ struct net_daemon {
     srv_try_connect_h on_try_connect;
     srv_connect_h on_connect;
     srv_event_h on_event;
-    srv_event_h on_idle;
     srv_disconnect_h on_disconnect;
     pthread_barrier_t barrier;
 };
@@ -175,7 +174,7 @@ static int netconn_new (netsrv_t *srv) {
     if (-1 == epoll_ctl(srv_io->efd, EPOLL_CTL_ADD, in_fd, &event))
         goto err;
     if (daemon->on_connect)
-        conn->data = daemon->on_connect(conn->fd);
+        daemon->on_connect(conn->fd, &conn->data);
     return 0;
 err:
     if (in_fd > 0)
@@ -395,10 +394,7 @@ inline void netsrv_setopt_connect (net_daemon_t *daemon, netsrv_opt_t opt, srv_c
 }
 
 inline void netsrv_setopt_event (net_daemon_t *daemon, netsrv_opt_t opt, srv_event_h x) {
-    if (NETSRV_EVENT == opt)
-        daemon->on_event = x;
-    else
-        daemon->on_idle = x;
+    daemon->on_event = x;
 }
 
 inline void netsrv_setopt_disconnect (net_daemon_t *daemon, netsrv_opt_t opt, srv_disconnect_h x) {
