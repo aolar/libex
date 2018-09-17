@@ -2,46 +2,6 @@
 
 #define CONN_BUF_SIZE 512
 
-typedef struct netsrv netsrv_t;
-typedef struct {
-    int fd;
-    struct in_addr addr;
-    list_item_t *li;
-    list_item_t *li_wait;
-    strbuf_t buf;
-    void *data;
-    uint32_t state;
-    netsrv_t *srv;
-} netconn_t;
-
-struct net_daemon {
-    netsrv_t *srvs;
-    int max_threads;
-    int srv_id;
-    char *service;
-    srv_try_connect_h on_try_connect;
-    srv_connect_h on_connect;
-    srv_event_h on_event;
-    srv_disconnect_h on_disconnect;
-    pthread_barrier_t barrier;
-};
-
-struct netsrv {
-    net_daemon_t *daemon;
-    int efd;
-    int sfd;
-    struct epoll_event *events;
-    struct epoll_event event;
-    netconn_t conn;
-    int is_active;
-    list_t *conns;
-    list_t *waited_conns;
-    int max_events;
-    int status;
-    pthread_t pid;
-    pthread_rwlock_t locker;
-};
-
 static int atoport (const char *service, const char *proto) {
     struct servent *servent;
     int port;
@@ -271,7 +231,7 @@ static int netsrv_wait (netsrv_t *srv) {
         }
         return epoll_wait(srv->efd, srv->events, srv->max_events, timeout);
     }
-    return epoll_wait(srv->efd, srv->events, srv->max_events, -1);
+    return epoll_wait(srv->efd, srv->events, srv->max_events, srv->daemon->ms_timeout);
 }
 
 static void *some_netsrv_start (netsrv_t *srv) {
@@ -374,11 +334,16 @@ net_daemon_info_t *get_daemon_info (net_daemon_t *daemon) {
 
 net_daemon_t *netsrv_init () {
     net_daemon_t *daemon = calloc(1, sizeof(net_daemon_t));
+    daemon->ms_timeout = -1;
     return daemon;
 }
 
 inline void netsrv_setopt_int (net_daemon_t *daemon, netsrv_opt_t opt, int x) {
-    daemon->max_threads = x;
+    switch (opt) {
+        case NETSRV_THREADS: daemon->max_threads = x; break;
+        case NETSRV_MSTIMEOUT: daemon->ms_timeout = x; break;
+        default: break;
+    }
 }
 
 inline void netsrv_setopt_str (net_daemon_t *daemon, netsrv_opt_t opt, const char *x) {

@@ -37,7 +37,8 @@ typedef enum {
     NETSRV_TRYCONNECT,          /**< callback function before connecting */
     NETSRV_CONNECT,             /**< callback function after connecting */
     NETSRV_EVENT,               /**< callback function after receive data */
-    NETSRV_DISCONNECT           /**< callback function after disconnect */
+    NETSRV_DISCONNECT,          /**< callback function after disconnect */
+    NETSRV_MSTIMEOUT            /**< timeout */
 } netsrv_opt_t;
 
 /** @brief callback function for #NETSRV_TRYCONNECT
@@ -61,6 +62,46 @@ typedef int (*srv_event_h) (int, strbuf_t *buf, void *data);
 typedef int (*srv_disconnect_h) (int, void*);
 /** @brief opaque net service structure */
 typedef struct net_daemon net_daemon_t;
+typedef struct netsrv netsrv_t;
+typedef struct {
+    int fd;
+    struct in_addr addr;
+    list_item_t *li;
+    list_item_t *li_wait;
+    strbuf_t buf;
+    void *data;
+    uint32_t state;
+    netsrv_t *srv;
+} netconn_t;
+
+struct net_daemon {
+    netsrv_t *srvs;
+    int max_threads;
+    int srv_id;
+    int ms_timeout;
+    char *service;
+    srv_try_connect_h on_try_connect;
+    srv_connect_h on_connect;
+    srv_event_h on_event;
+    srv_disconnect_h on_disconnect;
+    pthread_barrier_t barrier;
+};
+
+struct netsrv {
+    net_daemon_t *daemon;
+    int efd;
+    int sfd;
+    struct epoll_event *events;
+    struct epoll_event event;
+    netconn_t conn;
+    int is_active;
+    list_t *conns;
+    list_t *waited_conns;
+    int max_events;
+    int status;
+    pthread_t pid;
+    pthread_rwlock_t locker;
+};
 
 /** @brief net service thread info */
 typedef struct {
