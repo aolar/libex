@@ -1,4 +1,4 @@
-#include "../include/libex/msg.h"
+#include "msg.h"
 
 msg_allocator_h msg_alloc = malloc;
 msg_deallocator_h msg_free = free;

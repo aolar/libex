@@ -1,4 +1,4 @@
-#include "../include/libex/html.h"
+#include "html.h"
 
 #define FOUND_NONE 0
 #define FOUND_TAG 1

@@ -1,4 +1,4 @@
-#include "../include/libex/file.h"
+#include "file.h"
 
 const char *log_fname = NULL;
 #ifndef __WIN32__
