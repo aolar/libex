@@ -7,7 +7,7 @@ static int on_try_connect(struct sockaddr_in *in_addr, int fd) {
     return in_addr->sin_addr.s_addr == listen_addr ? NETSRV_OK : NETSRV_DONE;
 }
 
-static void on_connect (int fd, void **data) {
+static void on_connect (int fd, netconn_t *conn) {
     printf("connected: %d\n", fd);
 }
 
@@ -16,7 +16,7 @@ static int on_disconnect (int fd, void *data) {
     return 0;
 }
 
-static int on_event (int fd, strbuf_t *buf, void *data) {
+static int on_event (int fd, strbuf_t *buf, netconn_t *conn) {
     if (0 == cmpstr(buf->ptr, buf->len, CONST_STR_LEN("close")))
         return NETSRV_DONE;
     char *str = strndup(buf->ptr, buf->len), resp [256], *tail;

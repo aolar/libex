@@ -49,17 +49,17 @@ typedef int (*srv_try_connect_h) (struct sockaddr_in*, int);
 /** callback function for #NETSRV_CONNECT
  * @param 1-st socket
  */
-typedef void (*srv_connect_h) (int, void**);
+typedef void (*srv_connect_h) (int, netconn_t*);
 /** @brief function for #NETSRV_EVENT
  * @param 1-st buffer with received data
- * @param 2-nd user data
+ * @param 2-nd connection structure
  */
-typedef int (*srv_event_h) (int, strbuf_t *buf, void *data);
+typedef int (*srv_event_h) (int, strbuf_t*, netconn_t*);
 /** @brief function for #NETSRV_DISCONNECT
  * @param 1-st socket
- * @param 2-nd user data
+ * @param 2-nd connection structure
  */
-typedef int (*srv_disconnect_h) (int, void*);
+typedef int (*srv_disconnect_h) (int, netconn_t*);
 /** @brief opaque net service structure */
 typedef struct net_daemon net_daemon_t;
 typedef struct netsrv netsrv_t;

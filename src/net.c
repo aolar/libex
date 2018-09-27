@@ -88,7 +88,7 @@ static void netconn_free (netconn_t *conn) {
     netsrv_t *srv = conn->srv;
     net_daemon_t *daemon = srv->daemon;
     if (daemon->on_disconnect)
-        daemon->on_disconnect(conn->fd, conn->data);
+        daemon->on_disconnect(conn->fd, conn);
     pthread_rwlock_wrlock(&srv->locker);
     if (conn->li_wait)
         lst_del(conn->li_wait);
@@ -134,7 +134,7 @@ static int netconn_new (netsrv_t *srv) {
     if (-1 == epoll_ctl(srv_io->efd, EPOLL_CTL_ADD, in_fd, &event))
         goto err;
     if (daemon->on_connect)
-        daemon->on_connect(conn->fd, &conn->data);
+        daemon->on_connect(conn->fd, conn);
     return 0;
 err:
     if (in_fd > 0)
@@ -162,7 +162,7 @@ static void netconn_io (netsrv_t *srv, netconn_t *conn) {
         }
         conn->buf.len += readed;
     }
-    switch (daemon->on_event(conn->fd, &conn->buf, conn->data)) {
+    switch (daemon->on_event(conn->fd, &conn->buf, conn)) {
         case NETSRV_DONE:
             pthread_rwlock_wrlock(&srv->locker);
             if (conn->li_wait) {
@@ -210,7 +210,7 @@ static int netsrv_wait (netsrv_t *srv) {
     if ((conn = get_next_conn(srv))) {
         net_daemon_t *daemon = srv->daemon;
         int timeout = 0;
-        switch (daemon->on_event(conn->fd, &conn->buf, conn->data)) {
+        switch (daemon->on_event(conn->fd, &conn->buf, conn)) {
             case NETSRV_DONE:
                 netconn_free(conn);
                 pthread_rwlock_rdlock(&srv->locker);
