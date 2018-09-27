@@ -1,4 +1,4 @@
-#include "../include/libex/hash.h"
+#include "hash.h"
 
 hash_key_t hash_str (const char *s, size_t dummy) {
     hash_key_t hash = 0;

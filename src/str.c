@@ -1,4 +1,4 @@
-#include "../include/libex/str.h"
+#include "str.h"
 
 str_t *stralloc (size_t len, size_t chunk_size) {
     size_t bufsize = (len / chunk_size) * chunk_size + chunk_size;

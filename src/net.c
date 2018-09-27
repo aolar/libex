@@ -1,4 +1,4 @@
-#include "../include/libex/net.h"
+#include "net.h"
 
 #define CONN_BUF_SIZE 512
 
