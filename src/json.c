@@ -393,12 +393,16 @@ void json_add_list (strbuf_t *buf, const char *key, size_t key_len, list_t *list
     if (list) {
         list_item_t *li = list->head;
         if (li) {
-            do {
-                int inserted = on_item(li, buf, userdata);
-                li = li->next;
-                if (JSON_INSERTED == inserted && li != list->head)
-                    strbufadd(buf, CONST_STR_LEN(","));
-            } while (li != list->head);
+            int inserted = on_item(li, buf, userdata);
+            li = li->next;
+            if (li != list->head) {
+                do {
+                    if (JSON_INSERTED == inserted)
+                        strbufadd(buf, CONST_STR_LEN(","));
+                    inserted = on_item(li, buf, userdata);
+                    li = li->next;
+                } while (li != list->head);
+            }
         }
     }
     if (key && key_len)
