@@ -9,7 +9,6 @@ void test_log () {
 }
 
 void test_conf () {
-//! [load conf]
     str_t *string_val = NULL;
     int integer_val = -1;
     double double_val = -1.0;
@@ -18,7 +17,6 @@ void test_conf () {
         ASSIGN_CONF_INT(integer_val, "integer")
         ASSIGN_CONF_DOUBLE(double_val, "double")
     CONF_HANDLER_END);
-//! [load conf]
     if (string_val) {
         printf("string: %s\n", string_val->ptr);
         free(string_val);
@@ -180,16 +178,16 @@ void test_copy_file (int argc, const char *argv[]) {
 
 int main (int argc, const char *argv[]) {
 /*    test_log();
-    test_path_combine();
+    test_path_combine();*/
     test_conf();
-    test_spec_path();
+/*    test_spec_path();
     test_expand_path();
     test_getdir();
     test_getfname();
     test_tempfile();
     test_load_all_file();
     test_copy_file(argc, argv);
-    test_ls();*/
-    test_load_all_file();
+    test_ls();
+    test_load_all_file();*/
     return 0;
 }

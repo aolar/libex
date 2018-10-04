@@ -80,7 +80,7 @@ int load_conf_exactly (const char *fname, load_conf_h fn) {
         if (p)
             line.len -= (uintptr_t)(line.ptr + line.len) - (uintptr_t)p;
         strptr_t name, val;
-        if (0 == strntok(&line.ptr, &line.len, CONST_STR_LEN("="), &name) && 0 == strntok(&line.ptr, &line.len, CONST_STR_LEN("\r\n"), &val))
+        if (0 == strntok(&line.ptr, &line.len, CONST_STR_LEN("="), &name) && -1 != strntok(&line.ptr, &line.len, CONST_STR_LEN("\r\n"), &val))
             fn(fname, &name, &val);
     }
     free(buf);

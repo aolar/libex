@@ -11,7 +11,7 @@ static void on_connect (int fd, netconn_t *conn) {
     printf("connected: %d\n", fd);
 }
 
-static int on_disconnect (int fd, void *data) {
+static int on_disconnect (int fd, netconn_t *data) {
     printf("disconnect: %d\n", fd);
     return 0;
 }
