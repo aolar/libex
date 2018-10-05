@@ -43,6 +43,7 @@ http_pair_t http_status[] = {
         { 424, CONST_STR_INIT("Failed Dependency") }, /* WebDAV */
         { 426, CONST_STR_INIT("Upgrade Required") }, /* TLS */
         { 429, CONST_STR_INIT("Too Many Requests") },
+        { 431, CONST_STR_INIT("Request Header Fields Too Large") },
         { 500, CONST_STR_INIT("Internal Server Error") },
         { 501, CONST_STR_INIT("Not Implemented") },
         { 502, CONST_STR_INIT("Bad Gateway") },
@@ -67,7 +68,7 @@ int http_get_status (int status) {
 
 #define MAX_HEADERS_LEN 32768
 #define MAX_QUERY_LEN 8192
-static int parse_prefix (char *p, http_request_buf_t *req) {
+static int parse_prefix (char *p, http_request_t *req) {
     char *q;
     req->prot.ptr = req->url.ptr;
     req->prot.len = (uintptr_t)p - (uintptr_t)req->url.ptr;
@@ -87,7 +88,7 @@ static int parse_prefix (char *p, http_request_buf_t *req) {
     return 0;
 }
 
-static int set_request_header (strptr_t *key, strptr_t *value, http_request_buf_t *req) {
+static int set_request_header (strptr_t *key, strptr_t *value, http_request_t *req) {
     if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Connection"))) {
         if (0 == cmpstr(value->ptr, value->len, CONST_STR_LEN("close"))) req->connection = CONNECTION_CLOSE; else
         if (0 == cmpstr(value->ptr, value->len, CONST_STR_LEN("keep-alive"))) req->connection = CONNECTION_KEEP_ALIVE; else
@@ -106,7 +107,7 @@ static int set_request_header (strptr_t *key, strptr_t *value, http_request_buf_
     return 0;
 }
 
-static int parse_headers (char **str, size_t *str_len, http_item_buf_t *headers, http_request_buf_t *req) {
+static int parse_headers (char **str, size_t *str_len, http_item_buf_t *headers, http_request_t *req) {
     size_t i = headers->len = 0;
     while (0 == strntok(str, str_len, CONST_STR_LEN(":\r"), &headers->keys[i]) && *str_len >= 3) {
         if (*(*str-1) == '\r' || 0 == headers->keys[i].len) return HTTP_ERROR;
@@ -155,7 +156,7 @@ static int get_http_method (strptr_t *str) {
     return -1;
 }
 
-int http_parse_request (http_request_buf_t *req, char *buf, size_t buf_len) {
+int http_parse_request (http_request_t *req, char *buf, size_t buf_len) {
     int ret, method_idx;
     char *str = buf, *p;//req->buf->ptr, *p;
     size_t str_len = buf_len;//req->buf->len;
@@ -181,7 +182,7 @@ int http_parse_request (http_request_buf_t *req, char *buf, size_t buf_len) {
     return HTTP_LOADED;
 }
 
-strptr_t *http_get_header (http_request_buf_t *req, const char *hdr_name, size_t hdr_name_len) {
+strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr_name_len) {
     for (size_t i = 0; i < req->headers.len; ++i)
         if (0 == cmpstr(req->headers.keys[i].ptr, req->headers.keys[i].len, hdr_name, hdr_name_len))
             return &req->headers.values[i];

@@ -122,6 +122,7 @@ int wcmpcasestr (const wchar_t *x, size_t x_len, const wchar_t *y, size_t y_len)
 static inline str_t *strclone (str_t *str) { return mkstr(str->ptr, str->len, str->chunk_size); };
 #define strcopy(x) strclone(x)
 static inline wstr_t *wstrclone (wstr_t *str) { return wmkstr(str->ptr, str->len, str->chunk_size); };
+
 int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size);
 int strbufsize (strbuf_t *strbuf, size_t nlen, int flags);
 int strbufput (strbuf_t *strbuf, const char *src, size_t src_len, int flags);

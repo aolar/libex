@@ -75,7 +75,7 @@ int load_conf_exactly (const char *fname, load_conf_h fn) {
     }
     strptr_t str = { readed, buf };
     strptr_t line;
-    while (0 == strntok(&str.ptr, &str.len, CONST_STR_LEN("\r\n"), &line)) {
+    while (-1 != strntok(&str.ptr, &str.len, CONST_STR_LEN("\r\n"), &line)) {
         char *p = strnchr(line.ptr, '#', line.len);
         if (p)
             line.len -= (uintptr_t)(line.ptr + line.len) - (uintptr_t)p;

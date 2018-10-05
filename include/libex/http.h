@@ -42,9 +42,9 @@ typedef struct {
     strptr_t host;
     strptr_t referer;
     strptr_t content_type;
-} http_request_buf_t;
-int http_parse_request (http_request_buf_t *req, char *buf, size_t buf_len);
-strptr_t *http_get_header (http_request_buf_t *req, const char *hdr_name, size_t hdr_name_len);
+} http_request_t;
+int http_parse_request (http_request_t *req, char *buf, size_t buf_len);
+strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr_name_len);
 
 #define HTTP_LOADED 0
 #define HTTP_PARTIAL_LOADED 1

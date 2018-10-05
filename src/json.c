@@ -393,17 +393,17 @@ void json_add_list (strbuf_t *buf, const char *key, size_t key_len, list_t *list
     if (list) {
         list_item_t *li = list->head;
         if (li) {
-            int inserted = on_item(li, buf, userdata);
-            li = li->next;
-            if (li != list->head) {
+            if (li) {
                 do {
-                    if (JSON_INSERTED == inserted)
-                        strbufadd(buf, CONST_STR_LEN(","));
-                    inserted = on_item(li, buf, userdata);
+                    int inserted = on_item(li, buf, userdata);
                     li = li->next;
+                    if (JSON_INSERTED == inserted && li != list->head)
+                        strbufadd(buf, CONST_STR_LEN(","));
                 } while (li != list->head);
             }
         }
+        if (buf->ptr[buf->len-1] == ',')
+            --buf->len;
     }
     if (key && key_len)
         json_close_array(buf, is_end);
@@ -755,7 +755,7 @@ static int on_list_to_array (json_item_t *li, list_to_array_t *la) {
     return ENUM_CONTINUE;
 }
 
-void jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods) {
+int jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods) {
     int rc;
     jsonrpc_t jsonrpc;
     memset(&jsonrpc, 0, sizeof(jsonrpc_t));
@@ -769,7 +769,7 @@ void jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods) {
             if (m->method.ptr && m->method.len) {
                 list_to_array_t la = { .params = calloc(jsonrpc.params->data.a->len, sizeof(json_item_t*)), .params_len = 0 };
                 json_enum_array(jsonrpc.params->data.a, (json_item_h)on_list_to_array, &la, 0);
-                m->handle(buf, la.params, la.params_len, id, id_len);
+                rc = m->handle(buf, la.params, la.params_len, id, id_len);
                 free(la.params);
             } else
                 jsonrpc_stderror(buf, JSONRPC_METHOD_NOT_FOUND, id, id_len);
@@ -777,8 +777,11 @@ void jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods) {
                 free((void*)id);
         } else
             jsonrpc_stderror(buf, JSONRPC_PARSE_ERROR, 0, 0);
-    } else
+    } else {
         jsonrpc_stderror(buf, rc, 0, 0);
+        rc = 0;
+    }
     if (jsonrpc.json)
         json_free(jsonrpc.json);
+    return rc;
 }

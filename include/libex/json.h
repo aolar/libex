@@ -148,13 +148,13 @@ int jsonrpc_response (strbuf_t *buf, intptr_t id, int id_len, jsonrpc_h on_resul
 void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len, jsonrpc_h on_data, void *userdata);
 void jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len);
 
-typedef void (*jsonrpc_method_h) (strbuf_t *buf, json_item_t **params, size_t params_len, intptr_t id, int id_len);
+typedef int (*jsonrpc_method_h) (strbuf_t *buf, json_item_t **params, size_t params_len, intptr_t id, int id_len);
 
 typedef struct {
     strptr_t method;
     jsonrpc_method_h handle;
 } jsonrpc_method_t;
 
-void jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods);
+int jsonrpc_execute (strbuf_t *buf, jsonrpc_method_t *methods);
 
 #endif // __LIBEX_JSON_H__
