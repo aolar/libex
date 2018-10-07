@@ -42,6 +42,9 @@ typedef struct {
     strptr_t host;
     strptr_t referer;
     strptr_t content_type;
+    strptr_t upgrade;
+    strptr_t sec_websock_key;
+    strptr_t sec_websock_ext;
 } http_request_t;
 int http_parse_request (http_request_t *req, char *buf, size_t buf_len);
 strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr_name_len);

@@ -147,4 +147,15 @@ strptr_t strset_fetch (void **strset_ptr);
 strptr_t strset_get (void *strset, size_t index);
 int strand (char *outbuf, size_t outlen, int flags);
 
+typedef struct
+{
+    uint32_t total[2];
+    uint32_t state[5];
+    uint8_t buffer[64];
+} sha1_t;
+
+void sha1_init (sha1_t *ctx);
+void sha1_update (sha1_t *ctx, uint8_t *input, uint32_t length);
+void sha1_done (sha1_t *ctx, uint8_t digest[20]);
+
 #endif // __LIBEX_STR_H__
