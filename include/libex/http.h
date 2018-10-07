@@ -20,13 +20,11 @@ typedef struct {
     strptr_t values [MAX_HTTP_ITEM];
 } http_item_buf_t;
 
-// -= response =-
 enum { CONNECTION_UNKNOWN=0, CONNECTION_CLOSE, CONNECTION_KEEP_ALIVE };
 enum { HTTP_OPTIONS, HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_DELETE, HTTP_TRACE, HTTP_LINK, HTTP_UNLINK, HTTP_CONNECT };
 typedef struct http_post_buf http_post_buf_t;
 typedef struct postform postform_t;
 typedef struct {
-//    str_t *buf;
     int method; // TODO : method as enum
     strptr_t prot;
     strptr_t domain;
@@ -36,7 +34,6 @@ typedef struct {
     http_item_buf_t query;
     http_item_buf_t headers;
     strptr_t content;
-    // headers
     int connection;
     size_t content_length;
     strptr_t host;
@@ -54,10 +51,5 @@ strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr
 #define HTTP_ERROR -1
 #define HTTP_ERROR_QUERY_TOO_LARGE -2
 #define HTTP_ERROR_HEADERS_TOO_LARGE -3
-
-int http_protocol_next (const char **url, strptr_t *result);
-int http_domain_next (const char **url, strptr_t *result);
-int http_port_next (const char **url, strptr_t *result);
-int http_url_next_part (const char **url, strptr_t *result);
 
 #endif // __LIBEX_HTTP_H__

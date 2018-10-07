@@ -25,7 +25,7 @@ void prntl (strptr_t *s1, strptr_t *s2) {
 }
 
 void test_http (char *content, size_t content_len) {
-    http_request_buf_t req;
+    http_request_t req;
     memset(&req, 0, sizeof req);
     int ret = http_parse_request(&req, content, content_len);
     if (HTTP_LOADED == ret) {
@@ -56,44 +56,7 @@ void test_http (char *content, size_t content_len) {
     printf("result: %d\n", ret);
 }
 
-static void print_sptr (const char *prompt, strptr_t *s) {
-    char *ss = strndup(s->ptr, s->len);
-    if (prompt) printf("%s", prompt);
-    printf("%s\n", ss);
-    free(ss);
-}
-
-static void parse_http_url (const char *url) {
-    int r;
-    strptr_t s = { .ptr = NULL, .len = 0 };
-    printf("source: %s\n", url);
-    if (-1 != (r = http_protocol_next(&url, &s))) {
-        if (1 == r)
-            print_sptr("protocol: ", &s);
-        if (1 == r && 1 != (r = http_domain_next(&url, &s)))
-            return;
-        if (1 == r)
-            print_sptr("domain: ", &s);
-        if (1 == r && -1 == (r = http_port_next(&url, &s)))
-            return;
-        if (1 == r)
-            print_sptr("port: ", &s);
-        while (0 < http_url_next_part(&url, &s))
-            print_sptr(NULL, &s);
-    }
-    printf("\n");
-}
-
-void test_http_url () {
-    parse_http_url("api/v1/people/brian");
-    parse_http_url("http://www.domain.org/api/v1/people/brian");
-    parse_http_url("http://www.domain.org:8080/api/v1/people/brian");
-    parse_http_url("http://127.0.0.1:8901/transform/PXRoq2pJLbIZZnI8Enjo%2FEivje5dHXJSBqPy4QaqvdlqqU1XwztgI%2B7waLnq%2Fz9CQA6DxXJBlrj%2B%0AOONlEKQS60II7bPLggEk15Xt%2BPTkcwaI30f2Ooqj1eIrPk%2FRq29UrOFxtcPQygyFfJRr6fuIugL6%0Art6jqcp%2BosTQEDD1QEY%3D%0A");
-}
-
-
 int main () {
     test_http(CONST_STR_LEN(HTTP1));
-    test_http_url();
     return 0;
 }

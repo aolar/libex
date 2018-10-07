@@ -189,8 +189,8 @@ static int get_http_method (strptr_t *str) {
 
 int http_parse_request (http_request_t *req, char *buf, size_t buf_len) {
     int ret, method_idx;
-    char *str = buf, *p;//req->buf->ptr, *p;
-    size_t str_len = buf_len;//req->buf->len;
+    char *str = buf, *p;
+    size_t str_len = buf_len;
     strptr_t method_str;
     if (0 != strntok(&str, &str_len, CONST_STR_LEN(" "), &method_str) || 0 == str_len)
         return HTTP_PARTIAL_LOADED;
@@ -199,7 +199,7 @@ int http_parse_request (http_request_t *req, char *buf, size_t buf_len) {
     req->method = http_methods[method_idx].i_val;
     if (0 != strntok(&str, &str_len, CONST_STR_LEN(" ?"), &req->url) || 0 == str_len)
         return HTTP_PARTIAL_LOADED;
-    if ((p = strnstr(req->url.ptr, req->url.len, CONST_STR_LEN("://")))) // TODO : in start string ?
+    if ((p = strnstr(req->url.ptr, req->url.len, CONST_STR_LEN("://"))))
         if (-1 == parse_prefix(p, req))
             return HTTP_ERROR;
     if (*(str-1) == '?') {
@@ -227,66 +227,4 @@ strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr
         if (0 == cmpstr(req->headers.keys[i].ptr, req->headers.keys[i].len, hdr_name, hdr_name_len))
             return &req->headers.values[i];
     return NULL;
-}
-
-int http_protocol_next (const char **url, strptr_t *result) {
-    const char *p = *url;
-    if ('\0' == *p) return -1;
-    while (*p && *p != '/') ++p;
-    if (p > *url && *(p-1) == ':' && *(++p) == '/') {
-        result->ptr = (char*)*url;
-        result->len = (uintptr_t)p - (uintptr_t)*url - 2;
-        *url = p;
-        return 1;
-    }
-    return 0;
-}
-
-int http_domain_next (const char **url, strptr_t *result) {
-    const char *p = *url, *e;
-    size_t len;
-    if ('/' == *p) ++p;
-    e = p;
-    while (*e && '/' != *e && ':' != *e) ++e;
-    if (!(len = (uintptr_t)e - (uintptr_t)p))
-        return -1;
-    result->ptr = (char*)p;
-    result->len = len;
-    *url = e;
-    return 1;
-}
-
-int http_port_next (const char **url, strptr_t *result) {
-    const char *p = *url, *e;
-    size_t len;
-    if ('\0' == *p) return -1;
-    if (':' != *p) return 0;
-    *url = e = ++p;
-    while (*e && *e != '/') ++e;
-    if ('\0' == *e) return -1;
-    if (!(len = (uintptr_t)e - (uintptr_t)p))
-        return -1;
-    result->ptr = (char*)p;
-    result->len = len;
-    *url = e;
-    return 1;
-}
-
-int http_url_next_part (const char **url, strptr_t *result) {
-    const char *p_url, *e_url;
-    size_t len;
-    if ('\0' == **url) return -1;
-    p_url = *url;
-    if ('/' == *p_url) ++p_url;
-    if ('/' == *p_url) ++p_url;
-    if (result)
-        result->ptr = (char*)p_url;
-    e_url = p_url;
-    while (*e_url && '/' != *e_url) ++e_url;
-    if (!(len = ((uintptr_t)e_url - (uintptr_t)p_url)))
-        return 0;
-    if (result)
-        result->len = (uintptr_t)e_url - (uintptr_t)p_url;
-    *url = e_url;
-    return 1;
 }
