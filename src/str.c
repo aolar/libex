@@ -472,14 +472,6 @@ static int mod_table[] = {0, 2, 1};
 
 #define ENCODED_LEN(X) 4 * ((X + 2) / 3)
 
-/**
- * base64_encode - convert string to base64
- * @data: input data
- * @input_length: input data size
- * @encoded_data: output string
- * @output_length: output string length
- *
- */
 static void base64_encode(const unsigned char *data, size_t input_length, char *encoded_data, size_t output_length) {
     for (int i = 0, j = 0; i < input_length;) {
         uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;

@@ -25,7 +25,7 @@ enum { HTTP_OPTIONS, HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_
 typedef struct http_post_buf http_post_buf_t;
 typedef struct postform postform_t;
 typedef struct {
-    int method; // TODO : method as enum
+    int method;
     strptr_t prot;
     strptr_t domain;
     strptr_t port;
@@ -42,7 +42,7 @@ typedef struct {
     strptr_t upgrade;
     strptr_t sec_websock_key;
     strptr_t sec_websock_ext;
-} http_request_t;
+} __attribute__ ((__packed__)) http_request_t;
 int http_parse_request (http_request_t *req, char *buf, size_t buf_len);
 strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr_name_len);
 
