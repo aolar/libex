@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <signal.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #ifndef __WIN32__
@@ -15,7 +16,6 @@
 #include <tchar.h>
 #endif
 #include "str.h"
-#include "thread.h"
 #include "list.h"
 
 typedef enum {
@@ -46,8 +46,8 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
 typedef struct slot slot_t;
 typedef void (*pool_msg_h) (void*, void*, void**);
-typedef void (*pool_create_h) (slot_t*, void*);
-typedef void (*pool_destroy_h) (void*);
+typedef int (*pool_create_h) (slot_t*, void*);
+typedef void (*pool_destroy_h) (slot_t*);
 
 typedef enum {
     POOL_MSG,

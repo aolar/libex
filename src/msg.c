@@ -19,16 +19,14 @@ static int allocate (msgbuf_t *msg, uint32_t len, uint32_t chunk_size) {
 }
 
 int msg_create_request (msgbuf_t *msg, uint32_t method, const char *cookie, size_t cookie_len, uint32_t len, uint32_t chunk_size) {
-    uint32_t nlen = cookie_len + sizeof(uint32_t) * 4;
-    if (len < nlen) len = nlen;
+    len = cookie_len + sizeof(uint32_t) * 4 + len;
     if (-1 == allocate(msg, len, chunk_size))
         return -1;
     return 0 == msg_setui32(msg, method) && 0 == msg_setstr(msg, cookie, cookie_len) ? 0 : -1;
 }
 
 int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_size) {
-    uint32_t nlen = sizeof(uint32_t) * 2;
-    if (len < nlen) len = nlen;
+    len = sizeof(uint32_t) * 2 + len;
     if (-1 == allocate(msg, len, chunk_size))
         return -1;
     return msg_seti32(msg, code);
@@ -153,6 +151,17 @@ int msg_load_response (msgbuf_t *msg, char *buf, size_t buflen) {
     return msg_getstr(msg, &msg->errmsg);
 }
 
+int msg_geti8 (msgbuf_t *msg, int8_t *val) {
+    errno = 0;
+    if (msg->ptr + msg->len < msg->pc + sizeof(int8_t)) {
+        errno = EFAULT;
+        return -1;
+    }
+    *val = *(int8_t*)msg->pc;
+    msg->pc += sizeof(uint8_t);
+    return 0;
+}
+
 int msg_geti (msgbuf_t *msg, int *val) {
     errno = 0;
     if (msg->ptr + msg->len < msg->pc + sizeof(int)) {
@@ -183,6 +192,17 @@ int msg_getui32 (msgbuf_t *msg, uint32_t *val) {
     }
     *val = *(uint32_t*)msg->pc;
     msg->pc += sizeof(uint32_t);
+    return 0;
+}
+
+int msg_geti64 (msgbuf_t *msg, int64_t *val) {
+    errno = 0;
+    if (msg->ptr + msg->len < msg->pc + sizeof(int64_t)) {
+        errno = EFAULT;
+        return -1;
+    }
+    *val = *(int64_t*)msg->pc;
+    msg->pc += sizeof(int64_t);
     return 0;
 }
 

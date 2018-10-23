@@ -9,6 +9,15 @@ const char *log_fname = NULL;
 #define PATH_DELIM_S "\\"
 #endif
 
+static void std_slogf (const char *fmt, ...) {}
+static void std_vslogf (int is_print_time, const char *fmt, va_list va) {}
+
+static void fl_vslogf (int is_print_time, const char *fmt, va_list ap);
+static void fl_slogf (const char *fmt, ...);
+
+slogf_h slogf = std_slogf;
+vslogf_h vslogf = std_vslogf;
+
 int loginit (const char *fname) {
     struct stat st;
     if (-1 == stat(fname, &st)) {
@@ -19,6 +28,8 @@ int loginit (const char *fname) {
             int fd = open(fname, O_WRONLY | O_CREAT | O_APPEND);
             #endif
             if (fd >= 0) close(fd); else return -1;
+            slogf = fl_slogf;
+            vslogf = fl_vslogf;
         } else
             return -1;
     }
@@ -28,7 +39,7 @@ int loginit (const char *fname) {
 
 #define LOG_BUF_SIZE 1024
 
-void vslogf (int is_print_time, const char *fmt, va_list ap) {
+static void fl_vslogf (int is_print_time, const char *fmt, va_list ap) {
     if (log_fname) {
         char buf [LOG_BUF_SIZE] = {'\0'};
         time_t t = time(0);
@@ -54,7 +65,7 @@ void vslogf (int is_print_time, const char *fmt, va_list ap) {
     }
 }
 
-void slogf (const char *fmt, ...) {
+static void fl_slogf (const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vslogf(1, fmt, ap);

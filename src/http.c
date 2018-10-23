@@ -1,5 +1,8 @@
 #include "http.h"
 
+http_item_h on_http_query = NULL,
+            on_http_header = NULL;
+
 http_pair_t http_status[] = {
         { 100, CONST_STR_INIT("Continue") },
         { 101, CONST_STR_INIT("Switching Protocols") },
@@ -88,84 +91,51 @@ static int parse_prefix (char *p, http_request_t *req) {
     return 0;
 }
 
-static int set_request_header (strptr_t *key, strptr_t *value, http_request_t *req) {
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Connection"))) {
-        if (0 == cmpstr(value->ptr, value->len, CONST_STR_LEN("close")))
-            req->connection = CONNECTION_CLOSE;
+static int parse_headers (char **str, size_t *str_len, http_request_t *req, void *userdata) {
+    int rc;
+    strptr_t key = { .ptr = NULL, .len = 0 },
+             val = { .ptr = NULL, .len = 0 };
+    while (-1 != strntok(str, str_len, CONST_STR_LEN(":\r"), &key) && *str_len >= 3) {
+        if (*(*str-1) == '\r' || 0 == key.len)
+            return HTTP_ERROR;
+        strntrim(&key.ptr, &key.len);
+        if (-1 != strntok(str, str_len, CONST_STR_LEN("\r"), &val) && *str_len >= 3)
+            strntrim(&val.ptr, &val.len);
+        if (0 == cmpstr(key.ptr, key.len, CONST_STR_LEN("Content-Length"))) {
+            char *tail;
+            req->content_length = strtol(val.ptr, &tail, 0);
+            if ('\r' != tail[0] || ERANGE == errno)
+                return HTTP_ERROR;
+        } else
+        if (0 == cmpstr(key.ptr, key.len, CONST_STR_LEN("Host")))
+            req->host = val;
         else
-        if (0 == cmpstr(value->ptr, value->len, CONST_STR_LEN("keep-alive")))
-            req->connection = CONNECTION_KEEP_ALIVE; else
-        return -1;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Content-Length"))) {
-        if (value->len > 16) return -1;
-        char buf [16], *tail;
-        strncpy(buf, value->ptr, sizeof buf); buf[value->len] = '\0';
-        req->content_length = strtol(buf, &tail, 0);
-        if (*tail != '\0' || ERANGE == errno) return -1;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Host"))) {
-        req->host.ptr = value->ptr;
-        req->host.len = value->len;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Referer"))) {
-        req->referer.ptr = value->ptr;
-        req->referer.len = value->len;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Content-Type"))) {
-        req->content_type.ptr = value->ptr;
-        req->content_type.len = value->len;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Upgrade"))) {
-        req->upgrade.ptr = value->ptr;
-        req->upgrade.len = value->len;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Sec-WebSocket-Key"))) {
-        req->sec_websock_key.ptr = value->ptr;
-        req->sec_websock_key.len = value->len;
-    } else
-    if (0 == cmpstr(key->ptr, key->len, CONST_STR_LEN("Sec-WebSocket-Ext"))) {
-        req->sec_websock_ext.ptr = value->ptr;
-        req->sec_websock_ext.len = value->len;
-    };
-    return 0;
-}
-
-static int parse_headers (char **str, size_t *str_len, http_item_buf_t *headers, http_request_t *req) {
-    size_t i = headers->len = 0;
-    while (0 == strntok(str, str_len, CONST_STR_LEN(":\r"), &headers->keys[i]) && *str_len >= 3) {
-        if (*(*str-1) == '\r' || 0 == headers->keys[i].len)
-            return HTTP_ERROR;
-        strntrim(&headers->keys[i].ptr, &headers->keys[i].len);
-        if (0 == strntok(str, str_len, CONST_STR_LEN("\r"), &headers->values[i]) && *str_len >= 3)
-            strntrim(&headers->values[i].ptr, &headers->values[i].len);
-        if (-1 == set_request_header(&headers->keys[i], &headers->values[i], req))
-            return HTTP_ERROR;
-        if (++i >= MAX_HTTP_ITEM)
-            return HTTP_ERROR_HEADERS_TOO_LARGE;
-        headers->len = i;
+        if (0 == cmpstr(key.ptr, key.len, CONST_STR_LEN("Connection")))
+            req->connection = val;
+        else
+        if (on_http_header && 0 > (rc = on_http_header(&key, &val, userdata)))
+            return rc;
         ++*str; --*str_len;
         if (0 == cmpstr(*str, 2, CONST_STR_LEN("\r\n"))) {
             *str += 2; *str_len -= 2;
-            if (CONNECTION_UNKNOWN == req->connection)
-                req->connection = CONNECTION_CLOSE;
             return HTTP_LOADED;
         }
     }
     return HTTP_PARTIAL_LOADED;
 }
 
-static int parse_query (char **str, size_t *str_len, http_item_buf_t *query) {
-    size_t i = query->len = 0;
-    while (0 == strntok(str, str_len, CONST_STR_LEN("= "), &query->keys[i])) {
-        if (**str != '=' || 0 == query->keys[i].len)
+static int parse_query (char **str, size_t *str_len, void *userdata) {
+    int rc;
+    strptr_t key = { .ptr = NULL, .len = 0 },
+             val = { .ptr = NULL, .len = 0 };
+    while (-1 != strntok(str, str_len, CONST_STR_LEN("= "), &key)) {
+        if (**str != '=' || 0 == key.len)
             return HTTP_ERROR;
-        strntrim(&query->keys[i].ptr, &query->keys[i].len);
-        if (0 == strntok(str, str_len, CONST_STR_LEN("& "), &query->values[i]))
-            strntrim(&query->values[i].ptr, &query->values[i].len);
-        if (++i >= MAX_HTTP_ITEM)
-            return HTTP_ERROR_QUERY_TOO_LARGE;
-        query->len = i;
+        strntrim(&key.ptr, &key.len);
+        if (-1 != strntok(str, str_len, CONST_STR_LEN("& "), &val))
+            strntrim(&val.ptr, &val.len);
+        if (on_http_query && 0 > (rc = on_http_query(&key, &val, userdata)))
+            return rc;
         if (*(*str-1) == ' ' && *str_len > 0)
             return HTTP_LOADED;
     }
@@ -187,17 +157,17 @@ static int get_http_method (strptr_t *str) {
     return -1;
 }
 
-int http_parse_request (http_request_t *req, char *buf, size_t buf_len) {
+int http_parse_request (http_request_t *req, char *buf, size_t buf_len, void *userdata) {
     int ret, method_idx;
     char *str = buf, *p;
     size_t str_len = buf_len;
     strptr_t method_str;
-    if (0 != strntok(&str, &str_len, CONST_STR_LEN(" "), &method_str) || 0 == str_len)
+    if (-1 == strntok(&str, &str_len, CONST_STR_LEN(" "), &method_str) || 0 == str_len)
         return HTTP_PARTIAL_LOADED;
     if (-1 == (method_idx = get_http_method(&method_str)))
         return HTTP_ERROR;
     req->method = http_methods[method_idx].i_val;
-    if (0 != strntok(&str, &str_len, CONST_STR_LEN(" ?"), &req->url) || 0 == str_len)
+    if (-1 == strntok(&str, &str_len, CONST_STR_LEN(" ?"), &req->url) || 0 == str_len)
         return HTTP_PARTIAL_LOADED;
     if ((p = strnstr(req->url.ptr, req->url.len, CONST_STR_LEN("://"))))
         if (-1 == parse_prefix(p, req))
@@ -205,15 +175,15 @@ int http_parse_request (http_request_t *req, char *buf, size_t buf_len) {
     if (*(str-1) == '?') {
         if (0 == str_len)
             return HTTP_PARTIAL_LOADED;
-        if (HTTP_LOADED != (ret = parse_query(&str, &str_len, &req->query)) || 0 == str_len)
+        if (HTTP_LOADED != (ret = parse_query(&str, &str_len, userdata)) || 0 == str_len)
             return ret;
     }
-    if (0 != strntok(&str, &str_len, CONST_STR_LEN("\r"), &req->ver) || 0 == str_len)
+    if (-1 == strntok(&str, &str_len, CONST_STR_LEN("\r"), &req->ver) || 0 == str_len)
         return HTTP_PARTIAL_LOADED;
     if (*str != '\n')
         return HTTP_PARTIAL_LOADED;
     ++str; --str_len;
-    if (HTTP_LOADED != (ret = parse_headers(&str, &str_len, &req->headers, req)))
+    if (HTTP_LOADED != (ret = parse_headers(&str, &str_len, req, userdata)))
         return ret;
     if (0 != str_len) {
         req->content.ptr = str;
@@ -222,9 +192,10 @@ int http_parse_request (http_request_t *req, char *buf, size_t buf_len) {
     return HTTP_LOADED;
 }
 
-strptr_t *http_get_header (http_request_t *req, const char *hdr_name, size_t hdr_name_len) {
-    for (size_t i = 0; i < req->headers.len; ++i)
-        if (0 == cmpstr(req->headers.keys[i].ptr, req->headers.keys[i].len, hdr_name, hdr_name_len))
-            return &req->headers.values[i];
-    return NULL;
+int http_cmpurl (const char *url, size_t url_len, const char *url_ep, size_t url_ep_len) {
+    if (url_len > 1 && url[url_len - 1] == '/')
+        url_len--;
+    if (url_len != url_ep_len)
+        return -1;
+    return 0 == cmpstr(url, url_len, url_ep, url_ep_len) ? 0 : -1;
 }

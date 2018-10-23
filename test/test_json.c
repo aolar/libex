@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "../include/libex/json.h"
-
+#if 0
 void test_json1 () {
     int fd = open("./json_1.txt", O_RDONLY);
     if (-1 != fd) {
@@ -149,11 +149,11 @@ void test_json4 () {
     
     free(buf.ptr);
 }
-
+#endif
 int main (int argc, const char *argv[]) {
 //    test_json1();
 //    test_json2();
 //    test_json3();
-    test_json4();
+//    test_json4();
     return 0;
 }

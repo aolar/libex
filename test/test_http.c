@@ -9,7 +9,7 @@
     "Content-Length: 35\r\n" \
     "\r\n" \
     "login=Petya&password=qq"
-
+#if 0
 void prnt (const char *name, strptr_t *str) {
     str_t *s = mkstr(str->ptr, str->len, 8); STR_ADD_NULL(s);
     printf("%s: %s\n", name, s->ptr);
@@ -55,8 +55,8 @@ void test_http (char *content, size_t content_len) {
     }
     printf("result: %d\n", ret);
 }
-
+#endif
 int main () {
-    test_http(CONST_STR_LEN(HTTP1));
+//    test_http(CONST_STR_LEN(HTTP1));
     return 0;
 }

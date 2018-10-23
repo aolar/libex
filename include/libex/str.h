@@ -127,17 +127,22 @@ int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size);
 int strbufsize (strbuf_t *strbuf, size_t nlen, int flags);
 int strbufput (strbuf_t *strbuf, const char *src, size_t src_len, int flags);
 int strbufadd (strbuf_t *strbuf, const char *src, size_t src_len);
+int strbufset (strbuf_t *buf, const char c, size_t len);
 
+ssize_t base64_encode(const unsigned char *data, size_t input_length, char *encoded_data, size_t output_length);
 str_t *str_base64_encode (const char *buf, size_t bufsize, size_t chunk_size);
 str_t *str_base64_decode (const char *buf, size_t bufsize, size_t chunk_size);
 int strbuf_base64_encode (strbuf_t *encoded, const char *input, size_t input_len, size_t chunk_size);
 int strbuf_base64_decode (strbuf_t *decoded, const char *input, size_t input_len, size_t chunk_size);
+
 str_t *str_url_encode (const char *str, size_t str_len, size_t chunk_size);
 str_t *str_url_decode (const char *str, size_t str_len, size_t chunk_size);
+
 str_t *str_unescape (const char *src, size_t src_len, size_t chunk_size);
 int strbuf_unescape (strbuf_t *strbuf, const char *src, size_t src_len);
 str_t *str_escape (const char *src, size_t src_len, size_t chunk_size);
 int strbuf_escape (strbuf_t *dst, const char *src, size_t src_len);
+
 static inline size_t strset_count (void *strset) { return *((size_t*)(strset+sizeof(size_t))); }
 static inline size_t strset_size (void *strset) { return *((size_t*)strset); }
 void *mkstrset (size_t count, const char **strs);

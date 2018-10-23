@@ -449,8 +449,30 @@ void test_msg () {
     msg_destroy(&resp);
 }
 
+void test_sha () {
+    sha1_t ctx;
+    uint8_t sha1sum [20];
+    char buf [40+2+1], sec_key [36+24+1] = "l+NYYmMnNuzOB+X8kVOsTQ==";
+    strcpy(sec_key + 24, "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+    sha1_init(&ctx);
+    sha1_update(&ctx, (unsigned char*)sec_key, 36+24);
+    sha1_done(&ctx, sha1sum);
+/*    int j = 0;
+    for (int i = 0; i < 20; ++i) {
+        printf("%02x", (unsigned char)sha1sum[i]);
+        snprintf(&buf[j], 3, "%02x", (unsigned char)sha1sum[i]);
+        j += 2;
+    }
+    printf("\n");
+    buf[j] = '\0';
+    printf("%s\n", buf);*/
+    ssize_t n = base64_encode((unsigned char*)sha1sum, sizeof(sha1sum), sec_key, sizeof(sec_key));
+    sec_key[n] = '\0';
+    printf("%s\n", sec_key);
+}
+
 int main () {
-    test_strntok();
+/*    test_strntok();
     test_strepl();
     str_size();
     str_del();
@@ -472,6 +494,7 @@ int main () {
     test_strw_c();
     test_hexstr();
     test_concat();
-    test_msg();
+    test_msg();*/
+    test_sha();
     return 0;
 }

@@ -17,9 +17,15 @@
 #include "str.h"
 #include "list.h"
 
+typedef void (*slogf_h) (const char*, ...);
+typedef void (*vslogf_h) (int, const char*, va_list);
+
+extern slogf_h slogf;
+extern vslogf_h vslogf;
+
 int loginit (const char *fname);
-void slogf (const char *fmt, ...);
-void vslogf (int is_print_time, const char *fmt, va_list ap);
+//void slogf (const char *fmt, ...);
+//void vslogf (int is_print_time, const char *fmt, va_list ap);
 
 typedef void (*load_conf_h) (const char*, strptr_t*, strptr_t*);
 int load_conf (const char *fname, load_conf_h fn);

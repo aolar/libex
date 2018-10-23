@@ -1,53 +1,5 @@
 #include "task.h"
 
-#if 0
-char **mkcmdstr (const char *cmdline, size_t cmd_len) {
-    str_t *cmd_str = mkstr(cmdline, cmd_len, 8);
-    strptr_t cmd = { cmd_str->len, cmd_str->ptr }, tok;
-    size_t cnt = 0, n = 1;
-    char **args = NULL;
-    STR_ADD_NULL(cmd_str);
-    while (0 == strntok(&cmd.ptr, &cmd.len, CONST_STR_LEN(" "), &tok)) {
-        if (n) {
-            if (tok.ptr[0] == '"') n = 0;
-            if (cnt > 0) *(tok.ptr - n) = '\0';
-            ++cnt;
-        } else
-        if (tok.ptr[tok.len-1] == '"') {
-            *(tok.ptr + tok.len - 1) = '\0';
-            n = 1;
-        }
-    }
-    cmd.ptr = cmd_str->ptr;
-    cmd.len = cmd_str->len;
-    if (0 == strntok(&cmd.ptr, &cmd.len, CONST_STR_LEN("\0"), &tok)) {
-        char *p;
-        args = malloc(sizeof(char*) * (cnt + 2));
-        args[0] = malloc(tok.len+1);
-        strncpy(args[0], tok.ptr, tok.len);
-        args[0][tok.len] = '\0';
-        if ((p = strrchr(tok.ptr, '/'))) {
-            *p++ = '\0';
-            tok.len -= (uintptr_t)p - (uintptr_t)tok.ptr;
-            tok.ptr = p;
-        }
-        args[1] = malloc(tok.len+1);
-        strncpy(args[1], tok.ptr, tok.len);
-        args[1][tok.len] = '\0';
-        n = 2;
-        while (0 == strntok(&cmd.ptr, &cmd.len, CONST_STR_LEN("\0"), &tok)) {
-            args[n] = malloc(tok.len+1);
-            strncpy(args[n], tok.ptr, tok.len);
-            args[n][tok.len] = '\0';
-            ++n;
-        }
-        args[n] = NULL;
-    }
-    free(cmd_str);
-    return args;
-}
-#endif
-
 typedef struct {
     char **cmd;
     size_t idx;
@@ -108,7 +60,6 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags) {
         if (WIFEXITED(status)) { proc->run_exit = RUN_EXITED; proc->exit_code = WEXITSTATUS(status); } else
         if (WIFSTOPPED(status)) { proc->run_exit = RUN_STOPPED; proc->exit_code = WSTOPSIG(status); } else
         if (WIFSIGNALED(status)) { proc->run_exit = RUN_SIGNALED; proc->exit_code = WTERMSIG(status); };
-//        proc->pid = 0;
     }
     #else
     char cmdline [cmd_len+1];
@@ -205,14 +156,8 @@ static msg_t *get_next_msg (slot_t *slot, pool_t *pool) {
             struct timespec totime;
             clock_gettime(CLOCK_MONOTONIC, &totime);
             totime.tv_sec += pool->livingtime;
-            if (ETIMEDOUT == pthread_cond_timedwait(&pool->cond, &pool->locker, &totime)) {
-                lst_del(slot->node);
-                if (pool->on_destroy_slot)
-                    pool->on_destroy_slot(slot->data);
-                free(slot);
-                pthread_mutex_unlock(&pool->locker);
-                return NULL;
-            }
+            if (ETIMEDOUT == pthread_cond_timedwait(&pool->cond, &pool->locker, &totime))
+                slot->is_alive = 0;
         }
     }
     pthread_mutex_unlock(&pool->locker);
@@ -232,8 +177,16 @@ static void *slot_process (void *arg) {
     pthread_mutex_lock(&pool->locker);
     slot->node =lst_adde(pool->slots, slot);
     pthread_mutex_unlock(&pool->locker);
-    if (pool->on_create_slot)
-        pool->on_create_slot(slot, sd->init_data);
+    if (pool->on_create_slot) {
+        if (-1 == pool->on_create_slot(slot, sd->init_data)) {
+            pthread_mutex_lock(&pool->locker);
+            lst_del(slot->node);
+            if (pool->on_destroy_slot)
+                pool->on_destroy_slot(slot);
+            free(slot);
+            pthread_mutex_unlock(&pool->locker);
+        }
+    }
     free(sd);
     while ((msg = get_next_msg(slot, pool))) {
         if (msg->on_msg) {
@@ -248,6 +201,12 @@ static void *slot_process (void *arg) {
             pool->on_freemsg(msg->in_data);
         free(msg);
     }
+    pthread_mutex_lock(&pool->locker);
+    if (pool->on_destroy_slot)
+        pool->on_destroy_slot(slot);
+    lst_del(slot->node);
+    pthread_mutex_unlock(&pool->locker);
+    free(slot);
     return NULL;
 }
 
@@ -279,6 +238,7 @@ static int add_slot (pool_t *pool, void *init_data) {
         free(sd);
         return -1;
     }
+    pthread_detach(slot->th);
     return 0;
 }
 
@@ -318,7 +278,7 @@ int pool_call (pool_t *pool,
     msg->mutex = mutex;
     msg->cond = cond;
     pthread_mutex_lock(&pool->locker);
-    if (pool->livingtime > 0 && pool->queue->len > 0 && pool->slots->len < pool->max_slots)
+    if (pool->livingtime > 0 && (0 == pool->slots->len || (pool->queue->len > 0 && pool->slots->len < pool->max_slots)))
         ret = add_slot(pool, init_data);
     if (0 != ret)
         return ret;
@@ -328,19 +288,14 @@ int pool_call (pool_t *pool,
     return ret;
 }
 
-static int on_send_stop (list_item_t *li, void *dummy) {
+typedef struct {
+    pthread_t *ths;
+    int idx;
+} slot_stop_t;
+
+static int on_send_stop (list_item_t *li, void *data) {
     slot_t *slot = (slot_t*)li->ptr;
     slot->is_alive = 0;
-    return ENUM_CONTINUE;
-}
-
-static int on_wait_slot (list_item_t *li, void *dummy) {
-    pthread_join(((slot_t*)li->ptr)->th, NULL);
-    return ENUM_CONTINUE;
-}
-
-static int on_free_slot (list_item_t *li, void *dummy) {
-    free(li->ptr);
     return ENUM_CONTINUE;
 }
 
@@ -354,11 +309,11 @@ void pool_destroy (pool_t *pool) {
     pool->is_alive = 0;
     if (!pool->timeout) {
         pthread_mutex_lock(&pool->locker);
-        lst_enum(pool->slots, on_send_stop, NULL, 0);
+        slot_stop_t ss = { .ths = NULL, .idx = 0 };
+        lst_enum(pool->slots, on_send_stop, (void*)&ss, 0);
         pthread_cond_broadcast(&pool->cond);
         pthread_mutex_unlock(&pool->locker);
-        lst_enum(pool->slots, on_wait_slot, NULL, 0);
-        lst_enum(pool->slots, on_free_slot, NULL, 0);
+        sleep(1);
         lst_free(pool->slots);
         lst_enum(pool->queue, (list_item_h)on_free_queue, pool, 0);
         lst_free(pool->queue);

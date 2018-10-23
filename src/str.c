@@ -47,10 +47,12 @@ wstr_t *wmkstr (const wchar_t *str, size_t len, size_t chunk_size) {
 int strsize (str_t **str, size_t nlen, int flags) {
     str_t *s = *str;
     size_t bufsize = (nlen / s->chunk_size) * s->chunk_size + s->chunk_size;
+    errno = 0;
     if (bufsize == s->bufsize) return 0;
     if (!(flags & STR_REDUCE) && bufsize < s->bufsize) return 0;
     s = realloc(s, sizeof(size_t)*3 + bufsize);
     if (!s) return -1;
+    errno = ERANGE;
     s->bufsize = bufsize;
     *str = s;
     STR_ADD_NULL(*str);
@@ -418,10 +420,12 @@ int strbufalloc (strbuf_t *strbuf, size_t len, size_t chunk_size) {
 int strbufsize (strbuf_t *strbuf, size_t nlen, int flags) {
     char *buf = strbuf->ptr;
     size_t bufsize = (nlen / strbuf->chunk_size) * strbuf->chunk_size + strbuf->chunk_size;
+    errno = 0;
     if (bufsize == strbuf->bufsize) return 0;
     if (!(flags & STR_REDUCE) && bufsize < strbuf->bufsize) return 0;
     buf = realloc(buf, bufsize);
     if (!buf) return -1;
+    errno = ERANGE;
     strbuf->bufsize = bufsize;
     strbuf->ptr = buf;
     if (nlen < strbuf->len) strbuf->len = nlen;
@@ -450,6 +454,14 @@ int strbufadd (strbuf_t *strbuf, const char *src, size_t src_len) {
     return 0;
 }
 
+int strbufset (strbuf_t *buf, const char c, size_t len) {
+    if (-1 == strbufsize(buf, len, 0))
+        return -1;
+    buf->len = len;
+    memset(buf->ptr, c, len);
+    return 0;
+}
+
 static char encoding_table [] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static char decoding_table [] = {
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -472,8 +484,9 @@ static int mod_table[] = {0, 2, 1};
 
 #define ENCODED_LEN(X) 4 * ((X + 2) / 3)
 
-static void base64_encode(const unsigned char *data, size_t input_length, char *encoded_data, size_t output_length) {
-    for (int i = 0, j = 0; i < input_length;) {
+ssize_t base64_encode(const unsigned char *data, size_t input_length, char *encoded_data, size_t output_length) {
+    ssize_t i = 0, j = 0;
+    for (i = 0, j = 0; i < input_length;) {
         uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
         uint32_t octet_b = i < input_length ? (unsigned char)data[i++] : 0;
         uint32_t octet_c = i < input_length ? (unsigned char)data[i++] : 0;
@@ -483,8 +496,11 @@ static void base64_encode(const unsigned char *data, size_t input_length, char *
         encoded_data[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
         encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
     }
+    j--;
     for (int i = 0; i < mod_table[input_length % 3]; i++)
-        encoded_data[output_length - 1 - i] = '=';
+        //encoded_data[output_length - 1 - i] = '=';
+        encoded_data[j++] = '=';
+    return j;
 }
 
 str_t *str_base64_encode (const char *buf, size_t bufsize, size_t chunk_size) {
