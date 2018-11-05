@@ -996,6 +996,7 @@ static char als ['Z'-'A'+1+'z'-'a'+1];
 static char al_reg_nums ['9'-'0'+1+'Z'-'A'+1];
 static char al_regs ['Z'-'A'+1];
 
+__attribute__ ((constructor))
 static void init () {
     char c,
          *p_al_nums = al_nums,
@@ -1013,7 +1014,6 @@ static void init () {
         *p_al_nums++ = *p_als++ = c++;
     srand(time(0));
 }
-static void init () __attribute__ ((constructor));
 
 typedef int (*charconv_h) (int);
 

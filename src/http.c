@@ -115,6 +115,8 @@ static int parse_headers (char **str, size_t *str_len, http_request_t *req, void
         else
         if (on_http_header && 0 > (rc = on_http_header(&key, &val, userdata)))
             return rc;
+        if (*str_len == 0)
+            return HTTP_PARTIAL_LOADED;
         ++*str; --*str_len;
         if (0 == cmpstr(*str, 2, CONST_STR_LEN("\r\n"))) {
             *str += 2; *str_len -= 2;

@@ -9,14 +9,14 @@ const char *log_fname = NULL;
 #define PATH_DELIM_S "\\"
 #endif
 
-static void std_slogf (const char *fmt, ...) {}
-static void std_vslogf (int is_print_time, const char *fmt, va_list va) {}
+//static void std_slogf (const char *fmt, ...) {}
+//static void std_vslogf (int is_print_time, const char *fmt, va_list va) {}
 
-static void fl_vslogf (int is_print_time, const char *fmt, va_list ap);
-static void fl_slogf (const char *fmt, ...);
+//static void fl_vslogf (int is_print_time, const char *fmt, va_list ap);
+//static void fl_slogf (const char *fmt, ...);
 
-slogf_h slogf = std_slogf;
-vslogf_h vslogf = std_vslogf;
+//slogf_h slogf = std_slogf;
+//vslogf_h vslogf = std_vslogf;
 
 int loginit (const char *fname) {
     struct stat st;
@@ -28,8 +28,8 @@ int loginit (const char *fname) {
             int fd = open(fname, O_WRONLY | O_CREAT | O_APPEND);
             #endif
             if (fd >= 0) close(fd); else return -1;
-            slogf = fl_slogf;
-            vslogf = fl_vslogf;
+            //slogf = fl_slogf;
+            //vslogf = fl_vslogf;
         } else
             return -1;
     }
@@ -39,7 +39,7 @@ int loginit (const char *fname) {
 
 #define LOG_BUF_SIZE 1024
 
-static void fl_vslogf (int is_print_time, const char *fmt, va_list ap) {
+void vslogf (int is_print_time, const char *fmt, va_list ap) {
     if (log_fname) {
         char buf [LOG_BUF_SIZE] = {'\0'};
         time_t t = time(0);
@@ -57,15 +57,15 @@ static void fl_vslogf (int is_print_time, const char *fmt, va_list ap) {
         #else
         if (-1 != (fd = open(log_fname, O_WRONLY | O_CREAT | O_APPEND))) {
         #endif
-            flock(fd, LOCK_EX);
+//            flock(fd, LOCK_EX);
             write(fd, buf, len);
-            flock(fd, LOCK_UN);
+//            flock(fd, LOCK_UN);
             close(fd);
         }
     }
 }
 
-static void fl_slogf (const char *fmt, ...) {
+void slogf (const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vslogf(1, fmt, ap);
@@ -250,7 +250,8 @@ str_t *path_add_path (str_t *path, const char *arg, ...) {
 #define TEMP_NAMLEN 16
 #define TEMP_TIMLEN 24
 char templ ['9'-'0'+1+'Z'-'A'+1+'z'-'a'+1];
-void init_templ () __attribute__ ((constructor));
+
+__attribute__ ((constructor))
 void init_templ () {
     char *p = templ;
     char c = '0';

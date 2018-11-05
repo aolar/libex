@@ -140,23 +140,27 @@ static inline int jsonrpc_parse_request (const char *json_str, jsonrpc_t *jsonrp
 static inline int jsonrpc_parse_response_len (const char *json_str, size_t json_str_len, jsonrpc_t *jsonrpc) { return jsonrpc_parse_response_intr(json_str, json_str_len, json_parse_len, jsonrpc); };
 static inline int jsonrpc_parse_response (const char *json_str, jsonrpc_t *jsonrpc) { return jsonrpc_parse_response_intr(json_str, strlen(json_str), json_parse_len, jsonrpc); };
 
-typedef void (*jsonrpc_h) (strbuf_t*, void *userdata);
+typedef int (*jsonrpc_h) (strbuf_t*, void *userdata);
 void jsonrpc_setver (jsonrpc_ver_t ver);
 
 extern char json_prefix;
 extern size_t json_prefix_len;
 
-void jsonrpc_request (strbuf_t *buf, const char *method, size_t method_len, intptr_t id, int id_len, jsonrpc_h on_params, void *userdata);
-void jsonrpc_response (strbuf_t *buf, intptr_t id, int id_len, jsonrpc_h on_result, void *userdata);
+void jsonrpc_prepare (strbuf_t *buf);
+int jsonrpc_request (strbuf_t *buf, const char *method, size_t method_len, intptr_t id, int id_len, jsonrpc_h on_params, void *userdata);
+int jsonrpc_response (strbuf_t *buf, intptr_t id, int id_len, jsonrpc_h on_result, void *userdata);
+void jsonrpc_response_begin (strbuf_t *buf, intptr_t id, int id_len);
+void jsonrpc_response_end (strbuf_t *buf);
 static inline void jsonrpc_response_ok (strbuf_t *buf, intptr_t id, int id_len) {
     jsonrpc_response(buf, id, id_len, ({
-        void fn (strbuf_t *buf, void *dummy) {
+        int fn (strbuf_t *buf, void *dummy) {
             json_add_true(buf, CONST_STR_NULL, JSON_END);
+            return 0;
         } fn;
     }), NULL);
 }
-void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len);
-void jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len);
+int jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len);
+int jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len);
 
 typedef void (*jsonrpc_method_h) (strbuf_t *buf, json_item_t **params, size_t params_len, intptr_t id, int id_len, void**);
 

@@ -1,5 +1,5 @@
 Package: libex-dev
-Version: 0.1.0
+Version: 0.1.1
 Maintainer: BrianBoru <brian_boru@toavalon.com>
 Depends: libc6 (>= 2.14)
 Architecture: amd64

@@ -101,7 +101,9 @@ void json_free (json_t *j) {
 }
 
 int json_str2long (strptr_t *str, int64_t *l) {
-    char *s = strndup(str->ptr, str->len), *tail;
+    char *s = strndup(str->ptr, str->len), *tail = NULL;
+    if (!isdigit(*s) && '-' != *s && '+' != *s)
+        return -1;
     *l = strtoll(s, &tail, 0);
     int ret = *tail != '\0' || errno == ERANGE ? -1 : 0;
     free(s);
@@ -109,7 +111,9 @@ int json_str2long (strptr_t *str, int64_t *l) {
 }
 
 int json_str2double (strptr_t *str, long double *d) {
-    char *s = strndup(str->ptr, str->len), *tail;
+    char *s = strndup(str->ptr, str->len), *tail = NULL;
+    if (!isdigit(*s) && '-' != *s && '+' != *s)
+        return -1;
     *d = strtold(s, &tail);
     int ret = *tail != '\0' || errno == ERANGE ? -1 : 0;
     free(s);
@@ -660,7 +664,14 @@ static void jsonrpc_id (strbuf_t *buf, intptr_t id, int id_len, int is_end) {
         json_add_null(buf, CONST_STR_LEN("id"), is_end);
 }
 
-void jsonrpc_request (strbuf_t *buf, const char *method, size_t method_len, intptr_t id, int id_len, jsonrpc_h on_params, void *userdata) {
+void jsonrpc_prepare (strbuf_t *buf) {
+    buf->len = 0;
+    if (json_prefix_len > 0)
+        strbufset(buf, json_prefix, json_prefix_len);
+}
+
+int jsonrpc_request (strbuf_t *buf, const char *method, size_t method_len, intptr_t id, int id_len, jsonrpc_h on_params, void *userdata) {
+    int rc = 0;
     buf->len = 0;
     if (json_prefix_len > 0)
         strbufset(buf, json_prefix, json_prefix_len);
@@ -669,26 +680,46 @@ void jsonrpc_request (strbuf_t *buf, const char *method, size_t method_len, intp
     json_add_str(buf, CONST_STR_LEN("method"), method, method_len, JSON_NEXT);
     json_open_array(buf, CONST_STR_LEN("params"));
     if (on_params)
-        on_params(buf, userdata);
+        rc = on_params(buf, userdata);
     json_close_array(buf, JSON_NEXT);
     jsonrpc_id(buf, id, id_len, JSON_END);
     json_end_object(buf);
+    return rc;
 }
 
-void jsonrpc_response (strbuf_t *buf, intptr_t id, int id_len, jsonrpc_h on_result, void *userdata) {
+void jsonrpc_response_begin (strbuf_t *buf, intptr_t id, int id_len) {
+    buf->len = 0;
+    if (json_prefix_len > 0)
+        strbufset(buf, json_prefix, json_prefix_len);
+    json_begin_object(buf);
+    json_add_null(buf, CONST_STR_LEN("error"), JSON_NEXT);
+    jsonrpc_id(buf, id, id_len, JSON_END);
+    json_add_key(buf, CONST_STR_LEN("result"));
+}
+
+int jsonrpc_response (strbuf_t *buf, intptr_t id, int id_len, jsonrpc_h on_result, void *userdata) {
+    int rc = 0;
     buf->len = 0;
     if (json_prefix_len > 0)
         strbufset(buf, json_prefix, json_prefix_len);
     json_begin_object(buf);
     json_add_key(buf, CONST_STR_LEN("result"));
-    on_result(buf, userdata);
+    rc = on_result(buf, userdata);
     strbufadd(buf, CONST_STR_LEN(","));
     json_add_null(buf, CONST_STR_LEN("error"), JSON_NEXT);
     jsonrpc_id(buf, id, id_len, JSON_END);
     json_end_object(buf);
+    return rc;
 }
 
-void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len) {
+void jsonrpc_response_end (strbuf_t *buf) {
+    buf->len = 0;
+    if (json_prefix_len > 0)
+        strbufset(buf, json_prefix, json_prefix_len);
+    json_end_object(buf);
+}
+
+int jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len) {
     buf->len = 0;
     if (json_prefix_len > 0)
         strbufset(buf, json_prefix, json_prefix_len);
@@ -700,6 +731,7 @@ void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message
     json_close_object(buf, JSON_NEXT);
     jsonrpc_id(buf, id, id_len, JSON_END);
     json_end_object(buf);
+    return code;
 }
 
 #define JSONRPC_PARSE_ERROR_STR "Invalid JSON was received by the server."
@@ -708,7 +740,7 @@ void jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message
 #define JSONRPC_INVALID_PARAMS_STR "Invalid method parameters."
 #define JSONRPC_INTERNAL_ERROR_STR "Internal JSON-RPC error."
 
-void jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len) {
+int jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len) {
     switch (code) {
         case JSONRPC_PARSE_ERROR:
             jsonrpc_error(buf, JSONRPC_PARSE_ERROR, CONST_STR_LEN(JSONRPC_PARSE_ERROR_STR), id, id_len);
@@ -728,6 +760,7 @@ void jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len) {
         default:
             break;
     }
+    return code;
 }
 
 static int get_id (json_item_t *item, intptr_t *id, int *id_len) {
@@ -790,16 +823,16 @@ int jsonrpc_execute (strbuf_t *buf, size_t off, jsonrpc_method_t *methods, void 
                     m->handle(buf, la.params, la.params_len, id, id_len, result);
                     rc = m->id;
                 } else
-                    jsonrpc_stderror(buf, JSONRPC_INVALID_PARAMS, id, id_len);
+                    rc = jsonrpc_stderror(buf, JSONRPC_INVALID_PARAMS, id, id_len);
                 free(la.params);
             } else
-                jsonrpc_stderror(buf, JSONRPC_METHOD_NOT_FOUND, id, id_len);
+                rc = jsonrpc_stderror(buf, JSONRPC_METHOD_NOT_FOUND, id, id_len);
             if (id_len > 0)
                 free((void*)id);
         } else
-            jsonrpc_stderror(buf, JSONRPC_PARSE_ERROR, 0, 0);
+            rc = jsonrpc_stderror(buf, JSONRPC_PARSE_ERROR, 0, 0);
     } else
-        jsonrpc_stderror(buf, rc, 0, 0);
+        rc = jsonrpc_stderror(buf, rc, 0, 0);
     if (jsonrpc.json)
         json_free(jsonrpc.json);
     return rc;
