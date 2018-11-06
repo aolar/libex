@@ -165,6 +165,13 @@ static json_array_t *json_parse_array (json_t *j, strptr_t *token) {
                 goto err;
             }
         } else
+        if (0 == cmpstr(token->ptr, token->len, CONST_STR_LEN("["))) {
+            ji->type = JSON_ARRAY;
+            if (!(ji->data.a = json_parse_array(j, token))) {
+                json_free_item(ji);
+                goto err;
+            }
+        } else
             json_set_item_value(j, ji, token);
         lst_adde(a, (void*)ji);
         if (JSON_OK != get_token(j, token)) goto err;
