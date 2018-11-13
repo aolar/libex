@@ -38,7 +38,7 @@ list_item_t *lst_add (list_t *list, void *x);
 list_item_t *lst_adde (list_t *list, void *x);
 list_t *lst_addelst (list_t *dst, list_t *src);
 list_item_t *lst_del (list_item_t *item);
-void lst_enum (list_t *list, list_item_h fn, void *userdata, int flags);
+int lst_enum (list_t *list, list_item_h fn, void *userdata, int flags);
 list_item_t *lst_get (list_t *list, compare_h fn, void *userdata);
 static inline void on_default_free_item (void *x, void *y) {
     free(x);

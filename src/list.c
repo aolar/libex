@@ -78,16 +78,17 @@ list_item_t *lst_del (list_item_t *item) {
     return next;
 }
 
-void lst_enum (list_t *list, list_item_h fn, void *userdata, int flags) {
+int lst_enum (list_t *list, list_item_h fn, void *userdata, int flags) {
     list_item_t *x = list->head;
     if (x) {
         do {
             int n = fn(x, userdata);
             if (ENUM_BREAK == n && ENUM_STOP_IF_BREAK == flags)
-                return;
+                return ENUM_BREAK;
             x = x->next;
         } while (x != list->head);
     }
+    return ENUM_CONTINUE;
 }
 
 list_item_t *lst_get (list_t *list, compare_h fn, void *userdata) {
