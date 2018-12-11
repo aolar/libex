@@ -1,6 +1,9 @@
 #ifndef __LIBEX_MSG_H__
 #define __LIBEX_MSG_H__
 
+#ifdef __GMP__
+#include <gmp.h>
+#endif
 #include "str.h"
 #include "list.h"
 
@@ -69,5 +72,11 @@ static inline void msg_destroy (msgbuf_t *msg) { if (msg->ptr) { free(msg->ptr);
 
 #define MSG_END } }
 
+#ifdef __GMP__
+int msg_getmpz (msgbuf_t *msg, mpz_t w);
+int msg_getmpq (msgbuf_t *msg, mpq_t w);
+int msg_setmpz (msgbuf_t *msg, const mpz_t u);
+int msg_setmpq (msgbuf_t *msg, const mpq_t u);
+#endif
 
 #endif // __LIBEX_MSG_H__

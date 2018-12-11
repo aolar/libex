@@ -3,11 +3,12 @@
 
 int i, t;
 
-static void on_create_slot (slot_t *slot, void *x) {
+static int on_create_slot (slot_t *slot, void *x) {
     printf("create slot\n");
+    return 0;
 }
 
-static void on_destroy_slot (void *x) {
+static void on_destroy_slot (slot_t *x) {
     printf("destroy slot\n");
 }
 

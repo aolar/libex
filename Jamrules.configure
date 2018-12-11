@@ -1,9 +1,29 @@
+rule -configure-test-gmp- {
+    return [
+        -configure-test-compile-cc- "libgmp" :
+        "#include <gmp.h>"
+        "int main () {"
+        "mpz_t x;"
+        "mpz_init_set_str(x, "1234567", 10);"
+        "return 0;"
+        "}"
+        : : "-lgmp"
+    ] ;
+}
+
 rule -configure- {
     if ! $(PREFIX) {
         PREFIX = /usr/local ;
     }
     local pp = [ Command "echo $(PREFIX) | sed \"s/\\//\\\\\\\\\\\//g\"" : dummy ] ;
-    Command "sed \"s/@prefix/\\$(pp)/\" ./libex.pc.in > ./libex.pc" ;
+    if [ -configure-test-gmp- ] == 1 {
+        -configure-add-line- "CFLAGS.all += -D__GMP__ ;" ;
+        -configure-add-line- "LINKLIBS.all += -lgmp ;" ;
+        Command "sed -e \"s/@prefix/\\$(pp)/\" -e \"s/@lgmp/-lgmp/\" ./libex.pc.in > ./libex.pc" ;
+    } else {
+        #Command "sed \"s/@prefix/\\$(pp)/\" ./libex.pc.in > ./libex.pc" ;
+        Command "sed -e \"s/@prefix/\\$(pp)/\" -e \"s/@lgmp//\" ./libex.pc.in > ./libex.pc" ;
+    }
     if $(windoze) {
          -configure-add-line- "CFLAGS.all += -D__WINDOWS__ ;" ;
     }

@@ -16,6 +16,7 @@ Main test_qdb$(SUFEXE) : test_qdb.c ;
 Main test_task$(SUFEXE) : test_task.c ;
 Main test_srv$(SUFEXE) : test_srv.c ;
 Main test_cln$(SUFEXE) : test_cln.c ;
+Main test_msg$(SUFEXE) : test_msg.c ;
 
 # Link
 
@@ -33,6 +34,7 @@ LinkLibraries test_qdb$(SUFEXE) : libex.a ;
 LinkLibraries test_task$(SUFEXE) : libex.a ;
 LinkLibraries test_srv$(SUFEXE) : libex.a ;
 LinkLibraries test_cln$(SUFEXE) : libex.a ;
+LinkLibraries test_msg$(SUFEXE) : libex.a ;
 
 LINKLIBS on test_str$(SUFEXE) = -export-dynamic -rdynamic test/test_urlenc.o -rdynamic test/test_urldec.o ;
 

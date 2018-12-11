@@ -42,9 +42,9 @@ int msg_create_response (msgbuf_t *msg, int code, uint32_t len, uint32_t chunk_s
     return msg_seti32(msg, code);
 }
 
-int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
+static int msg_prealloc (msgbuf_t *msg, uint32_t nstr_len) {
     char *buf = msg->ptr;
-    uint32_t nstr_len = msg->len + src_len;
+//    uint32_t nstr_len = *new_len = msg->len + src_len;
     errno = 0;
     if (nstr_len >= msg->bufsize) {
         uint32_t nbufsize = (nstr_len / msg->chunk_size) * msg->chunk_size + msg->chunk_size;
@@ -55,6 +55,13 @@ int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
         msg->pc = msg->ptr + pc_len;
         msg->bufsize = nbufsize;
     }
+    return MSG_OK;
+}
+
+int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
+    uint32_t nstr_len = msg->len + src_len;
+    int rc = msg_prealloc(msg, nstr_len);
+    if (MSG_OK != rc) return rc;
     memcpy(msg->pc, src, src_len);
     msg->pc += src_len;
     msg->len = nstr_len;
@@ -63,18 +70,9 @@ int msg_setbuf (msgbuf_t *msg, void *src, uint32_t src_len) {
 }
 
 int msg_setstr (msgbuf_t *msg, const char *src, size_t src_len) {
-    char *buf = msg->ptr;
     uint32_t nstr_len = msg->len + src_len + sizeof(uint32_t) * 2;
-    errno = 0;
-    if (nstr_len >= msg->bufsize) {
-        uint32_t nbufsize = (nstr_len / msg->chunk_size) * msg->chunk_size + msg->chunk_size;
-        uintptr_t pc_len = (uintptr_t)msg->pc - (uintptr_t)msg->ptr;
-        buf = msg_realloc(buf, nbufsize);
-        if (!buf) return MSG_ERROR;
-        msg->ptr = buf;
-        msg->pc = msg->ptr + pc_len;
-        msg->bufsize = nbufsize;
-    }
+    int rc = msg_prealloc(msg, nstr_len);
+    if (MSG_OK != rc) return rc;
     *(uint32_t*)msg->pc = src_len;
     memcpy(msg->pc + sizeof(uint32_t), src, src_len);
     msg->pc += src_len + sizeof(uint32_t);
@@ -254,3 +252,55 @@ int msg_error (msgbuf_t *msg, int code, const char *str, size_t len) {
         return MSG_ERROR;
     return msg_setstr(msg, str, len);
 }
+
+#ifdef __GMP__
+int msg_getmpz (msgbuf_t *msg, mpz_t w) {
+    uint32_t len;
+    int rc;
+    if (MSG_OK != (rc = msg_getui32(msg, &len)))
+        return rc;
+    if (msg->ptr + msg->len < msg->pc + len) {
+        errno = EFAULT;
+        return MSG_ERROR;
+    }
+    mpz_import(w, len, 1, sizeof(char), 0, 0, msg->pc);
+    msg->pc += len;
+    return MSG_OK;
+}
+
+int msg_getmpq (msgbuf_t *msg, mpq_t w) {
+    int rc;
+    if (MSG_OK == (rc = msg_getmpz(msg, &w->_mp_num)))
+        rc = msg_getmpz(msg, &w->_mp_den);
+    return rc;
+}
+
+/*int msg_getmpq (msgbuf_t *msg, mpq_ptr w) {
+    if (0 == msg_getmpz(msg, &w->_mp_num) && 0 == msg_getmpz(msg, &w->_mp_den))
+        return 0;
+    return -1;
+}*/
+
+int msg_setmpz (msgbuf_t *msg, const mpz_t u) {
+    size_t numb = 8 * sizeof(char);
+    uint32_t src_len = (mpz_sizeinbase(u, 2) + numb-1) / numb,
+             nstr_len = msg->len + src_len;
+    int rc = msg_prealloc(msg, nstr_len);
+    if (MSG_OK != rc) return rc;
+    if (MSG_OK != (rc = msg_setui32(msg, src_len)))
+        return rc;
+    mpz_export(msg->pc, NULL, 1, sizeof(char), 0, 0, u);
+    msg->pc += src_len;
+    msg->len += src_len;
+    *(uint32_t*)msg->ptr = msg->len;
+    return MSG_OK;
+}
+
+int msg_setmpq (msgbuf_t *msg, const mpq_t u) {
+    int rc;
+    if (MSG_OK == (rc = msg_setmpz(msg, &u->_mp_num)))
+        rc = msg_setmpz(msg, &u->_mp_den);
+    return rc;
+}
+
+#endif // __GMP__
