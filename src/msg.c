@@ -275,12 +275,6 @@ int msg_getmpq (msgbuf_t *msg, mpq_t w) {
     return rc;
 }
 
-/*int msg_getmpq (msgbuf_t *msg, mpq_ptr w) {
-    if (0 == msg_getmpz(msg, &w->_mp_num) && 0 == msg_getmpz(msg, &w->_mp_den))
-        return 0;
-    return -1;
-}*/
-
 int msg_setmpz (msgbuf_t *msg, const mpz_t u) {
     size_t numb = 8 * sizeof(char);
     uint32_t src_len = (mpz_sizeinbase(u, 2) + numb-1) / numb,
