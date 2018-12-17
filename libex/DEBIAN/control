@@ -1,7 +1,7 @@
 Package: libex-dev
-Version: 0.1.1
+Version: 1.0.0
 Maintainer: BrianBoru <brian_boru@toavalon.com>
-Depends: libc6 (>= 2.14)
+Depends: libc6 (>= 2.14), libgmp10
 Architecture: amd64
 Priority: optional
 Section: libdevel

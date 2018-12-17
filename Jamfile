@@ -29,6 +29,7 @@ InstallFile include/libex :
     $(TOP)/include/libex/http.h
     $(TOP)/include/libex/list.h
     $(TOP)/include/libex/net.h
+    $(TOP)/include/libex/unet.h
     $(TOP)/include/libex/qdb.h
     $(TOP)/include/libex/str.h
     $(TOP)/include/libex/thread.h
@@ -36,6 +37,7 @@ InstallFile include/libex :
     $(TOP)/include/libex/json.h
     $(TOP)/include/libex/hash.h
     $(TOP)/include/libex/msg.h
+    $(TOP)/include/libex/ws.h
 ;
 
 InstallFile lib/pkgconfig : libex.pc ;
