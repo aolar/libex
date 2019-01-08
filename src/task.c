@@ -190,16 +190,25 @@ static void *slot_process (void *arg) {
     free(sd);
     while ((msg = get_next_msg(slot, pool))) {
         if (msg->on_msg) {
-            msg->on_msg(slot->data, msg->in_data, msg->out_data);
-            if (msg->mutex && msg->cond) {
-                pthread_mutex_lock(msg->mutex);
-                pthread_cond_signal(msg->cond);
-                pthread_mutex_unlock(msg->mutex);
+            int msg_rc = msg->on_msg(slot->data, msg->in_data, msg->out_data);
+            if (MSG_DONE == msg_rc) {
+                if (msg->mutex && msg->cond) {
+                    pthread_mutex_lock(msg->mutex);
+                    pthread_cond_signal(msg->cond);
+                    pthread_mutex_unlock(msg->mutex);
+                }
+                if (pool->on_freemsg)
+                    pool->on_freemsg(msg->in_data);
+                free(msg);
+            } else
+            if (MSG_CONTINUE == msg_rc) {
+                if (-1 == pool_call(pool, msg, NULL)) { // FIXME : init data ?
+                    if (pool->on_freemsg)
+                        pool->on_freemsg(msg->in_data);
+                    free(msg);
+                }
             }
         }
-        if (pool->on_freemsg)
-            pool->on_freemsg(msg->in_data);
-        free(msg);
     }
     pthread_mutex_lock(&pool->locker);
     if (pool->on_destroy_slot)
@@ -264,19 +273,20 @@ void pool_start (pool_t *pool) {
             add_slot(pool, NULL);
 }
 
-int pool_call (pool_t *pool,
-                pool_msg_h on_msg,
-                void *init_data, void *in_data, void **out_data,
-                pthread_mutex_t *mutex, pthread_cond_t *cond) {
-    int ret = 0;
-    if (!pool->is_alive)
-        return -1;
+msg_t *create_msg (pool_msg_h on_msg, void *init_data, void *in_data, void **out_data, pthread_mutex_t *mutex, pthread_cond_t *cond) {
     msg_t *msg = calloc(1, sizeof(msg_t));
     msg->in_data = in_data;
     msg->out_data = out_data;
     msg->on_msg = on_msg;
     msg->mutex = mutex;
     msg->cond = cond;
+    return msg;
+}
+
+int pool_call (pool_t *pool, msg_t *msg, void *init_data) {
+    int ret = 0;
+    if (!pool->is_alive)
+        return -1;
     pthread_mutex_lock(&pool->locker);
     if (pool->livingtime > 0 && (0 == pool->slots->len || (pool->queue->len > 0 && pool->slots->len < pool->max_slots)))
         ret = add_slot(pool, init_data);

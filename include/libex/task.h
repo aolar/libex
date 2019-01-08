@@ -44,8 +44,11 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 
 #define POOL_DEFAULT_SLOTS -1
 
+#define MSG_DONE 0
+#define MSG_CONTINUE 1
+
 typedef struct slot slot_t;
-typedef void (*pool_msg_h) (void*, void*, void**);
+typedef int (*pool_msg_h) (void*, void*, void**);
 typedef int (*pool_create_h) (slot_t*, void*);
 typedef void (*pool_destroy_h) (slot_t*);
 
@@ -108,10 +111,7 @@ int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
 pool_t *pool_create ();
 
 void pool_start (pool_t *pool);
-int pool_call (pool_t *pool,
-                pool_msg_h on_msg,
-                void *init_data, void *in_data, void **out_data,
-                pthread_mutex_t *mutex, pthread_cond_t *cond);
+int pool_call (pool_t *pool, msg_t *msg, void *init_data);
 void pool_destroy (pool_t *pool);
 
 #endif // __LIBEX_TASK_h__
