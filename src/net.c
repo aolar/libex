@@ -5,7 +5,7 @@
 mutex_h fn_lock = NULL;
 mutex_h fn_unlock = NULL;
 
-static int atoport (const char *service, const char *proto) {
+int atoport (const char *service, const char *proto) {
     struct servent *servent;
     int port;
     char *tail;
@@ -17,7 +17,7 @@ static int atoport (const char *service, const char *proto) {
     return htons(port);
 }
 
-static int atoaddr (const char *address, struct in_addr *addr) {
+int atoaddr (const char *address, struct in_addr *addr) {
     struct hostent *host;
     addr->s_addr = inet_addr(address);
     if (-1 == addr->s_addr)

@@ -35,6 +35,9 @@ typedef struct {
 
 typedef ssize_t (*fmt_checker_h) (const char*, size_t);
 
+int atoport (const char *service, const char *proto);
+int atoaddr (const char *address, struct in_addr *addr);
+
 int net_bind (const char *svc);
 int net_connect (char *to_addr, char *service, int timeout);
 ssize_t net_recv (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checker_h fn_check);

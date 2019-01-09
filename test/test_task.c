@@ -12,10 +12,11 @@ static void on_destroy_slot (slot_t *x) {
     printf("destroy slot\n");
 }
 
-static void on_msg (void *d, void *str, void **x) {
+static int on_msg (void *d, void *str, void **x) {
     printf("%s\n", (char*)str);
     free(str);
     sleep(t);
+    return MSG_DONE;
 }
 
 static void on_info (void *d, void *x, void **z) {
