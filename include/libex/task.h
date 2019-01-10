@@ -108,6 +108,8 @@ int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
     default: pool_setopt_int \
 )(pool,opt,arg)
 
+msg_t *create_msg (pool_msg_h on_msg, void *in_data, void **out_data, pthread_mutex_t *mutex, pthread_cond_t *cond);
+
 pool_t *pool_create ();
 
 void pool_start (pool_t *pool);

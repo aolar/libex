@@ -13,7 +13,8 @@ extern char wst_ping [];
 extern char wst_close [];
 
 int wsnet_handshake (int fd);
-int wsnet_recv (int fd, int timeout, netbuf_t *buf, void *locker, ws_t **result);
+int wsnet_try_handshake (int fd, strbuf_t *buf);
+int wsnet_recv (int fd, netbuf_t *buf, ws_t **result);
 void wsnet_reset (netbuf_t *nbuf);
 
 #endif // __LIBEX_WSNET_H__

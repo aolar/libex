@@ -40,7 +40,7 @@ int atoaddr (const char *address, struct in_addr *addr);
 
 int net_bind (const char *svc);
 int net_connect (char *to_addr, char *service, int timeout);
-ssize_t net_recv (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checker_h fn_check);
+ssize_t net_recv (int fd, strbuf_t *buf, fmt_checker_h fn_check);
 ssize_t net_write (int fd, char *buf, size_t size, void *locker);
 
 #endif // __LIBEX_NET_H__

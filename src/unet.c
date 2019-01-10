@@ -80,7 +80,7 @@ int unet_recv (int fd, netbuf_t *nbuf, msgbuf_t *result, msg_parse_h fn_parse) {
         return NET_WAIT;
     }
     memset(result, 0, sizeof(msgbuf_t));
-    if ((nbytes = net_recv(fd, -1, &nbuf->buf, NULL, msg_buflen)) > 0) {
+    if ((nbytes = net_recv(fd, &nbuf->buf, msg_buflen)) > 0) {
         if (-1 == (nbytes = msg_buflen(nbuf->buf.ptr, nbuf->buf.len)))
             return NET_WAIT;
         rc = fn_parse(result, nbuf->buf.ptr, nbytes);

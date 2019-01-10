@@ -273,7 +273,7 @@ void pool_start (pool_t *pool) {
             add_slot(pool, NULL);
 }
 
-msg_t *create_msg (pool_msg_h on_msg, void *init_data, void *in_data, void **out_data, pthread_mutex_t *mutex, pthread_cond_t *cond) {
+msg_t *create_msg (pool_msg_h on_msg, void *in_data, void **out_data, pthread_mutex_t *mutex, pthread_cond_t *cond) {
     msg_t *msg = calloc(1, sizeof(msg_t));
     msg->in_data = in_data;
     msg->out_data = out_data;

@@ -46,7 +46,7 @@ int net_bind (const char *svc) {
     }
     return fd;
 }
-
+#if 0
 static int net_wait (int fd, int timeout) {
     int rc;
     struct pollfd fds;
@@ -62,7 +62,7 @@ static int net_wait (int fd, int timeout) {
     return rc;
 }
 
-ssize_t net_recv (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checker_h fn_check) {
+ssize_t net_recv_r (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checker_h fn_check) {
     int done = 0, rc = -1;
     ssize_t total = 0;
     errno = 0;
@@ -104,6 +104,17 @@ ssize_t net_recv (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checker_
     }
     return rc > 0 ? total : rc;
 }
+#endif
+
+ssize_t net_recv (int fd, strbuf_t *buf, fmt_checker_h fn_check) {
+    ssize_t readed;
+    if (-1 == strbufsize(buf, buf->len + buf->chunk_size, 0))
+        return -1;
+    if ((readed = recv(fd, buf->ptr + buf->len, buf->chunk_size, 0)) > 0)
+        buf->len += readed;
+    return readed;
+}
+
 
 ssize_t net_write (int fd, char *buf, size_t size, void *locker) {
     ssize_t sent = 0, wrote;
