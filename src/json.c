@@ -799,7 +799,7 @@ static int on_list_to_array (json_item_t *li, list_to_array_t *la) {
     return ENUM_CONTINUE;
 }
 
-int jsonrpc_execute (strbuf_t *buf, size_t off, jsonrpc_method_t *methods, void **result) {
+int jsonrpc_execute (strbuf_t *buf, size_t off, jsonrpc_method_t *methods, void *userdata) {
     int rc;
     jsonrpc_t jsonrpc;
     memset(&jsonrpc, 0, sizeof(jsonrpc_t));
@@ -827,7 +827,7 @@ int jsonrpc_execute (strbuf_t *buf, size_t off, jsonrpc_method_t *methods, void 
                     }
                 }
                 if (is_params_correct) {
-                    m->handle(buf, la.params, la.params_len, id, id_len, result);
+                    m->handle(buf, la.params, la.params_len, id, id_len, userdata);
                     rc = m->id;
                 } else
                     rc = jsonrpc_stderror(buf, JSONRPC_INVALID_PARAMS, id, id_len);

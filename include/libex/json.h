@@ -162,7 +162,7 @@ static inline void jsonrpc_response_ok (strbuf_t *buf, intptr_t id, int id_len) 
 int jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len);
 int jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len);
 
-typedef void (*jsonrpc_method_h) (strbuf_t *buf, json_item_t **params, size_t params_len, intptr_t id, int id_len, void**);
+typedef void (*jsonrpc_method_h) (strbuf_t *buf, json_item_t **params, size_t params_len, intptr_t id, int id_len, void*);
 
 typedef struct {
     int id;
@@ -172,6 +172,6 @@ typedef struct {
     int *param_types;
 } jsonrpc_method_t;
 
-int jsonrpc_execute (strbuf_t *buf, size_t off, jsonrpc_method_t *methods, void **result);
+int jsonrpc_execute (strbuf_t *buf, size_t off, jsonrpc_method_t *methods, void *userdata);
 
 #endif // __LIBEX_JSON_H__
