@@ -5,6 +5,12 @@
 mutex_h fn_lock = NULL;
 mutex_h fn_unlock = NULL;
 
+int netbuf_alloc (netbuf_t *nbuf, size_t start_len, size_t chunk_size) {
+    if (-1 == strbufalloc(&nbuf->buf, start_len, chunk_size) || -1 == strbufalloc(&nbuf->tail, start_len, chunk_size))
+        return -1;
+    return 0;
+}
+
 int atoport (const char *service, const char *proto) {
     struct servent *servent;
     int port;
