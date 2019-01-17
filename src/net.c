@@ -11,6 +11,14 @@ int netbuf_alloc (netbuf_t *nbuf, size_t start_len, size_t chunk_size) {
     return 0;
 }
 
+void netbuf_free (netbuf_t *nbuf) {
+    if (nbuf->buf.ptr)
+        free(nbuf->buf.ptr);
+    if (nbuf->tail.ptr)
+        free(nbuf->tail.ptr);
+    memset(nbuf, 0, sizeof(netbuf_t));
+}
+
 int atoport (const char *service, const char *proto) {
     struct servent *servent;
     int port;

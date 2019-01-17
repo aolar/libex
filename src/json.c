@@ -704,7 +704,7 @@ void jsonrpc_response_begin (strbuf_t *buf, intptr_t id, int id_len) {
     json_add_key(buf, CONST_STR_LEN("result"));
 }
 
-int jsonrpc_response (strbuf_t *buf, intptr_t id, int id_len, jsonrpc_h on_result, void *userdata) {
+int jsonrpc_response (strbuf_t *buf, jsonrpc_h on_result, void *userdata, intptr_t id, int id_len) {
     int rc = 0;
     buf->len = 0;
     if (json_prefix_len > 0)

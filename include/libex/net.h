@@ -33,6 +33,7 @@ typedef struct {
     strbuf_t tail;
 } netbuf_t;
 int netbuf_alloc (netbuf_t *nbuf, size_t start_len, size_t chunk_size);
+void netbuf_free (netbuf_t *nbuf);
 
 typedef ssize_t (*fmt_checker_h) (const char*, size_t);
 

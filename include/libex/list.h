@@ -45,11 +45,11 @@ static inline void on_default_free_item (void *x, void *y) {
     if (y) free(y);
 }
 
-#define LST_FOREACH(value, lst) { \
+#define LST_FOREACH(lst, type, value) { \
     list_item_t *__x__ = lst->head; \
     if (__x__) { \
         do { \
-            void *value = __x__->ptr; \
+            type *value = __x__->ptr; \
 
 #define LST_END(lst) \
         __x__ = __x__->next; \
