@@ -96,7 +96,7 @@ ssize_t ws_buflen (const uint8_t *buf, size_t buflen) {
 
 int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
     if (buf_len < sizeof(wsh_t))
-        return WS_PARTIAL;
+        return WS_WAIT;
     ws->hdr = (ws_hdr_t*)buf;
     uint8_t mlen = WS_BODY_LEN(ws), l;
     int is_mask = WS_ISMASK(ws);
@@ -105,7 +105,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
         ws->len = mlen;
         if (is_mask) {
             l = mlen + sizeof(wsc_small_t);
-            if (buf_len < l) return WS_PARTIAL;
+            if (buf_len < l) return WS_WAIT;
             if (buf_len > l) return WS_TOOBIG;
             ws->ptr = (uint8_t*)buf + sizeof(wsc_small_t);
             ws->mask = ws->hdr->c_small.mask;
@@ -113,7 +113,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
             return WS_OK;
         }
         l = mlen + sizeof(wss_small_t);
-        if (buf_len < l) return WS_PARTIAL;
+        if (buf_len < l) return WS_WAIT;
         if (buf_len > l) return WS_TOOBIG;
         ws->ptr = (uint8_t*)buf + sizeof(wss_small_t);
         ws->mask = NULL;
@@ -124,7 +124,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
         if (is_mask) {
             ws->len = ws->hdr->c_big.len = htobe16(ws->hdr->c_big.len);
             l = ws->len + sizeof(wsc_big_t);
-            if (buf_len < l) return WS_PARTIAL;
+            if (buf_len < l) return WS_WAIT;
             if (buf_len > l) return WS_TOOBIG;
             ws->ptr = (uint8_t*)buf + sizeof(wsc_big_t);
             ws->mask = ws->hdr->c_big.mask;
@@ -133,7 +133,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
         }
         ws->len = ws->hdr->s_big.len = htobe16(ws->hdr->s_big.len);
         l = ws->len + sizeof(wss_big_t);
-        if (buf_len < l) return WS_PARTIAL;
+        if (buf_len < l) return WS_WAIT;
         if (buf_len < l) return WS_TOOBIG;
         ws->ptr = (uint8_t*)buf + sizeof(wss_big_t);
         ws->mask = NULL;
@@ -144,7 +144,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
     if (is_mask) {
         ws->len = ws->hdr->c_huge.len = htobe64(ws->hdr->c_huge.len);
         l = ws->len + sizeof(wsc_huge_t);
-        if (buf_len < l) return WS_PARTIAL;
+        if (buf_len < l) return WS_WAIT;
         if (buf_len > l) return WS_TOOBIG;
         ws->ptr = (uint8_t*)buf + sizeof(wsc_huge_t);
         ws->mask = ws->hdr->c_huge.mask;
@@ -153,7 +153,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws) {
     }
     ws->len = ws->hdr->s_huge.len = htobe64(ws->hdr->s_huge.len);
     l = ws->len + sizeof(wss_huge_t);
-    if (buf_len < l) return WS_PARTIAL;
+    if (buf_len < l) return WS_WAIT;
     if (buf_len > l) return WS_TOOBIG;
     ws->ptr = (uint8_t*)buf + sizeof(wss_huge_t);
     ws->mask = NULL;
@@ -175,8 +175,8 @@ static void ws_init () {
         bytes[i] = i;
 }
 
-static void ws_set_header_small (strbuf_t *buf, ws_t *ws, int is_mask) {
-    if (is_mask) {
+static void ws_set_header_small (strbuf_t *buf, ws_t *ws, unsigned int flags) {
+    if ((flags & WS_MASK)) {
         uint8_t len = buf->len - sizeof(wsc_small_t);
         ws->hdr = (ws_hdr_t*)buf->ptr;
         ws->hdr->h.mlen = 0x80 | len;
@@ -195,8 +195,8 @@ static void ws_set_header_small (strbuf_t *buf, ws_t *ws, int is_mask) {
     }
 }
 
-static void ws_set_header_big (strbuf_t *buf, ws_t *ws, int is_mask) {
-    if (is_mask) {
+static void ws_set_header_big (strbuf_t *buf, ws_t *ws, unsigned int flags) {
+    if ((flags & WS_MASK)) {
         uint16_t len = buf->len - sizeof(wsc_big_t);
         ws->hdr = (ws_hdr_t*)buf->ptr;
         ws->hdr->h.mlen = 0x80 | 0x7e;
@@ -217,8 +217,8 @@ static void ws_set_header_big (strbuf_t *buf, ws_t *ws, int is_mask) {
     }
 }
 
-static void ws_set_header_huge (strbuf_t *buf, ws_t *ws, int is_mask) {
-    if (is_mask) {
+static void ws_set_header_huge (strbuf_t *buf, ws_t *ws, unsigned int flags) {
+    if ((flags & WS_MASK)) {
         uint64_t len = buf->len - sizeof(wsc_huge_t);
         ws->hdr = (ws_hdr_t*)buf->ptr;
         ws->hdr->h.mlen = 0x80 | 0x7f;
@@ -239,29 +239,29 @@ static void ws_set_header_huge (strbuf_t *buf, ws_t *ws, int is_mask) {
     }
 }
 
-void ws_set_header (strbuf_t *buf, ws_type_t type, int is_mask, int is_fin, uint8_t opcode) {
+void ws_set_header (strbuf_t *buf, ws_type_t type, unsigned int flags, uint8_t opcode) {
     ws_t ws;
     switch (type) {
         case WS_SMALL:
-            ws_set_header_small(buf, &ws, is_mask);
+            ws_set_header_small(buf, &ws, flags);
             break;
         case WS_BIG:
-            ws_set_header_big(buf, &ws, is_mask);
+            ws_set_header_big(buf, &ws, flags);
             break;
         case WS_HUGE:
-            ws_set_header_huge(buf, &ws, is_mask);
+            ws_set_header_huge(buf, &ws, flags);
             break;
         default:
             if (buf->len < 126)
-                ws_set_header_small(buf, &ws, is_mask);
+                ws_set_header_small(buf, &ws, flags);
             else
             if (buf->len < 65535)
-                ws_set_header_big(buf, &ws, is_mask);
+                ws_set_header_big(buf, &ws, flags);
             else
-                ws_set_header_huge(buf, &ws, is_mask);
+                ws_set_header_huge(buf, &ws, flags);
     }
     ws.hdr->h.b0 = opcode;
-    if (is_fin)
+    if ((flags & WS_FIN))
         ws.hdr->h.b0 |= WS_FIN;
 }
 

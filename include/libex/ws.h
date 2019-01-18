@@ -10,7 +10,7 @@
 #define SHA1_LEN 20
 
 #define WS_FIN  0b10000000
-#define WS_FLRSV1 001000000
+#define WS_RSV1 0b01000000
 #define WS_RSV2 0b00100000
 #define WS_RSV3 0b00010000
 
@@ -29,13 +29,12 @@
 #define WS_HDRLEN sizeof(uint8_t) * 2
 #define WS_MASKLEN sizeof(uint8_t) * 4
 
-#define WS_PARTIAL 1
+#define WS_WAIT 1
 #define WS_OK 0
 #define WS_ERROR -1
 #define WS_TOOBIG -2
 
-#define WS_MASK 1
-#define WS_NOMASK 0
+#define WS_MASK 0b00000001
 
 typedef enum { WS_AUTO, WS_SMALL, WS_BIG, WS_HUGE } ws_type_t;
 
@@ -112,7 +111,7 @@ int ws_parse (const char *buf, size_t buf_len, ws_t *ws);
 void ws_mask (ws_t *ws);
 int ws_create (ws_type_t type, ws_t *ws, strbuf_t *buf, uint8_t op, uint8_t flags, int is_mask);
 int ws_add (ws_t *ws, strbuf_t *buf, const char *src, size_t src_len);
-void ws_set_header (strbuf_t *buf, ws_type_t type, int is_mask, int is_fin, uint8_t opcode);
+void ws_set_header (strbuf_t *buf, ws_type_t type, unsigned int flags, uint8_t opcode);
 
 ssize_t ws_buflen (const uint8_t *buf, size_t buflen);
 

@@ -56,28 +56,28 @@ int wsnet_recv (int fd, netbuf_t *nbuf, ws_t **result) {
         rc = ws_parse(nbuf->buf.ptr, nbytes, *result);
         wsnet_save_tail(nbuf, nbytes);
         if (WS_OK == rc)
-            return NET_OK;
+            return WS_OK;
         free(*result);
         *result = NULL;
-        return NET_WAIT;
+        return WS_WAIT;
     }
     if (*result)
         free(*result);
     if ((nbytes = net_recv(fd, &nbuf->buf, (fmt_checker_h)ws_buflen)) > 0) {
         if (-1 == (nbytes = ws_buflen((const uint8_t*)nbuf->buf.ptr, nbuf->buf.len)))
-            return NET_WAIT;
+            return WS_WAIT;
         *result = calloc(1, sizeof(ws_t));
         rc = ws_parse(nbuf->buf.ptr, nbytes, *result);
         wsnet_save_tail(nbuf, nbytes);
         if (WS_OK == rc)
-            return NET_OK;
+            return WS_OK;
         free(*result);
         *result = NULL;
-        return NET_WAIT;
+        return WS_WAIT;
     } else
     if (0 == nbytes)
-        return NET_WAIT;
-    return NET_ERROR;
+        return WS_WAIT;
+    return WS_ERROR;
 }
 
 void wsnet_reset (netbuf_t *nbuf) {
