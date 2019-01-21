@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define DEFINE_ARRAY(_array_type_, _data_type_) \
-    size_t _##_array_type_##_data_size = sizeof(_data_type_); \
+    static inline size_t data_size_##_array_type_ () { return sizeof( _data_type_ ); }; \
     typedef void (*free_item_##_array_type_##_h) (_data_type_); \
     typedef struct _array_##_array_type_##_ _array_type_; \
     struct _array_##_array_type_##_ { \
@@ -20,7 +20,7 @@
     if (_array_) { \
         (_array_)->bufsize = _##_array_type_##_bufsize; \
         (_array_)->len = 0; \
-        (_array_)->data_size = _##_array_type_##_data_size; \
+        (_array_)->data_size = data_size_##_array_type_(); \
         (_array_)->chunk_size = _chunk_size_; \
         (_array_)->on_free = _on_free_; \
     } \
@@ -74,7 +74,7 @@
     free(_array_)
 
 #define DEFINE_SORTED_ARRAY(_array_type_, _data_type_) \
-    size_t _##_array_type_##_data_size = sizeof(_data_type_); \
+    static inline size_t data_size_##_array_type_ () { return sizeof( _data_type_ ); }; \
     typedef void (*free_item_##_array_type_##_h) (_data_type_); \
     typedef int (*compare_items_##_array_type_##_h) (_data_type_*, _data_type_*); \
     typedef struct _array_##_array_type_##_ _array_type_; \
@@ -91,7 +91,7 @@
     if (_array_) { \
         (_array_)->bufsize = _##_array_type_##_bufsize; \
         (_array_)->len = 0; \
-        (_array_)->data_size = _##_array_type_##_data_size; \
+        (_array_)->data_size = data_size_##_array_type(); \
         (_array_)->chunk_size = _chunk_size_; \
         (_array_)->on_free = _on_free_; \
         (_array_)->on_compare = _on_compare_; \
