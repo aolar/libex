@@ -11,7 +11,7 @@ if $(debug) {
 }
 set-default-locations ;
 
-CFLAGS.all += -fPIC -D_GNU_SOURCE -Wall -Iinclude/libex -fsplit-stack ;
+CFLAGS.all += -fPIC -D_GNU_SOURCE -Wall -Iinclude/libex ;
 
 SubDir TOP ;
 SubInclude TOP src ;

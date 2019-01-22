@@ -191,21 +191,20 @@ static void *slot_process (void *arg) {
     while ((msg = get_next_msg(slot, pool))) {
         if (msg->on_msg) {
             int msg_rc = msg->on_msg(slot->data, msg->in_data, msg->out_data);
+            if (msg->mutex && msg->cond) {
+                pthread_mutex_lock(msg->mutex);
+                pthread_cond_signal(msg->cond);
+                pthread_mutex_unlock(msg->mutex);
+            }
             if (MSG_DONE == msg_rc) {
-                if (msg->mutex && msg->cond) {
-                    pthread_mutex_lock(msg->mutex);
-                    pthread_cond_signal(msg->cond);
-                    pthread_mutex_unlock(msg->mutex);
-                }
                 if (pool->on_freemsg)
                     pool->on_freemsg(msg->in_data);
                 free(msg);
             } else
-            if (MSG_CONTINUE == msg_rc) {
-                if (-1 == pool_call(pool, msg, NULL)) { // FIXME : init data ?
+            if (msg_rc == MSG_CONTINUE) {
+                if (-1 == pool_call(pool, msg, msg->out_data)) {
                     if (pool->on_freemsg)
                         pool->on_freemsg(msg->in_data);
-                    free(msg);
                 }
             }
         }
@@ -273,7 +272,7 @@ void pool_start (pool_t *pool) {
             add_slot(pool, NULL);
 }
 
-msg_t *create_msg (pool_msg_h on_msg, void *in_data, void **out_data, pthread_mutex_t *mutex, pthread_cond_t *cond) {
+msg_t *pool_createmsg (pool_msg_h on_msg, void *in_data, void *out_data, pthread_mutex_t *mutex, pthread_cond_t *cond) {
     msg_t *msg = calloc(1, sizeof(msg_t));
     msg->in_data = in_data;
     msg->out_data = out_data;

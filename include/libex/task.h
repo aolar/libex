@@ -48,7 +48,7 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 #define MSG_CONTINUE 1
 
 typedef struct slot slot_t;
-typedef int (*pool_msg_h) (void*, void*, void**);
+typedef int (*pool_msg_h) (void *slot_data, void *in_data, void *out_data);
 typedef int (*pool_create_h) (slot_t*, void*);
 typedef void (*pool_destroy_h) (slot_t*);
 
@@ -64,7 +64,7 @@ typedef enum {
 
 typedef struct {
     void *in_data;
-    void **out_data;
+    void *out_data;
     pool_msg_h on_msg;
     pthread_mutex_t *mutex;
     pthread_cond_t *cond;
@@ -108,7 +108,7 @@ int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
     default: pool_setopt_int \
 )(pool,opt,arg)
 
-msg_t *create_msg (pool_msg_h on_msg, void *in_data, void **out_data, pthread_mutex_t *mutex, pthread_cond_t *cond);
+msg_t *pool_createmsg (pool_msg_h on_msg, void *in_data, void *out_data, pthread_mutex_t *mutex, pthread_cond_t *cond);
 
 pool_t *pool_create ();
 
