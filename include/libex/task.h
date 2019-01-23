@@ -114,6 +114,7 @@ pool_t *pool_create ();
 
 void pool_start (pool_t *pool);
 int pool_call (pool_t *pool, msg_t *msg, void *init_data);
+int pool_callmsgwait (pool_t *pool, pool_msg_h on_msg, void *in_data, void *out_data, void *init_data);
 void pool_destroy (pool_t *pool);
 
 #endif // __LIBEX_TASK_h__

@@ -202,7 +202,7 @@ static void *slot_process (void *arg) {
                 free(msg);
             } else
             if (msg_rc == MSG_CONTINUE) {
-                if (-1 == pool_call(pool, msg, msg->out_data)) {
+                if (-1 == pool_call(pool, msg, slot->data)) {
                     if (pool->on_freemsg)
                         pool->on_freemsg(msg->in_data);
                 }
@@ -295,6 +295,19 @@ int pool_call (pool_t *pool, msg_t *msg, void *init_data) {
     pthread_cond_broadcast(&pool->cond);
     pthread_mutex_unlock(&pool->locker);
     return ret;
+}
+
+int pool_callmsgwait (pool_t *pool, pool_msg_h on_msg, void *in_data, void *out_data, void *init_data) {
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+    msg_t *msg = pool_createmsg(on_msg, in_data, out_data, &mutex, &cond);
+    int rc = pool_call(pool, msg, init_data);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+    pthread_cond_destroy(&cond);
+    pthread_mutex_destroy(&mutex);
+    return rc;
 }
 
 typedef struct {

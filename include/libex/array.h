@@ -16,7 +16,7 @@
 
 #define INIT_ARRAY(_array_type_, _array_, _start_len_, _chunk_size_, _on_free_) { \
     size_t _##_array_type_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
-    _array_ = malloc(_##_array_type_##_data_size * _##_array_type_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
+    _array_ = malloc(data_size_##_array_type_() * _##_array_type_##_bufsize + 4 * sizeof(size_t) + sizeof(void*)); \
     if (_array_) { \
         (_array_)->bufsize = _##_array_type_##_bufsize; \
         (_array_)->len = 0; \
@@ -87,11 +87,11 @@
 
 #define INIT_SORTED_ARRAY(_array_type_, _array_, _start_len_, _chunk_size_, _on_free_, _on_compare_) { \
     size_t _##_array_type_##_bufsize = (_start_len_ / _chunk_size_) * _chunk_size_; \
-    _array_ = malloc(_##_array_type_##_data_size * _##_array_type_##_bufsize + 4 * sizeof(size_t) + sizeof(void*) * 2); \
+    _array_ = malloc( data_size_##_array_type_() * _##_array_type_##_bufsize + 4 * sizeof(size_t) + sizeof(void*) * 2); \
     if (_array_) { \
         (_array_)->bufsize = _##_array_type_##_bufsize; \
         (_array_)->len = 0; \
-        (_array_)->data_size = data_size_##_array_type(); \
+        (_array_)->data_size = data_size_##_array_type_(); \
         (_array_)->chunk_size = _chunk_size_; \
         (_array_)->on_free = _on_free_; \
         (_array_)->on_compare = _on_compare_; \

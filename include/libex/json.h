@@ -159,6 +159,14 @@ static inline void jsonrpc_response_ok (strbuf_t *buf, intptr_t id, int id_len) 
         } fn;
     }), NULL, id, id_len);
 }
+static inline void jsonrpc_response_str (strbuf_t *buf, const char *str, size_t len, intptr_t id, int id_len) {
+    jsonrpc_response(buf, ({
+        int fn (strbuf_t *buf, void *dummy) {
+            json_add_str(buf, CONST_STR_NULL, str, len, JSON_END);
+            return 0;
+        } fn;
+    }), NULL, id, id_len);
+}
 int jsonrpc_error (strbuf_t *buf, int code, const char *message, size_t message_len, intptr_t id, int id_len);
 int jsonrpc_stderror (strbuf_t *buf, int code, intptr_t id, int id_len);
 
