@@ -93,6 +93,7 @@ struct slot {
     pthread_t th;
     list_item_t *node;
     void *data;
+    void *init_data;
 };
 
 int pool_setopt_int (pool_t *pool, pool_opt_t opt, long arg);

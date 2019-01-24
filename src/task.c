@@ -171,14 +171,16 @@ typedef struct {
 
 static void *slot_process (void *arg) {
     msg_t *msg = NULL;
-    slot_data_t *sd = (slot_data_t*)arg;
-    slot_t *slot = sd->slot;
+    //slot_data_t *sd = (slot_data_t*)arg;
+    //slot_t *slot = sd->slot;
+    slot_t *slot = (slot_t*)arg;
     pool_t *pool = slot->pool;
     pthread_mutex_lock(&pool->locker);
     slot->node =lst_adde(pool->slots, slot);
     pthread_mutex_unlock(&pool->locker);
     if (pool->on_create_slot) {
-        if (-1 == pool->on_create_slot(slot, sd->init_data)) {
+        //if (-1 == pool->on_create_slot(slot, sd->init_data)) {
+        if (-1 == pool->on_create_slot(slot, slot->init_data)) {
             pthread_mutex_lock(&pool->locker);
             lst_del(slot->node);
             if (pool->on_destroy_slot)
@@ -187,7 +189,7 @@ static void *slot_process (void *arg) {
             pthread_mutex_unlock(&pool->locker);
         }
     }
-    free(sd);
+//    free(sd);
     while ((msg = get_next_msg(slot, pool))) {
         if (msg->on_msg) {
             int msg_rc = msg->on_msg(slot->data, msg->in_data, msg->out_data);
@@ -202,7 +204,7 @@ static void *slot_process (void *arg) {
                 free(msg);
             } else
             if (msg_rc == MSG_CONTINUE) {
-                if (-1 == pool_call(pool, msg, slot->data)) {
+                if (-1 == pool_call(pool, msg, slot->init_data)) {
                     if (pool->on_freemsg)
                         pool->on_freemsg(msg->in_data);
                 }
@@ -236,14 +238,17 @@ static void *pool_process (void *param) {
 }
 
 static int add_slot (pool_t *pool, void *init_data) {
-    slot_data_t *sd = malloc(sizeof(slot_data_t));
-    slot_t *slot = sd->slot = calloc(1, sizeof(slot_t));
+//    slot_data_t *sd = malloc(sizeof(slot_data_t));
+//    slot_t *slot = sd->slot = calloc(1, sizeof(slot_t));
+    slot_t *slot = calloc(1, sizeof(slot_t));
     slot->is_alive = 1;
     slot->pool = pool;
-    sd->init_data = init_data;
-    if (0 != pthread_create(&slot->th, NULL, slot_process, sd)) {
+    slot->init_data = init_data;
+//    sd->init_data = init_data;
+//    if (0 != pthread_create(&slot->th, NULL, slot_process, sd)) {
+    if (0 != pthread_create(&slot->th, NULL, slot_process, slot)) {
         free(slot);
-        free(sd);
+//        free(sd);
         return -1;
     }
     pthread_detach(slot->th);

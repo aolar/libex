@@ -105,7 +105,7 @@
         signed long long int _l_ = 0, _r_ = _array_->len - 1; \
         while (_l_ <= _r_) { \
             _found_idx_ = (_l_ + _r_) / 2LL; \
-            __is_found__ = _array_->on_compare(&_data_, &_array_->ptr[_found_idx_]); \
+            __is_found__ = _array_->on_compare(&(_data_), &_array_->ptr[_found_idx_]); \
             if (__is_found__ > 0) _l_ = _found_idx_ + 1; \
             else if (__is_found__ < 0) _r_ = _found_idx_ - 1; \
             else break; \
