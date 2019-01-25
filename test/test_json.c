@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "../include/libex/file.h"
 #include "../include/libex/json.h"
 #if 0
 void test_json1 () {
@@ -150,10 +151,23 @@ void test_json4 () {
     free(buf.ptr);
 }
 #endif
+
+void test_json5 () {
+    str_t *str = load_all_file("./json_4.txt", 2048, 8192);
+    json_t *json = json_parse_len(str->ptr, str->len);
+    if (json) {
+        printf("Ok\n");
+        json_free(json);
+    }
+    printf("%d %s\n", errno, strerror(errno));
+    free(str);
+}
+
 int main (int argc, const char *argv[]) {
 //    test_json1();
 //    test_json2();
 //    test_json3();
 //    test_json4();
+    test_json5();
     return 0;
 }

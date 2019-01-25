@@ -14,7 +14,13 @@ extern char wst_close [];
 
 int wsnet_handshake (int fd);
 int wsnet_try_handshake (int fd, strbuf_t *buf);
-int wsnet_recv (int fd, netbuf_t *buf, ws_t **result);
+int wsnet_recvfn (int fd, netbuf_t *nbuf, net_recv_h on_recv, ws_t **result);
+static inline int wsnet_recv (int fd, netbuf_t *nbuf, ws_t **result) {
+    return wsnet_recvfn(fd, nbuf, net_recv, result);
+}
+static inline int wsnet_recvnb (int fd, netbuf_t *nbuf, ws_t **result) {
+    return wsnet_recvfn(fd, nbuf, net_recvnb, result);
+}
 void wsnet_reset (netbuf_t *nbuf);
 
 #endif // __LIBEX_WSNET_H__

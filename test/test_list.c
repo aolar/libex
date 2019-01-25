@@ -30,7 +30,7 @@ void test () {
     }
     lst_enum(lst, fn_print, NULL, 0);
     printf("foreach\n");
-    LST_FOREACH(value, lst)
+    LST_FOREACH(lst, str_t, value)
         printf("- %s\n", ((str_t*)value)->ptr);
     LST_END(lst)
     lst_clear(lst);

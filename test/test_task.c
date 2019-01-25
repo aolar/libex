@@ -12,14 +12,14 @@ static void on_destroy_slot (slot_t *x) {
     printf("destroy slot\n");
 }
 
-static int on_msg (void *d, void *str, void **x) {
+static int on_msg (void *d, void *str, void *x) {
     printf("%s\n", (char*)str);
     free(str);
     sleep(t);
     return MSG_DONE;
 }
 
-static void on_info (void *d, void *x, void **z) {
+static void on_info (void *d, void *x, void *z) {
     printf("%d: %lu\n", i++, time(0));
 }
 
@@ -37,7 +37,7 @@ static void test_1 (long livingtime, int timeout) {
         if (timeout > 0)
             sleep(timeout);
         snprintf(str, 16, "i:%d", i);
-        pool_call(pool, on_msg, NULL, str, NULL, NULL, NULL);
+        pool_call(pool, on_msg, NULL);
     }
     sleep(t);
     pool_destroy(pool);

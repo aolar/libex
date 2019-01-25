@@ -38,6 +38,7 @@ InstallFile include/libex :
     $(TOP)/include/libex/hash.h
     $(TOP)/include/libex/msg.h
     $(TOP)/include/libex/ws.h
+    $(TOP)/include/libex/wsnet.h
 ;
 
 InstallFile lib/pkgconfig : libex.pc ;

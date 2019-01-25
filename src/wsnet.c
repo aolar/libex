@@ -11,7 +11,7 @@ int wsnet_handshake (int fd) {
     strbufalloc(&buf, 128, 128);
     memset(&wsh, 0, sizeof(wsh));
     memset(&req, 0, sizeof(req));
-    while (net_recv(fd, &buf, NULL) > 0) {
+    while (net_recv(fd, &buf) > 0) {
         if (HTTP_LOADED == ws_handshake(&req, buf.ptr, buf.len, &wsh)) {
             ws_make_response(&buf, &wsh);
             if (net_write(fd, buf.ptr, buf.len, NULL) > 0)
@@ -24,19 +24,19 @@ int wsnet_handshake (int fd) {
 }
 
 int wsnet_try_handshake (int fd, strbuf_t *buf) {
-    int rc = -1;
+    int rc = WS_ERROR;
     http_request_t req;
     ws_handshake_t wsh;
-    if (net_recv(fd, buf, NULL) > 0) {
+    if (net_recvnb(fd, buf) > 0) {
         if (HTTP_LOADED == (rc = ws_handshake(&req, buf->ptr, buf->len, &wsh))) {
             ws_make_response(buf, &wsh);
             if (net_write(fd, buf->ptr, buf->len, NULL) > 0)
-                rc = 1;
+                rc = WS_OK;
         } else
         if (HTTP_PARTIAL_LOADED == rc)
-            rc = 0;
+            rc = WS_WAIT;
     } else
-        rc = -1;
+        rc = WS_ERROR;
     return rc;
 }
 
@@ -48,7 +48,7 @@ static void wsnet_save_tail (netbuf_t *nbuf, ssize_t nbytes) {
     nbuf->buf.len = nbytes;
 }
 
-int wsnet_recv (int fd, netbuf_t *nbuf, ws_t **result) {
+int wsnet_recvfn (int fd, netbuf_t *nbuf, net_recv_h on_recv, ws_t **result) {
     int rc = 0;
     ssize_t nbytes;
     if ((nbytes = ws_buflen((const uint8_t*)nbuf->buf.ptr, nbuf->buf.len)) > 0) {
@@ -63,7 +63,7 @@ int wsnet_recv (int fd, netbuf_t *nbuf, ws_t **result) {
     }
     if (*result)
         free(*result);
-    if ((nbytes = net_recv(fd, &nbuf->buf, (fmt_checker_h)ws_buflen)) > 0) {
+    if ((nbytes = on_recv(fd, &nbuf->buf)) > 0) {
         if (-1 == (nbytes = ws_buflen((const uint8_t*)nbuf->buf.ptr, nbuf->buf.len)))
             return WS_WAIT;
         *result = calloc(1, sizeof(ws_t));

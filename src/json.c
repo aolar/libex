@@ -16,8 +16,10 @@ static int get_token (json_t *j, strptr_t *token) {
     token->ptr = NULL;
     token->len = 0;
     while (p < e && isspace(*p)) ++p;
-    if (p >= e)
+    if (p >= e) {
+        errno = EAGAIN;
         return JSON_FIN;
+    }
     q = p;
     if ('"' == *p) {
         token->ptr = p++;
@@ -28,8 +30,10 @@ static int get_token (json_t *j, strptr_t *token) {
                 ++p;
             ++p;
         }
-        if (p >= e)
+        if (p >= e) {
+            errno = EAGAIN;
             return JSON_ERROR;
+        }
         j->text_ptr = ++p;
         token->ptr = q;
         token->len = (uintptr_t)p - (uintptr_t)q;
@@ -73,10 +77,12 @@ static void json_free_array (json_array_t *ja) {
 static void json_clear_item (json_item_t *ji) {
     switch (ji->type) {
         case JSON_OBJECT:
-            json_free_object(ji->data.o);
+            if (ji->data.o)
+                json_free_object(ji->data.o);
             break;
         case JSON_ARRAY:
-            json_free_array(ji->data.a);
+            if (ji->data.a)
+                json_free_array(ji->data.a);
             break;
         default: break;
     }
@@ -179,6 +185,7 @@ static json_array_t *json_parse_array (json_t *j, strptr_t *token) {
             continue;
         if (0 == cmpstr(token->ptr, token->len, CONST_STR_LEN("]")))
             break;
+        goto err;
     }
     return a;
 err:
@@ -248,6 +255,7 @@ static json_object_t *json_parse_object(json_t *j, strptr_t *token) {
             continue;
         if (0 == cmpstr(token->ptr, token->len, CONST_STR_LEN("}")))
             break;
+        goto err; // FIXME
     }
     return o;
 err:
@@ -258,6 +266,7 @@ err:
 json_t *json_parse_len (const char *json_str, size_t json_str_len) {
     json_t *j = calloc(1, sizeof(json_t));
     strptr_t token;
+    errno = 0;
     j->text = j->text_ptr = (char*)json_str;
     j->text_len = json_str_len;
     if (JSON_ERROR == get_token(j, &token)) goto err;

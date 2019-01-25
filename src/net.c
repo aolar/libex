@@ -60,39 +60,19 @@ int net_bind (const char *svc) {
     }
     return fd;
 }
-#if 0
-static int net_wait (int fd, int timeout) {
-    int rc;
-    struct pollfd fds;
-    long nbytes = -1;
-    memset(&fds, 0, sizeof(fds));
-    fds.fd = fd;
-    fds.events = POLLIN;
-    if (0 == (rc = ioctl(fd, FIONREAD, &nbytes)) && nbytes > 0)
-        return 1;
-    if (-1 == rc)
-        return -1;
-    rc = poll(&fds, 1, timeout);
-    return rc;
-}
 
-ssize_t net_recv_r (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checker_h fn_check) {
+ssize_t net_recvnb (int fd, strbuf_t *buf) {
     int done = 0, rc = -1;
     ssize_t total = 0;
     errno = 0;
-    while (!done && (rc = net_wait(fd, timeout) > 0)) {
+    while (!done) {
         while (1) {
             ssize_t readed;
             if (-1 == strbufsize(buf, buf->len + buf->chunk_size, 0)) {
                 done = 1;
                 break;
             }
-            if (locker && fn_lock && fn_unlock) {
-                fn_lock(locker);
-                readed = recv(fd, buf->ptr + buf->len, buf->chunk_size, MSG_DONTWAIT);
-                fn_unlock(locker);
-            } else
-                readed = recv(fd, buf->ptr + buf->len, buf->chunk_size, MSG_DONTWAIT);
+            readed = recv(fd, buf->ptr + buf->len, buf->chunk_size, 0);
             if (-1 == readed) {
                 if (EAGAIN == errno)
                     errno = 0;
@@ -110,17 +90,12 @@ ssize_t net_recv_r (int fd, int timeout, strbuf_t *buf, void *locker, fmt_checke
             }
             buf->len += readed;
             total += readed;
-            if (fn_check && -1 != fn_check(buf->ptr, buf->len)) {
-                done = 1;
-                break;
-            }
         }
     }
     return rc > 0 ? total : rc;
 }
-#endif
 
-ssize_t net_recv (int fd, strbuf_t *buf, fmt_checker_h fn_check) {
+ssize_t net_recv (int fd, strbuf_t *buf) {
     ssize_t readed;
     if (-1 == strbufsize(buf, buf->len + buf->chunk_size, 0))
         return -1;
@@ -128,7 +103,6 @@ ssize_t net_recv (int fd, strbuf_t *buf, fmt_checker_h fn_check) {
         buf->len += readed;
     return readed;
 }
-
 
 ssize_t net_write (int fd, char *buf, size_t size, void *locker) {
     ssize_t sent = 0, wrote;
