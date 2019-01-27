@@ -45,7 +45,7 @@ void run (const char *cmd, size_t cmd_len, run_t *proc, int flags);
 #define POOL_DEFAULT_SLOTS -1
 
 #define MSG_DONE 0
-#define MSG_CONTINUE 1
+#define MSG_WAIT 1
 
 typedef struct slot slot_t;
 typedef int (*pool_msg_h) (void *slot_data, void *in_data, void *out_data);
@@ -62,10 +62,14 @@ typedef enum {
     POOL_DESTROYSLOT
 } pool_opt_t;
 
+#define TASK_PIN 0x00000001
+
 typedef struct {
     void *in_data;
     void *out_data;
     pool_msg_h on_msg;
+    unsigned int flags;
+    pthread_t tid;
     pthread_mutex_t *mutex;
     pthread_cond_t *cond;
 } msg_t;
@@ -109,13 +113,16 @@ int pool_setopt_destroy (pool_t *pool, pool_opt_t opt, pool_destroy_h arg);
     default: pool_setopt_int \
 )(pool,opt,arg)
 
-msg_t *pool_createmsg (pool_msg_h on_msg, void *in_data, void *out_data, pthread_mutex_t *mutex, pthread_cond_t *cond);
+msg_t *pool_createmsg (pool_msg_h on_msg,
+                       void *in_data, void *out_data,
+                       pthread_mutex_t *mutex, pthread_cond_t *cond,
+                       unsigned int flags);
 
 pool_t *pool_create ();
 
 void pool_start (pool_t *pool);
 int pool_call (pool_t *pool, msg_t *msg, void *init_data);
-int pool_callmsgwait (pool_t *pool, pool_msg_h on_msg, void *in_data, void *out_data, void *init_data);
+int pool_callmsgwait (pool_t *pool, pool_msg_h on_msg, void *in_data, void *out_data, void *init_data, unsigned int flags);
 void pool_destroy (pool_t *pool);
 
 #endif // __LIBEX_TASK_h__

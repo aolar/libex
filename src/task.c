@@ -148,7 +148,10 @@ static msg_t *get_next_msg (slot_t *slot, pool_t *pool) {
     while (slot->is_alive && !msg) {
         if ((li = pool->queue->head)) {
             msg = (msg_t*)li->ptr;
-            lst_del(li);
+            if ((msg->flags & TASK_PIN) && msg->tid == pthread_self())
+                lst_del(li);
+            else
+                continue;
         } else
         if (0 == pool->livingtime)
             pthread_cond_wait(&pool->cond, &pool->locker);
@@ -195,6 +198,8 @@ static void *slot_process (void *arg) {
             int msg_rc = msg->on_msg(slot->data, msg->in_data, msg->out_data);
             if (msg->mutex && msg->cond) {
                 pthread_mutex_lock(msg->mutex);
+                if ((msg->flags & TASK_PIN))
+                    msg->tid = pthread_self();
                 pthread_cond_signal(msg->cond);
                 pthread_mutex_unlock(msg->mutex);
             }
@@ -203,7 +208,7 @@ static void *slot_process (void *arg) {
                     pool->on_freemsg(msg->in_data);
                 free(msg);
             } else
-            if (msg_rc == MSG_CONTINUE) {
+            if (msg_rc == MSG_WAIT) {
                 if (-1 == pool_call(pool, msg, slot->init_data)) {
                     if (pool->on_freemsg)
                         pool->on_freemsg(msg->in_data);
@@ -277,13 +282,17 @@ void pool_start (pool_t *pool) {
             add_slot(pool, NULL);
 }
 
-msg_t *pool_createmsg (pool_msg_h on_msg, void *in_data, void *out_data, pthread_mutex_t *mutex, pthread_cond_t *cond) {
+msg_t *pool_createmsg (pool_msg_h on_msg,
+                       void *in_data, void *out_data,
+                       pthread_mutex_t *mutex, pthread_cond_t *cond,
+                       unsigned int flags) {
     msg_t *msg = calloc(1, sizeof(msg_t));
     msg->in_data = in_data;
     msg->out_data = out_data;
     msg->on_msg = on_msg;
     msg->mutex = mutex;
     msg->cond = cond;
+    msg->flags = flags;
     return msg;
 }
 
@@ -302,11 +311,11 @@ int pool_call (pool_t *pool, msg_t *msg, void *init_data) {
     return ret;
 }
 
-int pool_callmsgwait (pool_t *pool, pool_msg_h on_msg, void *in_data, void *out_data, void *init_data) {
+int pool_callmsgwait (pool_t *pool, pool_msg_h on_msg, void *in_data, void *out_data, void *init_data, unsigned int flags) {
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
     pthread_mutex_lock(&mutex);
-    msg_t *msg = pool_createmsg(on_msg, in_data, out_data, &mutex, &cond);
+    msg_t *msg = pool_createmsg(on_msg, in_data, out_data, &mutex, &cond, flags);
     int rc = pool_call(pool, msg, init_data);
     pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
